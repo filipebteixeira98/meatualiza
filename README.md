@@ -48,7 +48,7 @@ Verificação inicial em 20/10/2026, somente de leitura:
 | Firebase            | MCP autenticado; nenhum projeto vinculado a esta pasta e nenhum projeto identificado como Meatualiza na lista acessível. É necessário definir o projeto e registrar/configurar a aplicação web para F2. |
 | Sentry              | Conexão disponível; a busca por Meatualiza na organização acessível não encontrou projeto correspondente. Integração prevista para F7.                                                                  |
 | PostHog             | Conexão disponível com projeto ativo chamado “Default project”; ainda é necessário definir o projeto destinado à plataforma antes de instrumentar eventos e surveys.                                    |
-| Hospedagem e GitHub | Repositório privado em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.      |
+| Hospedagem e GitHub | Repositório em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.              |
 
 Esta etapa não coleta analytics nem envia dados de alunos aos serviços. O repositório GitHub foi criado a pedido do responsável; nenhum recurso Firebase, Sentry ou PostHog foi criado ou alterado. Autenticação, inscrições, painéis, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
 

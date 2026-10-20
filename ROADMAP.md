@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: base Next.js e landing page compacta em tema escuro implementadas e verificadas localmente. Repositório privado GitHub criado e remoto configurado. Regras Q1–Q17 consolidadas; integrações, autenticação e funcionalidades de monitoria seguem nas próximas fases. A verificação dos serviços está registrada em README.md.
+Status: base Next.js e landing page compacta em tema escuro implementadas e verificadas localmente. Repositório GitHub criado e remoto configurado. Regras Q1–Q17 consolidadas; integrações, autenticação e funcionalidades de monitoria seguem nas próximas fases. A verificação dos serviços está registrada em README.md.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -210,7 +210,7 @@ O quadro distingue regras definidas e entregas implementadas. As verificações 
 | —                                                                                                         | —            | Confirmar fuso, dias/horários e acesso com qualquer conta Google                                           |
 | —                                                                                                         | —            | Vincular pedido à inscrição, com uma inscrição ativa por aluno e sessão                                    |
 | —                                                                                                         | —            | F0.5 — Definir prazos, janela de quatro semanas, término, presença manual e cancelamento com motivo        |
-| F0.6 — Definir/vincular projetos de serviços e hospedagem                                                 | —            | Verificar conexões e criar repositório privado GitHub com remoto configurado                               |
+| F0.6 — Definir/vincular projetos de serviços e hospedagem                                                 | —            | Verificar conexões e criar repositório GitHub com remoto configurado                                       |
 | —                                                                                                         | —            | F1.1 — Inicializar Git, branch de funcionalidade e convenções de commit                                    |
 | —                                                                                                         | —            | F1.2 — Criar base Next.js/TypeScript, componentes Shadcn e tokens neutros                                  |
 | —                                                                                                         | —            | F1.3 — Configurar ESLint, Prettier, Husky, lint-staged, testes e workflow de CI                            |
