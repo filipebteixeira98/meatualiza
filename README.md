@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra <http://localhost:3000>. A rota `/` apresenta a landing page. `/entrar` informa que o acesso está em preparação; o login Google será implementado na fase F2.
+Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` informa que o acesso está em preparação; o login Google será implementado na fase F2.
 
 ## Verificar
 
@@ -48,9 +48,9 @@ Verificação inicial em 20/10/2026, somente de leitura:
 | Firebase            | MCP autenticado; nenhum projeto vinculado a esta pasta e nenhum projeto identificado como Meatualiza na lista acessível. É necessário definir o projeto e registrar/configurar a aplicação web para F2. |
 | Sentry              | Conexão disponível; a busca por Meatualiza na organização acessível não encontrou projeto correspondente. Integração prevista para F7.                                                                  |
 | PostHog             | Conexão disponível com projeto ativo chamado “Default project”; ainda é necessário definir o projeto destinado à plataforma antes de instrumentar eventos e surveys.                                    |
-| Hospedagem e GitHub | Nenhuma hospedagem vinculada e nenhum remoto Git configurado. O workflow está preparado localmente; a execução remota e a abertura de PR dependem do repositório remoto.                                |
+| Hospedagem e GitHub | Repositório privado em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.      |
 
-Esta etapa não coleta analytics nem envia dados de alunos aos serviços. Nenhum recurso externo foi criado ou alterado. Autenticação, inscrições, painéis, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
+Esta etapa não coleta analytics nem envia dados de alunos aos serviços. O repositório GitHub foi criado a pedido do responsável; nenhum recurso Firebase, Sentry ou PostHog foi criado ou alterado. Autenticação, inscrições, painéis, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 

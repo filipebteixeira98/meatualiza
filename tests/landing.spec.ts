@@ -8,8 +8,10 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
   await page.goto("/");
   await expect(page).toHaveTitle(/meatualiza.*Lógica de Programação/);
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await expect(page.locator("html")).toHaveCSS("color-scheme", "dark");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Destrave sua lógica.",
+    "Deu um nó",
   );
   await expect(
     page.getByRole("heading", { name: "Segunda-feira", exact: true }),
@@ -18,7 +20,19 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
     page.getByRole("heading", { name: "Quarta-feira", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("11h30–12h30", { exact: true })).toHaveCount(2);
-  await expect(page.locator("#conteudos").getByRole("listitem")).toHaveCount(9);
+  const topics = page.locator("#conteudos");
+  const disclosure = topics.getByRole("button", {
+    name: "Explorar os 9 assuntos",
+  });
+  await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+  await expect(topics.getByRole("list")).not.toBeVisible();
+  await disclosure.click();
+  await expect(topics.getByRole("listitem")).toHaveCount(9);
+  await expect(
+    topics.getByText("Teste de mesa e depuração", { exact: true }),
+  ).toBeVisible();
+  await disclosure.click();
+  await expect(topics.getByRole("list")).not.toBeVisible();
   await expect(page.locator("#conteudos")).toContainText(
     "Outro assunto / não sei classificar",
   );
@@ -28,6 +42,7 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
   await expect(
     page.getByText("Laboratório de informática L7", { exact: true }),
   ).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await page.screenshot({
     path: testInfo.outputPath("landing.png"),
     fullPage: true,
@@ -74,7 +89,7 @@ test("leva ao estado real do acesso e permite voltar", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("link", { name: "Voltar para a monitoria" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Destrave sua lógica.",
+    "Deu um nó",
   );
 });
 
@@ -93,7 +108,7 @@ test("menu móvel navega e devolve o foco ao fechar", async ({
   await trigger.click();
   await page
     .getByRole("navigation", { name: "Navegação móvel" })
-    .getByRole("link", { name: "Conteúdos" })
+    .getByRole("link", { name: "Assuntos" })
     .click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page).toHaveURL(/#conteudos$/);
@@ -112,4 +127,11 @@ test("não cria rolagem horizontal em telas pequenas e grandes", async ({
     );
     expect(hasOverflow, `Overflow horizontal na largura ${width}`).toBe(false);
   }
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.getByRole("button", { name: "Explorar os 9 assuntos" }).click();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    ),
+  ).toBe(false);
 });

@@ -1,4 +1,9 @@
-import { ArrowUpRight, Braces } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { assuntos } from "@/lib/monitoria";
 
 export function Topics() {
@@ -6,59 +11,41 @@ export function Topics() {
     <section
       id="conteudos"
       aria-labelledby="topics-title"
-      className="site-container py-16 sm:py-24"
+      className="site-container py-12 sm:py-16"
     >
-      <div className="grid gap-10 lg:grid-cols-[0.8fr_1.3fr] lg:gap-20">
-        <div className="lg:sticky lg:top-10 lg:self-start">
-          <p className="eyebrow">UMA BASE QUE FAZ DIFERENÇA</p>
-          <h2 id="topics-title" className="section-title mt-3">
-            Da primeira variável
-            <br />
-            ao próximo desafio.
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <p className="eyebrow">QUAL LINHA TE TRAVOU?</p>
+          <h2
+            id="topics-title"
+            className="mt-3 text-2xl font-medium tracking-tight sm:text-3xl"
+          >
+            Dos algoritmos à depuração.
           </h2>
-          <p className="mt-5 max-w-sm text-sm leading-7 text-muted-foreground">
-            Você não precisa saber tudo para começar. A monitoria acompanha os
-            fundamentos da disciplina, a partir da dificuldade que você trouxer.
+          <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
+            Variáveis, decisões, laços e funções. O ponto de partida é a dúvida
+            que você trouxer.
           </p>
-          <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-xs text-muted-foreground">
-            <Braces className="size-4" aria-hidden="true" />O foco é entender o
-            raciocínio.
-          </div>
         </div>
         <div>
-          <ul className="divide-y divide-border border-y border-border">
-            {assuntos.map((assunto, index) => (
-              <li
-                key={assunto.titulo}
-                className="flex items-start gap-4 py-5 sm:gap-5"
-              >
-                <span className="mt-0.5 w-5 shrink-0 font-mono text-[11px] text-muted-foreground">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div>
-                  <h3 className="text-sm font-medium sm:text-base">
-                    {assunto.titulo}
-                  </h3>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                    {assunto.descricao}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-5 flex items-start gap-3 rounded-xl border border-dashed border-border p-4 text-sm">
-            <ArrowUpRight
-              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <p className="leading-relaxed text-muted-foreground">
-              <span className="font-medium text-foreground">
-                Não sabe classificar sua dúvida?
-              </span>{" "}
-              Tudo bem. Escolha “Outro assunto / não sei classificar” e conte o
-              que está tentando resolver.
-            </p>
-          </div>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="assuntos" className="border-y border-border">
+              <AccordionTrigger className="min-h-14 text-sm hover:no-underline">
+                Explorar os {assuntos.length} assuntos
+              </AccordionTrigger>
+              <AccordionContent>
+                <ul className="grid gap-x-5 gap-y-3 pt-2 pb-1 text-sm text-muted-foreground sm:grid-cols-2">
+                  {assuntos.map((assunto) => (
+                    <li key={assunto.titulo}>{assunto.titulo}</li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          <p className="mt-4 text-xs leading-6 text-muted-foreground">
+            Não sabe o nome do assunto? Escolha “Outro assunto / não sei
+            classificar” ao enviar sua dúvida.
+          </p>
         </div>
       </div>
     </section>

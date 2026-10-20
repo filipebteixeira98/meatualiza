@@ -84,9 +84,10 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  color-scheme: dark;
+  --background: oklch(0.13 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.17 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -148,18 +149,6 @@
 
 @utility section-title {
   @apply text-3xl leading-[1.15] font-medium tracking-[-0.045em] sm:text-4xl;
-}
-
-.schedule-surface::before {
-  position: absolute;
-  inset: 0;
-  content: "";
-  opacity: 0.08;
-  background-image: radial-gradient(
-    var(--primary-foreground) 0.7px,
-    transparent 0.7px
-  );
-  background-size: 14px 14px;
 }
 
 @media (prefers-reduced-motion: reduce) {

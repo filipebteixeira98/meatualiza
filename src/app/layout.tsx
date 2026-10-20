@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   description:
     "Um espaço para perguntar, praticar e avançar em Lógica de Programação. Monitoria presencial às segundas e quartas, no SENAI Dendezeiros, laboratório L7.",
   openGraph: {
-    title: "meatualiza — Uma dúvida de cada vez",
+    title: "meatualiza — Deu um nó na lógica?",
     description:
       "Conheça a monitoria de Lógica de Programação no SENAI Dendezeiros.",
     siteName: "meatualiza",
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <a

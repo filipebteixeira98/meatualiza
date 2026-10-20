@@ -14,7 +14,7 @@ import {
 
 const navigation = [
   { label: "Como funciona", href: "/#como-funciona" },
-  { label: "Conteúdos", href: "/#conteudos" },
+  { label: "Assuntos", href: "/#conteudos" },
   { label: "Perguntas frequentes", href: "/#perguntas" },
 ];
 
