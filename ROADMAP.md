@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: planejamento funcional consolidado com as respostas Q1–Q17; implementação não iniciada. Acesso aos serviços e preparação do ambiente ainda precisam ser verificados.
+Status: base Next.js e landing page compacta em tema escuro implementadas e verificadas localmente. Repositório GitHub criado e remoto configurado. Regras Q1–Q17 consolidadas; integrações, autenticação e funcionalidades de monitoria seguem nas próximas fases. A verificação dos serviços está registrada em README.md.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -30,25 +30,25 @@ Organizar a procura por reforço em **Lógica de Programação**, permitindo ao 
 
 ## Decisões confirmadas
 
-| ID | Decisão | Resposta do responsável | Situação |
-|---|---|---|---|
-| Q1 | Formato, duração e capacidade | Atendimento em grupo; 60 minutos e dez alunos, definidos em Q7 | Confirmado |
-| Q2 | Fuso da agenda | America/Bahia | Confirmado |
-| Q3 | Confirmação das inscrições | Automática | Confirmado |
-| Q4 | Quem pode solicitar monitoria | Qualquer pessoa autenticada com Google | Confirmado; não exigir convite ou domínio institucional |
-| Q5 | Modalidade e local | Presencial no SENAI Dendezeiros, laboratório de informática L7, definido em Q8 | Confirmado |
-| Q6 | Conteúdo programático | Elaborar proposta inicial, aprovada em Q13 | Confirmado |
+| ID  | Decisão                       | Resposta do responsável                                                        | Situação                                                |
+| --- | ----------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| Q1  | Formato, duração e capacidade | Atendimento em grupo; 60 minutos e dez alunos, definidos em Q7                 | Confirmado                                              |
+| Q2  | Fuso da agenda                | America/Bahia                                                                  | Confirmado                                              |
+| Q3  | Confirmação das inscrições    | Automática                                                                     | Confirmado                                              |
+| Q4  | Quem pode solicitar monitoria | Qualquer pessoa autenticada com Google                                         | Confirmado; não exigir convite ou domínio institucional |
+| Q5  | Modalidade e local            | Presencial no SENAI Dendezeiros, laboratório de informática L7, definido em Q8 | Confirmado                                              |
+| Q6  | Conteúdo programático         | Elaborar proposta inicial, aprovada em Q13                                     | Confirmado                                              |
 
 ### Segunda rodada: respostas confirmadas
 
-| ID | Decisão | Regra confirmada |
-|---|---|---|
-| Q7 | Duração e capacidade | Uma sessão coletiva de 60 minutos, das 11h30 às 12h30, com até dez alunos |
-| Q8 | Local presencial | SENAI Dendezeiros, laboratório de informática L7 |
-| Q9 | Relação entre dúvida e inscrição | Pedido vinculado à sessão, uma inscrição ativa por aluno em cada sessão, descrição das dúvidas editável sem nova inscrição |
-| Q10 | Prazos | Inscrição, cancelamento e troca até o início da sessão, sem antecedência mínima |
-| Q11 | Horizonte e término | Próximas quatro semanas, com término previsto em 11/12/2026 |
-| Q12 | Presença e cancelamento pelo monitor | Presença manual; cancelamento de sessão cancela inscrições e exibe motivo aos alunos no aplicativo |
+| ID  | Decisão                              | Regra confirmada                                                                                                           |
+| --- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Q7  | Duração e capacidade                 | Uma sessão coletiva de 60 minutos, das 11h30 às 12h30, com até dez alunos                                                  |
+| Q8  | Local presencial                     | SENAI Dendezeiros, laboratório de informática L7                                                                           |
+| Q9  | Relação entre dúvida e inscrição     | Pedido vinculado à sessão, uma inscrição ativa por aluno em cada sessão, descrição das dúvidas editável sem nova inscrição |
+| Q10 | Prazos                               | Inscrição, cancelamento e troca até o início da sessão, sem antecedência mínima                                            |
+| Q11 | Horizonte e término                  | Próximas quatro semanas, com término previsto em 11/12/2026                                                                |
+| Q12 | Presença e cancelamento pelo monitor | Presença manual; cancelamento de sessão cancela inscrições e exibe motivo aos alunos no aplicativo                         |
 
 ### Operação da agenda
 
@@ -64,20 +64,20 @@ Organizar a procura por reforço em **Lógica de Programação**, permitindo ao 
 
 ### Terceira rodada: assuntos e resolução
 
-| ID | Decisão | Resposta e situação |
-|---|---|---|
-| Q13 | Assuntos iniciais | Lista aprovada, incluindo “Outro assunto / não sei classificar” |
-| Q14 | Estados do fluxo | Acrescentar controle da resolução das dúvidas com avaliação do próprio aluno; fluxo confirmado em Q15–Q17 |
+| ID  | Decisão           | Resposta e situação                                                                                       |
+| --- | ----------------- | --------------------------------------------------------------------------------------------------------- |
+| Q13 | Assuntos iniciais | Lista aprovada, incluindo “Outro assunto / não sei classificar”                                           |
+| Q14 | Estados do fluxo  | Acrescentar controle da resolução das dúvidas com avaliação do próprio aluno; fluxo confirmado em Q15–Q17 |
 
 Estados definidos para o fluxo:
 
-| Elemento | Estados | Regra |
-|---|---|---|
-| Sessão | Agendada, realizada ou cancelada | O monitor registra realização ou cancelamento; passar do horário não comprova realização |
-| Inscrição | Confirmada ou cancelada | Confirmação automática; cancelamento pelo aluno antes do início ou pelo cancelamento da sessão |
-| Comparecimento | Não registrado, presente ou ausente | O monitor registra; inscrição não comprova presença e ausência de registro não significa falta |
-| Resolução da dúvida | Não avaliada, resolvida, parcialmente resolvida ou não resolvida | O próprio aluno avalia o pedido de ajuda da inscrição como um todo; presença e realização não geram resposta automaticamente |
-| Avaliação do atendimento | Aguardada ou respondida, quando já estiver disponível | Disponível após sessão realizada e presença registrada; falta de resposta não é resposta negativa e não bloqueia agendamentos |
+| Elemento                 | Estados                                                          | Regra                                                                                                                         |
+| ------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Sessão                   | Agendada, realizada ou cancelada                                 | O monitor registra realização ou cancelamento; passar do horário não comprova realização                                      |
+| Inscrição                | Confirmada ou cancelada                                          | Confirmação automática; cancelamento pelo aluno antes do início ou pelo cancelamento da sessão                                |
+| Comparecimento           | Não registrado, presente ou ausente                              | O monitor registra; inscrição não comprova presença e ausência de registro não significa falta                                |
+| Resolução da dúvida      | Não avaliada, resolvida, parcialmente resolvida ou não resolvida | O próprio aluno avalia o pedido de ajuda da inscrição como um todo; presença e realização não geram resposta automaticamente  |
+| Avaliação do atendimento | Aguardada ou respondida, quando já estiver disponível            | Disponível após sessão realizada e presença registrada; falta de resposta não é resposta negativa e não bloqueia agendamentos |
 
 As solicitações do painel são os pedidos de ajuda associados às inscrições. Separar pedidos futuros “a atender”, dúvidas avaliadas como parcialmente/não resolvidas e avaliações aguardadas, sem criar uma fila de aprovação manual das inscrições.
 
@@ -85,10 +85,10 @@ As solicitações do painel são os pedidos de ajuda associados às inscrições
 
 As três decisões foram aprovadas pelo responsável.
 
-| ID | Decisão | Regra confirmada |
-|---|---|---|
-| Q15 | Unidade de avaliação | Avaliar o pedido de ajuda da inscrição como um todo, considerando assunto e descrição; uma avaliação por aluno e sessão |
-| Q16 | Quem informa a resolução | O próprio aluno indica resolvida, parcialmente resolvida ou não resolvida, com comentário opcional; o monitor acompanha a resposta |
+| ID  | Decisão                                          | Regra confirmada                                                                                                                        |
+| --- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Q15 | Unidade de avaliação                             | Avaliar o pedido de ajuda da inscrição como um todo, considerando assunto e descrição; uma avaliação por aluno e sessão                 |
+| Q16 | Quem informa a resolução                         | O próprio aluno indica resolvida, parcialmente resolvida ou não resolvida, com comentário opcional; o monitor acompanha a resposta      |
 | Q17 | Quando avaliar e efeito sobre novos agendamentos | Disponibilizar no aplicativo após sessão realizada e presença registrada; não bloquear novos agendamentos enquanto não houver avaliação |
 
 O formulário contém o resultado da ajuda e um comentário opcional. A avaliação considera o assunto e a descrição do pedido da inscrição como um todo.
@@ -120,17 +120,17 @@ Cenários para verificar o modelo: dois alunos se inscrevem no mesmo horário e 
 
 Lista inicial aprovada pelo responsável em Q13, sem presumir linguagem de programação específica.
 
-| Assunto | Conteúdos abrangidos |
-|---|---|
-| Algoritmos e representação | Sequência de passos, pseudocódigo e fluxogramas |
-| Variáveis e tipos de dados | Variáveis, constantes, atribuição e tipos básicos |
-| Operadores e expressões | Operadores aritméticos, relacionais e lógicos; precedência |
-| Entrada e saída | Leitura de dados, conversões básicas e apresentação de resultados |
-| Estruturas condicionais | Decisões simples, compostas e encadeadas |
-| Estruturas de repetição | Contadores, acumuladores e laços com diferentes condições de parada |
-| Vetores e matrizes | Índices, percursos e operações básicas com coleções |
-| Funções e procedimentos | Decomposição, parâmetros, retorno e escopo |
-| Teste de mesa e depuração | Rastreamento de execução, identificação de erros e casos de teste |
+| Assunto                    | Conteúdos abrangidos                                                |
+| -------------------------- | ------------------------------------------------------------------- |
+| Algoritmos e representação | Sequência de passos, pseudocódigo e fluxogramas                     |
+| Variáveis e tipos de dados | Variáveis, constantes, atribuição e tipos básicos                   |
+| Operadores e expressões    | Operadores aritméticos, relacionais e lógicos; precedência          |
+| Entrada e saída            | Leitura de dados, conversões básicas e apresentação de resultados   |
+| Estruturas condicionais    | Decisões simples, compostas e encadeadas                            |
+| Estruturas de repetição    | Contadores, acumuladores e laços com diferentes condições de parada |
+| Vetores e matrizes         | Índices, percursos e operações básicas com coleções                 |
+| Funções e procedimentos    | Decomposição, parâmetros, retorno e escopo                          |
+| Teste de mesa e depuração  | Rastreamento de execução, identificação de erros e casos de teste   |
 
 Oferecer também “Outro assunto / não sei classificar”, exigindo a descrição da dúvida para que uma classificação incerta não impeça o pedido de ajuda. Não incluir conteúdo avançado sem relação confirmada com a disciplina.
 
@@ -162,18 +162,18 @@ Oferecer também “Outro assunto / não sei classificar”, exigindo a descriç
 
 As métricas usam os registros da aplicação; preferências de analytics não podem alterar a contagem operacional de solicitações e reservas.
 
-| Métrica | Definição | Dependência |
-|---|---|---|
-| Solicitações recebidas | Número de solicitações criadas no período | Registro de criação e filtro de período |
-| Solicitações a atender | Pedidos de ajuda vinculados a inscrições confirmadas em sessões futuras não canceladas | Estados base de sessão e inscrição |
-| Alunos previstos por sessão | Quantidade de alunos distintos com inscrição ativa na sessão, de zero a dez; excluir cancelados e não multiplicar por quantidade de dúvidas | Uma inscrição ativa por aluno e sessão, conforme Q9 |
-| Próximas sessões | Sessões futuras não canceladas, com acesso ao total de alunos previstos de cada uma | Sessões de 60 minutos nas janelas confirmadas |
-| Sessões realizadas | Sessões explicitamente marcadas como realizadas no período; uma sessão coletiva conta uma vez | Registro de conclusão |
-| Presenças registradas | Quantidade de alunos com comparecimento registrado manualmente em cada sessão, separada da previsão de presença | Registro manual pelo monitor, conforme Q12 |
-| Assuntos mais demandados | Número de solicitações por assunto, no período | Conteúdo programático aprovado |
-| Ocupação da sessão | Alunos previstos divididos por dez; por exemplo, oito inscritos equivalem a 80% | Capacidade de dez alunos, conforme Q7 |
-| Resultado da resolução | Contagem de respostas resolvida, parcialmente resolvida e não resolvida, uma por inscrição; manter sem resposta em categoria separada | O próprio aluno avalia o pedido de ajuda como um todo, conforme Q15–Q16 |
-| Avaliações aguardadas | Inscrições de alunos com presença registrada em sessões realizadas, sem avaliação recebida; não incluir sessões futuras, canceladas ou alunos ausentes/sem presença registrada | Disponibilidade confirmada em Q17 |
+| Métrica                     | Definição                                                                                                                                                                      | Dependência                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Solicitações recebidas      | Número de solicitações criadas no período                                                                                                                                      | Registro de criação e filtro de período                                 |
+| Solicitações a atender      | Pedidos de ajuda vinculados a inscrições confirmadas em sessões futuras não canceladas                                                                                         | Estados base de sessão e inscrição                                      |
+| Alunos previstos por sessão | Quantidade de alunos distintos com inscrição ativa na sessão, de zero a dez; excluir cancelados e não multiplicar por quantidade de dúvidas                                    | Uma inscrição ativa por aluno e sessão, conforme Q9                     |
+| Próximas sessões            | Sessões futuras não canceladas, com acesso ao total de alunos previstos de cada uma                                                                                            | Sessões de 60 minutos nas janelas confirmadas                           |
+| Sessões realizadas          | Sessões explicitamente marcadas como realizadas no período; uma sessão coletiva conta uma vez                                                                                  | Registro de conclusão                                                   |
+| Presenças registradas       | Quantidade de alunos com comparecimento registrado manualmente em cada sessão, separada da previsão de presença                                                                | Registro manual pelo monitor, conforme Q12                              |
+| Assuntos mais demandados    | Número de solicitações por assunto, no período                                                                                                                                 | Conteúdo programático aprovado                                          |
+| Ocupação da sessão          | Alunos previstos divididos por dez; por exemplo, oito inscritos equivalem a 80%                                                                                                | Capacidade de dez alunos, conforme Q7                                   |
+| Resultado da resolução      | Contagem de respostas resolvida, parcialmente resolvida e não resolvida, uma por inscrição; manter sem resposta em categoria separada                                          | O próprio aluno avalia o pedido de ajuda como um todo, conforme Q15–Q16 |
+| Avaliações aguardadas       | Inscrições de alunos com presença registrada em sessões realizadas, sem avaliação recebida; não incluir sessões futuras, canceladas ou alunos ausentes/sem presença registrada | Disponibilidade confirmada em Q17                                       |
 
 Ao mostrar resultados de resolução, informar também quantas avaliações foram recebidas e quantas estão aguardadas. Não apresentar a opinião de quem respondeu como resultado conhecido de todos os inscritos.
 
@@ -183,66 +183,69 @@ Exemplo de apresentação: “Segunda, 11h30–12h30 — 8/10 alunos previstos �
 
 Cada tarefa de implementação deve gerar uma feature branch e um PR revisável, com Conventional Commits em inglês. Testes relevantes entram junto com o comportamento que validam.
 
-| Fase | Resultado | Critérios de aceite |
-|---|---|---|
-| F0 — Regras e preparação | Regras funcionais consolidadas; verificar projetos, credenciais, ambientes e hospedagem | Q1–Q17 documentadas; acesso e configuração dos serviços verificados antes de implementar suas integrações |
-| F1 — Base e qualidade | Inicializar Git, Next.js/TypeScript, Tailwind/Shadcn, tokens, formulários e automação | Aplicação executa; CI verifica lint, tipos, testes disponíveis e build; hooks verificam arquivos alterados |
-| F2 — Identidade e autorização | Login Google aberto, sessão, logout, perfis e persistência mínima | Qualquer conta Google pode entrar como aluno; dados alheios e operações do monitor seguem protegidos; perfil privilegiado não pode ser escolhido pelo usuário |
-| F3 — Solicitações | Assuntos aprovados, descrição editável, vínculo com inscrição, resolução, listagem e detalhes por perfil | Aluno informa e acompanha a dúvida; monitor consulta demandas; editar a descrição não cria outra inscrição; resolução não é inferida da presença |
-| F4 — Sessões e inscrições | Calendário de quatro semanas, sessões até o término informado, confirmação automática, cancelamento e remarcação | Até dez alunos distintos por sessão, inclusive sob concorrência; alterações pelo aluno encerram no início; remarcação falha preserva a inscrição anterior; cancelamento da sessão afeta suas inscrições e exibe motivo |
-| F5 — Painéis, avaliação e navegação | Painéis, inscritos, total por sessão, presença manual, avaliação do atendimento e acompanhamento da resolução | O aluno avalia seu pedido uma vez por inscrição após realização e presença; monitor acompanha; falta de resposta não bloqueia agendamentos; resultados e falhas preservam dados e permissões |
-| F6 — Onboarding e tour | Apresentação dos fluxos reais para cada perfil | Tour pode ser pulado e reaberto; conclusão é persistida; teclado e celular funcionam; não cria agendamentos de teste reais |
-| F7 — Privacidade, feedback e observabilidade | Termos/preferências, PostHog Surveys, Sentry e eventos definidos | Captura opcional respeita escolhas; resposta de teste chega ao survey; erro de teste chega ao Sentry sem dados pessoais desnecessários |
-| F8 — Validação e publicação | Verificar jornadas, preparar preview, publicação e rollback | Fluxos de aluno e monitor, concorrência, responsividade e acessibilidade verificados; deploy automatizado e operação documentados |
+| Fase                                         | Resultado                                                                                                        | Critérios de aceite                                                                                                                                                                                                    |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F0 — Regras e preparação                     | Regras funcionais consolidadas; verificar projetos, credenciais, ambientes e hospedagem                          | Q1–Q17 documentadas; acesso e configuração dos serviços verificados antes de implementar suas integrações                                                                                                              |
+| F1 — Base, landing page e qualidade          | Inicializar Git, Next.js/TypeScript, Tailwind/Shadcn, tokens, página pública e automação                         | Landing page simples, moderna e responsiva; navegação e FAQ funcionam; build, tipagem, lint e testes passam localmente; CI e hooks configurados                                                                        |
+| F2 — Identidade e autorização                | Login Google aberto, sessão, logout, perfis e persistência mínima                                                | Qualquer conta Google pode entrar como aluno; dados alheios e operações do monitor seguem protegidos; perfil privilegiado não pode ser escolhido pelo usuário                                                          |
+| F3 — Solicitações                            | Assuntos aprovados, descrição editável, vínculo com inscrição, resolução, listagem e detalhes por perfil         | Aluno informa e acompanha a dúvida; monitor consulta demandas; editar a descrição não cria outra inscrição; resolução não é inferida da presença                                                                       |
+| F4 — Sessões e inscrições                    | Calendário de quatro semanas, sessões até o término informado, confirmação automática, cancelamento e remarcação | Até dez alunos distintos por sessão, inclusive sob concorrência; alterações pelo aluno encerram no início; remarcação falha preserva a inscrição anterior; cancelamento da sessão afeta suas inscrições e exibe motivo |
+| F5 — Painéis, avaliação e navegação          | Painéis, inscritos, total por sessão, presença manual, avaliação do atendimento e acompanhamento da resolução    | O aluno avalia seu pedido uma vez por inscrição após realização e presença; monitor acompanha; falta de resposta não bloqueia agendamentos; resultados e falhas preservam dados e permissões                           |
+| F6 — Onboarding e tour                       | Apresentação dos fluxos reais para cada perfil                                                                   | Tour pode ser pulado e reaberto; conclusão é persistida; teclado e celular funcionam; não cria agendamentos de teste reais                                                                                             |
+| F7 — Privacidade, feedback e observabilidade | Termos/preferências, PostHog Surveys, Sentry e eventos definidos                                                 | Captura opcional respeita escolhas; resposta de teste chega ao survey; erro de teste chega ao Sentry sem dados pessoais desnecessários                                                                                 |
+| F8 — Validação e publicação                  | Verificar jornadas, preparar preview, publicação e rollback                                                      | Fluxos de aluno e monitor, concorrência, responsividade e acessibilidade verificados; deploy automatizado e operação documentados                                                                                      |
 
 Responsividade, acessibilidade, estados de interface e testes são critérios de cada fase. A apresentação de termos e preferências deve estar pronta antes de receber alunos reais; a coleta opcional só pode ser habilitada depois de seus controles funcionarem.
 
 ## Quadro de tarefas
 
-O status “Concluído” abaixo descreve documentação e levantamento, não funcionalidades implementadas.
+O quadro distingue regras definidas e entregas implementadas. As verificações desta primeira entrega foram executadas localmente; a execução do CI remoto depende do repositório GitHub.
 
-| A Fazer | Em Andamento | Concluído |
-|---|---|---|
-| — | — | F0.1 — Definir duração de 60 minutos e capacidade de dez alunos |
-| — | — | F0.2 — Definir SENAI Dendezeiros, laboratório de informática L7 |
-| — | — | F0.3 — Aprovar assuntos iniciais e incluir controle de resolução |
-| — | — | F0.4 — Confirmar avaliação pelo aluno, por inscrição, após realização/presença e sem bloquear agendamentos |
-| — | — | Confirmar fuso, dias/horários e acesso com qualquer conta Google |
-| — | — | Vincular pedido à inscrição, com uma inscrição ativa por aluno e sessão |
-| — | — | F0.5 — Definir prazos, janela de quatro semanas, término, presença manual e cancelamento com motivo |
-| F0.6 — Verificar projetos, credenciais, ambientes e hospedagem | — | — |
-| F1.1 — Inicializar Git e convenções de PR/commit | — | — |
-| F1.2 — Criar aplicação e tokens de interface | — | — |
-| F1.3 — Configurar lint, formatação, hooks, testes e CI | — | — |
-| F2.1 — Implementar login, sessão e logout | — | — |
-| F2.2 — Configurar conta do monitor e autorização por perfil | — | — |
-| F2.3 — Persistir perfis e testar isolamento entre alunos | — | — |
-| F3.1 — Disponibilizar assuntos do programa aprovado | — | — |
-| F3.2 — Implementar formulário de dúvida e validações | — | — |
-| F3.3 — Implementar listagem, detalhes e estados das solicitações | — | — |
-| F4.1 — Gerar sessões de 60 minutos na janela móvel de quatro semanas e até o término em America/Bahia | — | — |
-| F4.2 — Implementar calendário responsivo e alternativa em lista | — | — |
-| F4.3 — Implementar inscrição automática, limite de dez, unicidade por aluno/sessão e contagem consistente | — | — |
-| F4.4 — Implementar cancelamento e remarcação preservando consistência | — | — |
-| F4.5 — Implementar bloqueios de datas e tratamento das reservas afetadas | — | — |
-| F4.6 — Testar disputa pela décima vaga, repetição pelo mesmo aluno, prazos e período da agenda | — | — |
-| F5.1 — Implementar painel do aluno e sidebar responsiva | — | — |
-| F5.2 — Implementar agenda com quantidade de alunos por sessão, lista de inscritos e dúvidas | — | — |
-| F5.3 — Implementar presença manual, realização da sessão e métricas aprovadas | — | — |
-| F5.4 — Implementar uma avaliação por inscrição, pelo aluno presente após sessão realizada | — | — |
-| F5.5 — Persistir avaliação e exibir resolução e avaliações aguardadas nos painéis | — | — |
-| F5.6 — Verificar permissões, reenvios, falhas e contagens da avaliação | — | — |
-| F6.1 — Escrever passos do onboarding e do tour para cada perfil | — | — |
-| F6.2 — Implementar pular, reabrir e persistir conclusão do tour | — | — |
-| F6.3 — Verificar foco, teclado, movimento reduzido e telas móveis | — | — |
-| F7.1 — Implementar termos, preferências, recusa e revogação | — | — |
-| F7.2 — Definir eventos e responsabilidades de Firebase Analytics e PostHog | — | — |
-| F7.3 — Criar survey de feedback e integrar acesso pela aplicação | — | — |
-| F7.4 — Verificar envio, erro e chegada da resposta de teste no PostHog | — | — |
-| F7.5 — Integrar Sentry e filtrar dados pessoais | — | — |
-| F8.1 — Executar jornadas completas de aluno e monitor | — | — |
-| F8.2 — Verificar responsividade e acessibilidade de todos os fluxos | — | — |
-| F8.3 — Configurar preview, deploy e procedimento de rollback | — | — |
+| A Fazer                                                                                                   | Em Andamento | Concluído                                                                                                  |
+| --------------------------------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| —                                                                                                         | —            | F0.1 — Definir duração de 60 minutos e capacidade de dez alunos                                            |
+| —                                                                                                         | —            | F0.2 — Definir SENAI Dendezeiros, laboratório de informática L7                                            |
+| —                                                                                                         | —            | F0.3 — Aprovar assuntos iniciais e incluir controle de resolução                                           |
+| —                                                                                                         | —            | F0.4 — Confirmar avaliação pelo aluno, por inscrição, após realização/presença e sem bloquear agendamentos |
+| —                                                                                                         | —            | Confirmar fuso, dias/horários e acesso com qualquer conta Google                                           |
+| —                                                                                                         | —            | Vincular pedido à inscrição, com uma inscrição ativa por aluno e sessão                                    |
+| —                                                                                                         | —            | F0.5 — Definir prazos, janela de quatro semanas, término, presença manual e cancelamento com motivo        |
+| F0.6 — Definir/vincular projetos de serviços e hospedagem                                                 | —            | Verificar conexões e criar repositório GitHub com remoto configurado                                       |
+| —                                                                                                         | —            | F1.1 — Inicializar Git, branch de funcionalidade e convenções de commit                                    |
+| —                                                                                                         | —            | F1.2 — Criar base Next.js/TypeScript, componentes Shadcn e tokens neutros                                  |
+| —                                                                                                         | —            | F1.3 — Configurar ESLint, Prettier, Husky, lint-staged, testes e workflow de CI                            |
+| —                                                                                                         | —            | F1.4 — Implementar landing page pública, horários/local, assuntos, FAQ e navegação responsiva              |
+| —                                                                                                         | —            | F1.5 — Verificar produção, teclado, menu móvel e larguras de 320 a 1440 pixels                             |
+| —                                                                                                         | —            | F1.6 — Refinar identidade do L7, tema escuro e assuntos recolhidos por padrão                              |
+| F2.1 — Implementar login, sessão e logout                                                                 | —            | —                                                                                                          |
+| F2.2 — Configurar conta do monitor e autorização por perfil                                               | —            | —                                                                                                          |
+| F2.3 — Persistir perfis e testar isolamento entre alunos                                                  | —            | —                                                                                                          |
+| F3.1 — Disponibilizar assuntos do programa aprovado                                                       | —            | —                                                                                                          |
+| F3.2 — Implementar formulário de dúvida e validações                                                      | —            | —                                                                                                          |
+| F3.3 — Implementar listagem, detalhes e estados das solicitações                                          | —            | —                                                                                                          |
+| F4.1 — Gerar sessões de 60 minutos na janela móvel de quatro semanas e até o término em America/Bahia     | —            | —                                                                                                          |
+| F4.2 — Implementar calendário responsivo e alternativa em lista                                           | —            | —                                                                                                          |
+| F4.3 — Implementar inscrição automática, limite de dez, unicidade por aluno/sessão e contagem consistente | —            | —                                                                                                          |
+| F4.4 — Implementar cancelamento e remarcação preservando consistência                                     | —            | —                                                                                                          |
+| F4.5 — Implementar bloqueios de datas e tratamento das reservas afetadas                                  | —            | —                                                                                                          |
+| F4.6 — Testar disputa pela décima vaga, repetição pelo mesmo aluno, prazos e período da agenda            | —            | —                                                                                                          |
+| F5.1 — Implementar painel do aluno e sidebar responsiva                                                   | —            | —                                                                                                          |
+| F5.2 — Implementar agenda com quantidade de alunos por sessão, lista de inscritos e dúvidas               | —            | —                                                                                                          |
+| F5.3 — Implementar presença manual, realização da sessão e métricas aprovadas                             | —            | —                                                                                                          |
+| F5.4 — Implementar uma avaliação por inscrição, pelo aluno presente após sessão realizada                 | —            | —                                                                                                          |
+| F5.5 — Persistir avaliação e exibir resolução e avaliações aguardadas nos painéis                         | —            | —                                                                                                          |
+| F5.6 — Verificar permissões, reenvios, falhas e contagens da avaliação                                    | —            | —                                                                                                          |
+| F6.1 — Escrever passos do onboarding e do tour para cada perfil                                           | —            | —                                                                                                          |
+| F6.2 — Implementar pular, reabrir e persistir conclusão do tour                                           | —            | —                                                                                                          |
+| F6.3 — Verificar foco, teclado, movimento reduzido e telas móveis                                         | —            | —                                                                                                          |
+| F7.1 — Implementar termos, preferências, recusa e revogação                                               | —            | —                                                                                                          |
+| F7.2 — Definir eventos e responsabilidades de Firebase Analytics e PostHog                                | —            | —                                                                                                          |
+| F7.3 — Criar survey de feedback e integrar acesso pela aplicação                                          | —            | —                                                                                                          |
+| F7.4 — Verificar envio, erro e chegada da resposta de teste no PostHog                                    | —            | —                                                                                                          |
+| F7.5 — Integrar Sentry e filtrar dados pessoais                                                           | —            | —                                                                                                          |
+| F8.1 — Executar jornadas completas de aluno e monitor                                                     | —            | —                                                                                                          |
+| F8.2 — Verificar responsividade e acessibilidade de todos os fluxos                                       | —            | —                                                                                                          |
+| F8.3 — Configurar preview, deploy e procedimento de rollback                                              | —            | —                                                                                                          |
 
 ## Tour guiado
 
