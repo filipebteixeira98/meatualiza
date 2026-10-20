@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F1 integrada à `main` no [PR #1](https://github.com/filipebteixeira98/meatualiza/pull/1). Próxima fase: identidade e autorização, detalhada em [PLANO-F2.md](./PLANO-F2.md). Regras Q1–Q17 consolidadas; integrações e funcionalidades de monitoria seguem pendentes. A verificação dos serviços está registrada em README.md.
+Status: F1 e planejamento integrados à `main`. F2-A implementada e verificada: Firebase, Google, Firestore, SDKs e emuladores preparados. Próxima entrega: F2-B, com login, sessão e perfil do aluno, detalhada em [PLANO-F2.md](./PLANO-F2.md). Regras Q1–Q17 consolidadas; funcionalidades de monitoria seguem pendentes. A configuração e a verificação dos serviços estão registradas em README.md.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -201,7 +201,7 @@ Responsividade, acessibilidade, estados de interface e testes são critérios de
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1 está integrada à `main`; F2 está planejada, ainda sem implementação. Conforme orientação do responsável, avisos de cobrança do GitHub Actions são desconsiderados para o andamento; as verificações locais continuam obrigatórias conforme o escopo.
+O quadro distingue regras definidas e entregas implementadas. F1 e o planejamento estão integrados à `main`; F2-A está implementada para revisão, com Google e regras de Firestore já aplicados ao projeto dedicado. F2-B/F2-C seguem pendentes. Conforme orientação do responsável, avisos de cobrança do GitHub Actions são desconsiderados para o andamento; as verificações locais continuam obrigatórias conforme o escopo.
 
 | A Fazer                                                                                                   | Em Andamento | Concluído                                                                                                  |
 | --------------------------------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -221,7 +221,7 @@ O quadro distingue regras definidas e entregas implementadas. F1 está integrada
 | —                                                                                                         | —            | F1.6 — Refinar identidade do L7, tema escuro e assuntos recolhidos por padrão                              |
 | —                                                                                                         | —            | Planejar F2 em três entregas com dependências e critérios de aceite documentados em PLANO-F2.md            |
 | —                                                                                                         | —            | Criar projeto Firebase dedicado meatualiza-monitoria e confirmar conta do monitor como a conta do MCP      |
-| F2.0 — Vincular projeto Firebase, habilitar Google e preparar ambiente/emuladores                         | —            | —                                                                                                          |
+| —                                                                                                         | —            | F2.0/F2-A — Preparar Firebase, Google, Firestore fechado, SDKs e oito testes nos emuladores                |
 | F2.1 — Implementar login, sessão e logout                                                                 | —            | —                                                                                                          |
 | F2.2 — Configurar conta do monitor e autorização por perfil                                               | —            | —                                                                                                          |
 | F2.3 — Persistir perfis e testar isolamento entre alunos                                                  | —            | —                                                                                                          |
@@ -337,7 +337,7 @@ Definir responsabilidades antes de instrumentar: PostHog para comportamento e su
 
 Sem pagamentos, chat, anexos, integração com calendários externos, aplicativo nativo, lista de espera ou notificações por e-mail/WhatsApp. Essas funções exigem necessidade confirmada antes de entrar no planejamento. Um único monitor é suficiente para o contexto informado.
 
-Nenhum ADR é necessário neste momento: o formato coletivo é uma regra de produto confirmada; ainda não houve escolha arquitetural de alto custo de reversão decorrente de um trade-off confirmado.
+As decisões da F2-A estão registradas no README: Firestore Standard em São Paulo, acesso direto fechado e SDK administrativo restrito ao servidor. Uma mudança futura da região do banco exigirá planejar a migração dos dados; não tratar essa alteração como simples troca de variável de ambiente.
 
 ## Referências consultadas
 

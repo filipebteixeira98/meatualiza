@@ -1,6 +1,6 @@
 # F2 — Identidade e autorização
 
-Status: planejamento, sem implementação da autenticação. Base: `main` após o [merge do PR #1](https://github.com/filipebteixeira98/meatualiza/pull/1), em 20/10/2026. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
+Status: F2-A implementada e verificada em 20/10/2026; F2-B é a próxima entrega. Base: `main` após o [merge do planejamento no PR #2](https://github.com/filipebteixeira98/meatualiza/pull/2). Login, sessão do usuário e autorização do monitor ainda não estão implementados. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
 ## Resultado esperado
 
@@ -10,15 +10,15 @@ As áreas iniciais mostram a identidade e o estado real dos recursos disponívei
 
 ## Dependências para começar
 
-| Item                  | Situação e próximo passo                                                                                                                                                                                   | Responsável                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Projeto Firebase      | Projeto dedicado `meatualiza-monitoria` criado e selecionado no MCP para esta pasta em 20/10, após confirmação do responsável. App web e configuração local reproduzível pendentes.                        | Implementação configura os recursos restantes |
-| Conta do monitor      | Confirmada pelo responsável: a mesma conta Google ativa no MCP. Após o primeiro acesso, conferir seu UID antes de atribuir privilégio. O e-mail pessoal não precisa ser versionado no repositório público. | Implementação confere UID e configura         |
-| Ambiente              | Registrar app web, habilitar provedor Google e configurar domínios autorizados. Documentar configuração pública e credencial de servidor separadamente.                                                    | Implementação                                 |
-| Verificação           | Preparar emuladores e contas de teste. Separar teste de permissões da validação do OAuth real com Google.                                                                                                  | Implementação                                 |
-| Acesso a alunos reais | Disponibilizar termos, informações de privacidade e preferências previstos no roadmap antes da abertura. Coleta opcional continua desabilitada até seus controles existirem.                               | Produto e implementação                       |
+| Item                  | Situação e próximo passo                                                                                                                                                                                         | Responsável                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Projeto Firebase      | Projeto dedicado `meatualiza-monitoria`, app Meatualiza Web e Firestore Standard em São Paulo preparados. Alias local, regras fechadas e testes reproduzíveis versionados em F2-A.                               | Concluído em F2-A                           |
+| Conta do monitor      | Confirmada pelo responsável: a mesma conta Google ativa no MCP. Após o primeiro acesso, conferir seu UID antes de atribuir privilégio. O e-mail pessoal não precisa ser versionado no repositório público.       | Implementação confere UID e configura       |
+| Ambiente              | Google habilitado; domínios Firebase, localhost e 127.0.0.1 autorizados. Configuração pública e ADC documentados separadamente. Credencial do servidor real deve ser configurada no ambiente da próxima entrega. | Preparação concluída; execução real em F2-B |
+| Verificação           | Oito testes de SDKs, isolamento e regras passaram nos emuladores; dez testes da landing também passaram. OAuth real continua pendente e não é comprovado pelos emuladores.                                       | Base concluída; fluxo real em F2-B/F2-C     |
+| Acesso a alunos reais | Disponibilizar termos, informações de privacidade e preferências previstos no roadmap antes da abertura. Coleta opcional continua desabilitada até seus controles existirem.                                     | Produto e implementação                     |
 
-As escolhas do projeto e da conta estão confirmadas; o projeto está ativo. A implementação da integração real ainda depende da configuração de F2-A e da obtenção do UID do monitor em F2-C. Nenhum privilégio foi concedido nesta preparação.
+As escolhas do projeto e da conta estão confirmadas; Google e Firestore estão configurados na nuvem. F2-B implementa a sessão e o perfil; F2-C confere o UID do monitor e concede o privilégio. Nenhum privilégio foi concedido nesta preparação.
 
 ## Entregas e critérios de aceite
 
