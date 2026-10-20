@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>:root{--background:#262626;--foreground:#fafafa}</style>
+  <rect width="64" height="64" rx="16" fill="var(--background)"/>
+  <path d="m23 23-9 9 9 9m18-18 9 9-9 9m-6-23-6 28" fill="none" stroke="var(--foreground)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
