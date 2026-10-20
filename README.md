@@ -41,18 +41,20 @@ As cores são definidas por variáveis CSS em `src/app/globals.css`. As fontes G
 
 ## Serviços e próximas integrações
 
-Verificação inicial em 20/10/2026, somente de leitura:
+Configuração e verificação em 20/10/2026:
 
-| Serviço             | Situação                                                                                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Firebase            | MCP autenticado; nenhum projeto vinculado a esta pasta e nenhum projeto identificado como Meatualiza na lista acessível. É necessário definir o projeto e registrar/configurar a aplicação web para F2. |
-| Sentry              | Conexão disponível; a busca por Meatualiza na organização acessível não encontrou projeto correspondente. Integração prevista para F7.                                                                  |
-| PostHog             | Conexão disponível com projeto ativo chamado “Default project”; ainda é necessário definir o projeto destinado à plataforma antes de instrumentar eventos e surveys.                                    |
-| Hospedagem e GitHub | Repositório em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.              |
+| Serviço             | Situação                                                                                                                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Firebase            | Projeto dedicado `meatualiza-monitoria` criado com autorização e selecionado no MCP para esta pasta. App web, provedor Google, Firestore e configuração local reproduzível ainda serão preparados em F2-A. |
+| Sentry              | Conexão disponível; a busca por Meatualiza na organização acessível não encontrou projeto correspondente. Integração prevista para F7.                                                                     |
+| PostHog             | Conexão disponível com projeto ativo chamado “Default project”; ainda é necessário definir o projeto destinado à plataforma antes de instrumentar eventos e surveys.                                       |
+| Hospedagem e GitHub | Repositório em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.                 |
 
-Esta etapa não coleta analytics nem envia dados de alunos aos serviços. O repositório GitHub foi criado a pedido do responsável; nenhum recurso Firebase, Sentry ou PostHog foi criado ou alterado. Autenticação, inscrições, painéis, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
+Esta etapa não coleta analytics nem envia dados de alunos aos serviços. O projeto Firebase dedicado foi criado a pedido do responsável; Sentry e PostHog permanecem sem alterações. A conta Google ativa no MCP foi confirmada como a conta do monitor; seu privilégio será atribuído pelo UID após o primeiro acesso. Autenticação, inscrições, painéis, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
+
+A base e a landing foram integradas à `main` no [PR #1](https://github.com/filipebteixeira98/meatualiza/pull/1). A próxima entrega está detalhada no [plano da fase F2: identidade e autorização](./PLANO-F2.md), com tarefas, dependências e critérios de aceite.
 
 ## Verificação da primeira entrega
 

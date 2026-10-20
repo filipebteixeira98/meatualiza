@@ -34,6 +34,7 @@
 - **Pull Requests:** Cada funcionalidade deve ser implementada em uma _feature branch_ individual e submetida via Pull Request (PR) para revisão.
 - **Qualidade & CI/CD:**
   - O repositório deve conter pipeline de CI/CD automatizado com execução de testes.
+  - Por orientação do responsável, desconsiderar avisos e falhas do GitHub Actions causados exclusivamente pela cobrança da conta. Eles não impedem o andamento do projeto. Manter o workflow e as verificações locais; falhas de código, configuração ou testes continuam exigindo correção.
   - Configurar _pre-commit hooks_ (Husky / lint-staged) para garantir a formatação de código (Prettier/ESLint) antes de cada commit.
 - **Eficiência de Comunicação:** Respostas objetivas, diretas e pragmáticas para economizar contexto e tokens.
 
