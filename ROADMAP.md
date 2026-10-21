@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F1 e planejamento integrados à `main`. F2-A implementada e verificada: Firebase, Google, Firestore, SDKs e emuladores preparados. Próxima entrega: F2-B, com login, sessão e perfil do aluno, detalhada em [PLANO-F2.md](./PLANO-F2.md). Regras Q1–Q17 consolidadas; funcionalidades de monitoria seguem pendentes. A configuração e a verificação dos serviços estão registradas em README.md.
+Status: F2-A integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. Próxima entrega: F2-B, com sete tarefas de acesso, sessão, perfil, saída e validação detalhadas em [PLANO-F2.md](./PLANO-F2.md). F2-C vem depois, com três tarefas de autorização do monitor. Regras Q1–Q17 consolidadas; funcionalidades de monitoria seguem pendentes. A configuração e a verificação dos serviços estão registradas em README.md.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -201,7 +201,7 @@ Responsividade, acessibilidade, estados de interface e testes são critérios de
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1 e o planejamento estão integrados à `main`; F2-A está implementada para revisão, com Google e regras de Firestore já aplicados ao projeto dedicado. F2-B/F2-C seguem pendentes. Conforme orientação do responsável, avisos de cobrança do GitHub Actions são desconsiderados para o andamento; as verificações locais continuam obrigatórias conforme o escopo.
+O quadro distingue regras definidas e entregas implementadas. F1, o planejamento e F2-A estão integrados à `main`. Os antigos itens F2.1–F2.4 foram detalhados nas tarefas F2-B/F2-C abaixo, todas ainda a fazer. Dependências e critérios de aceite estão em PLANO-F2.md. Conforme orientação do responsável, avisos de cobrança do GitHub Actions são desconsiderados para o andamento; as verificações locais continuam obrigatórias conforme o escopo.
 
 | A Fazer                                                                                                   | Em Andamento | Concluído                                                                                                  |
 | --------------------------------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -222,10 +222,17 @@ O quadro distingue regras definidas e entregas implementadas. F1 e o planejament
 | —                                                                                                         | —            | Planejar F2 em três entregas com dependências e critérios de aceite documentados em PLANO-F2.md            |
 | —                                                                                                         | —            | Criar projeto Firebase dedicado meatualiza-monitoria e confirmar conta do monitor como a conta do MCP      |
 | —                                                                                                         | —            | F2.0/F2-A — Preparar Firebase, Google, Firestore fechado, SDKs e oito testes nos emuladores                |
-| F2.1 — Implementar login, sessão e logout                                                                 | —            | —                                                                                                          |
-| F2.2 — Configurar conta do monitor e autorização por perfil                                               | —            | —                                                                                                          |
-| F2.3 — Persistir perfis e testar isolamento entre alunos                                                  | —            | —                                                                                                          |
-| F2.4 — Validar sessões inválidas, revogação, permissões e acesso Google real em desktop/celular           | —            | —                                                                                                          |
+| —                                                                                                         | —            | Refinar F2-B/F2-C em tarefas, dependências e aceites; confirmar merge de F2-A                              |
+| F2-B.0 — Preparar ambiente privado, validar ADC real e ciclo de cookie nos emuladores                     | —            | —                                                                                                          |
+| F2-B.1 — Implementar troca do ID token Google por sessão, CSRF e verificação do cookie                    | —            | —                                                                                                          |
+| F2-B.2 — Persistir perfil pelo UID verificado, com reenvios seguros e createdAt preservado                | —            | —                                                                                                          |
+| F2-B.3 — Implementar entrada Google e área inicial do aluno com estados e responsividade                  | —            | —                                                                                                          |
+| F2-B.4 — Implementar logout, limpeza da sessão e revalidação da navegação                                 | —            | —                                                                                                          |
+| F2-B.5 — Cobrir segurança, perfis, falhas e fluxo de navegador com Google emulado                         | —            | —                                                                                                          |
+| F2-B.6 — Validar OAuth real em desktop/celular e registrar evidências no PR                               | —            | —                                                                                                          |
+| F2-C.1 — Conferir UID e atribuir privilégio de monitor por ambiente confiável                             | —            | —                                                                                                          |
+| F2-C.2 — Implementar área do monitor e direcionamento por autorização verificada                          | —            | —                                                                                                          |
+| F2-C.3 — Testar escalada de privilégio, isolamento e concessão/remoção com revogação                      | —            | —                                                                                                          |
 | F3.1 — Disponibilizar assuntos do programa aprovado                                                       | —            | —                                                                                                          |
 | F3.2 — Implementar formulário de dúvida e validações                                                      | —            | —                                                                                                          |
 | F3.3 — Definir contrato do pedido vinculado à inscrição; persistência em F4 e listagem/detalhes em F5     | —            | —                                                                                                          |
