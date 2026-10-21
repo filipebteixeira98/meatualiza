@@ -84,7 +84,7 @@ Esta etapa não coleta analytics nem envia dados de alunos aos serviços. O proj
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base e a landing foram integradas à `main` no [PR #1](https://github.com/filipebteixeira98/meatualiza/pull/1). A próxima entrega está detalhada no [plano da fase F2: identidade e autorização](./PLANO-F2.md), com tarefas, dependências e critérios de aceite.
+A base Firebase foi integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. A próxima entrega, F2-B, está detalhada no [plano da fase F2](./PLANO-F2.md): sete tarefas para ambiente, sessão, perfil, acesso, saída e validação. O mesmo documento prepara as três tarefas seguintes de autorização do monitor em F2-C; todas permanecem a fazer no [quadro do roadmap](./ROADMAP.md).
 
 ## Verificação das entregas
 

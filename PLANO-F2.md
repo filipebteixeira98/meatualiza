@@ -1,6 +1,6 @@
 # F2 — Identidade e autorização
 
-Status: F2-A implementada e verificada em 20/10/2026; F2-B é a próxima entrega. Base: `main` após o [merge do planejamento no PR #2](https://github.com/filipebteixeira98/meatualiza/pull/2). Login, sessão do usuário e autorização do monitor ainda não estão implementados. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
+Status: F2-A integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. F2-B está detalhada abaixo e permanece sem implementação; F2-C vem em seguida. Login, sessão do usuário e autorização do monitor ainda não estão disponíveis. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
 ## Resultado esperado
 
@@ -22,15 +22,61 @@ As escolhas do projeto e da conta estão confirmadas; Google e Firestore estão 
 
 ## Entregas e critérios de aceite
 
-| Ordem / PR                       | Tarefas                                                                                                                                             | Critérios de aceite                                                                                                                                                                                                                                                      | Dependência                           | Esforço relativo |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ---------------- |
-| F2-A — Preparar Firebase         | F2.0: vincular projeto/app, configurar Google, separar inicialização do navegador e do servidor, documentar variáveis e preparar emuladores/regras. | Configuração reproduzível; credenciais administrativas ausentes do bundle e do Git; configuração ausente gera mensagem clara, sem acesso simulado; acesso direto ao Firestore negado por padrão.                                                                         | Projeto definido e acesso disponível. | Pequeno a médio  |
-| F2-B — Entrada e sessão do aluno | F2.1 + parte de F2.3/F2.4: substituir `/entrar`, criar sessão de servidor, persistir perfil mínimo, abrir área do aluno e implementar saída.        | Qualquer conta Google entra sem convite/domínio obrigatório; recarregar mantém sessão válida; novo login não duplica perfil; cancelamento/erro de login permite nova tentativa; saída limpa a sessão; perfil de outro aluno permanece inacessível.                       | F2-A.                                 | Médio            |
-| F2-C — Acesso do monitor         | F2.2 + conclusão de F2.3/F2.4: atribuir privilégio por UID em ambiente confiável, abrir área do monitor e validar permissões.                       | Aluno não escolhe nem grava papel de monitor; acesso direto à rota e à operação protegidas é recusado ao aluno; conta correta chega à área do monitor; sessão inválida, expirada ou revogada não autoriza; concessão/remoção de privilégio tem procedimento verificável. | F2-B e UID do monitor confirmado.     | Médio            |
+| Ordem / PR                       | Tarefas                                                                                                                                             | Critérios de aceite                                                                                                                                                                                                                                                      | Dependência                                                     | Esforço relativo |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- | ---------------- |
+| F2-A — Preparar Firebase         | F2.0: vincular projeto/app, configurar Google, separar inicialização do navegador e do servidor, documentar variáveis e preparar emuladores/regras. | Configuração reproduzível; credenciais administrativas ausentes do bundle e do Git; configuração ausente gera mensagem clara, sem acesso simulado; acesso direto ao Firestore negado por padrão.                                                                         | Projeto definido e acesso disponível.                           | Pequeno a médio  |
+| F2-B — Entrada e sessão do aluno | F2-B.0–F2-B.6 refinam F2.1 e a parte de perfil/testes de F2.3/F2.4: acesso Google, sessão, perfil, área do aluno e saída.                           | Qualquer conta Google entra sem convite/domínio obrigatório; recarregar mantém sessão válida; novo login não duplica perfil; cancelamento/erro de login permite nova tentativa; saída limpa a sessão; perfil de outro aluno permanece inacessível.                       | F2-A integrada; configuração e validação real conforme B.0/B.6. | Médio            |
+| F2-C — Acesso do monitor         | F2-C.1–F2-C.3 refinam F2.2 e os testes restantes de F2.4: atribuição por UID, área do monitor e permissões.                                         | Aluno não escolhe nem grava papel de monitor; acesso direto à rota e à operação protegidas é recusado ao aluno; conta correta chega à área do monitor; sessão inválida, expirada ou revogada não autoriza; concessão/remoção de privilégio tem procedimento verificável. | F2-B e UID do monitor confirmado.                               | Médio            |
 
 Cada PR inclui os testes do comportamento que introduz, título e descrição em inglês e Conventional Commits. Capturas de desktop e celular acompanham os PRs com mudanças visuais. Nenhuma tarefa de implementação está concluída apenas por constar neste plano.
 
 Não há histórico de velocidade nem disponibilidade de desenvolvimento informada. Os esforços acima servem para ordenar a execução, sem prometer datas ou pontos. Executar uma entrega por vez; quando houver capacidade de calendário definida, reservar cerca de 20% para ajustes e falhas de integração antes de assumir mais escopo.
+
+## Execução da F2-B
+
+Meta: o aluno entra com Google, encontra sua própria identificação em `/aluno`, mantém a sessão ao recarregar e consegue sair. Entregar esse fluxo em um único PR funcional, com testes junto de cada tarefa. O planejamento desta seção foi refinado em 21/10/2026; as tarefas continuam a fazer.
+
+| ID     | Tarefa e aceite                                                                                                                                                                                                                                          | Dependência                                 | Esforço         |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------- |
+| F2-B.0 | Preparar `.env.local` privado e validar ADC do servidor para o projeto real. Confirmar nos emuladores o ciclo de criação/verificação do cookie antes de construir a interface. Registrar separadamente a configuração local e a real.                    | F2-A integrada.                             | Pequeno a médio |
+| F2-B.1 | Implementar obtenção de CSRF e troca do ID token Google por sessão no servidor. Recusar payload inválido, origem/CSRF inadequados, token de outro projeto/provedor e autenticação antiga. Validar cookies inválidos e revogados nas leituras protegidas. | B.0 local.                                  | Médio           |
+| F2-B.2 | Criar/atualizar `users/{uid}` com nome, e-mail e timestamps do servidor, usando somente a identidade verificada. Reenvios preservam `createdAt` e não duplicam perfil; falha de gravação não confirma uma nova sessão funcional.                         | B.1.                                        | Pequeno         |
+| F2-B.3 | Substituir o placeholder de `/entrar` por uma ação “Entrar com Google” e criar `/aluno` com identificação real e saída. Tratar carregamento, popup bloqueado/cancelado e falha, com nova tentativa, foco e uso em celular.                               | B.1/B.2.                                    | Médio           |
+| F2-B.4 | Implementar saída pelo servidor, limpar o cookie e o Auth em memória e revalidar a navegação. Voltar/recarregar uma rota protegida exige sessão válida; falha de saída não é apresentada como sucesso.                                                   | B.3.                                        | Pequeno         |
+| F2-B.5 | Integrar testes de sessão, CSRF, reenvios, perfil, falhas e isolamento entre usuários; cobrir entrada/saída em desktop e celular nos emuladores e manter a regressão da landing.                                                                         | B.1–B.4; testes acompanham a implementação. | Médio           |
+| F2-B.6 | Validar o Google real com contas controladas, incluindo uma conta sem vínculo institucional, em desktop e celular; verificar cookie, perfil persistido e logout. Registrar resultados e screenshots no PR em inglês.                                     | B.0 real e B.5.                             | Pequeno a médio |
+
+Implementação conduz as tarefas; o responsável participa da validação interativa quando o Google solicitar acesso à sua conta. Não pedir senha, código de acesso ou chave privada em mensagens ou no PR.
+
+Na inspeção de 21/10, `.env.local` e a variável `GOOGLE_APPLICATION_CREDENTIALS` não estavam presentes no processo. Isso não comprova ausência de ADC por outro mecanismo; o acesso real do servidor ainda precisa ser verificado. Os emuladores permitem desenvolver e testar enquanto essa preparação ocorre, mas não substituem B.6.
+
+### Fronteiras da implementação
+
+- Reutilizar `getBrowserAuth`, `getAdminApp`, os componentes existentes e o tema escuro. Separar o componente de interação Google das operações de sessão/perfil com `server-only`; proteger os dados no ponto de leitura/escrita.
+- Proposta de rotas: `GET /api/auth/csrf`, `POST /api/auth/session`, `DELETE /api/auth/session`, `/entrar` e `/aluno`. A página do aluno lê seu perfil no servidor pelo UID da sessão; não é necessário expor um endpoint que aceite UID arbitrário.
+- Usar cookie de sessão `HttpOnly`, host-only, `Path=/`, `SameSite=Lax` e `Secure` em produção. Proposta inicial: validade de cinco dias, sem renovação automática; exigir autenticação ocorrida há menos de cinco minutos na troca do ID token. Manter tokens fora de URLs, logs e armazenamento persistente do navegador.
+- Validar origem e CSRF nas alterações de sessão. O servidor deriva UID, nome e e-mail do token Google validado; não aceita identidade ou papel enviados pelo formulário. Só definir o cookie de sucesso após persistir o perfil necessário, com repetição segura se uma etapa falhar.
+- Ler cookies com a API assíncrona do Next.js; defini-los/removê-los somente em Route Handlers ou Server Actions. Diferenciar ausência/invalidez da sessão de indisponibilidade do serviço, evitando redirecionamento em ciclo. Não compartilhar cache persistente de sessão/perfil entre usuários; revalidar a navegação após entrada e saída.
+- Limpar o Auth em memória após a troca, inclusive em falhas. Logout encerra a sessão do navegador atual; remoção de privilégios e revogação administrativa ficam distintas. Dados operacionais permanecem no Firestore; nenhuma coleta opcional é habilitada em F2-B.
+
+### Prova de conclusão
+
+1. Testes de servidor recusam CSRF/origem incorretos, ID token inadequado, cookie alterado/expirado/revogado e acesso sem identidade. Recusam tentativa de informar UID ou papel de outro usuário.
+2. Testes de perfil comprovam um documento por UID, preservação de `createdAt`, repetição segura e ausência de cookie de sucesso quando a persistência falha. Aluno A não recebe dados de B.
+3. Testes de navegador cobrem Google emulado → área do aluno → recarregar → sair → voltar/recarregar, além de cancelamento, falha e nova tentativa, com teclado e larguras móveis.
+4. A suíte de autenticação usa o Next.js em desenvolvimento com `demo-meatualiza` e os emuladores. A suíte atual da landing continua verificando o build de produção. Preservar o bloqueio de emuladores em produção da F2-A; não criar exceção ou rota de login exclusiva de testes na aplicação.
+5. Usar identidades Google simuladas pelo Auth Emulator nas verificações do provedor; os custom tokens da suíte de fundação não comprovam login Google. Automatizar o popup emulado para a interface e usar credenciais simuladas na preparação dos testes de servidor, sem desviar o fluxo de produção.
+6. O PR registra formatação, lint, tipos, build, testes relevantes e a validação OAuth real. Passar nos emuladores não permite marcar o Google real como verificado. Abertura para alunos reais continua dependente dos termos e preferências previstos no roadmap.
+
+## Execução seguinte: F2-C
+
+| ID     | Tarefa e aceite                                                                                                                                                                                          | Dependência                                 |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| F2-C.1 | Conferir o UID associado à conta do monitor já confirmada; atribuir `monitor: true` por ambiente administrativo confiável. Documentar concessão e remoção sem publicar credenciais ou e-mail pessoal.    | F2-B validada e primeiro acesso do monitor. |
+| F2-C.2 | Criar a área inicial `/monitor` e direcionar a sessão pelo privilégio verificado. Mostrar apenas ações disponíveis, com acesso protegido também no servidor.                                             | C.1.                                        |
+| F2-C.3 | Provar que o aluno não promove a si mesmo, não acessa operações do monitor e não assume a identidade de outro aluno. Testar renovação após concessão e rejeição da sessão antiga após remoção/revogação. | C.2.                                        |
+
+Depois de F2-C, seguir a preparação de solicitações em F3 e a inscrição vinculada à sessão em F4. Métricas, calendário, pedidos e tour continuam nas fases já aprovadas, sem antecipar telas com dados fictícios.
 
 ## Fluxo de acesso proposto
 
@@ -90,8 +136,10 @@ Melhorias de UX a incorporar nas respectivas entregas: entrada com uma ação pr
 
 ## Referências técnicas consultadas
 
-Consultadas via Context7 em 20/10/2026:
+Consultadas via Context7 em 20/10/2026; cookies de sessão, autenticação Next.js e Auth Emulator reconsultados em 21/10 para detalhar F2-B:
 
 - [Firebase: cookies de sessão](https://firebase.google.com/docs/auth/admin/manage-cookies).
 - [Firebase: custom claims e autorização](https://firebase.google.com/docs/auth/admin/custom-claims).
 - [Firebase Admin SDK: atribuição de custom claims](https://firebase.google.com/docs/reference/admin/node/firebase-admin.auth.baseauth#setcustomuserclaims).
+- [Next.js: autenticação e autorização](https://nextjs.org/docs/app/guides/authentication).
+- [Firebase: Auth Emulator e provedores simulados](https://firebase.google.com/docs/emulator-suite/connect_auth).
