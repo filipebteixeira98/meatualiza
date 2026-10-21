@@ -1,6 +1,6 @@
 # F2 — Identidade e autorização
 
-Status: F2-A integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. F2-B está detalhada abaixo e permanece sem implementação; F2-C vem em seguida. Login, sessão do usuário e autorização do monitor ainda não estão disponíveis. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
+Status: F2-A integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. F2-B está implementada nesta branch para revisão, com sessão, perfil, entrada e saída verificados nos emuladores. A configuração ADC e o OAuth real ainda estão pendentes; F2-B não está concluída. F2-C, com autorização do monitor, vem após essa validação. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
 ## Resultado esperado
 
@@ -34,7 +34,7 @@ Não há histórico de velocidade nem disponibilidade de desenvolvimento informa
 
 ## Execução da F2-B
 
-Meta: o aluno entra com Google, encontra sua própria identificação em `/aluno`, mantém a sessão ao recarregar e consegue sair. Entregar esse fluxo em um único PR funcional, com testes junto de cada tarefa. O planejamento desta seção foi refinado em 21/10/2026; as tarefas continuam a fazer.
+Meta: o aluno entra com Google, encontra sua própria identificação em `/aluno`, mantém a sessão ao recarregar e consegue sair. Entregar esse fluxo em um único PR funcional, com testes junto de cada tarefa. O planejamento desta seção foi refinado e implementado em 21/10/2026. B.1–B.5 estão implementadas para revisão; B.0 continua parcial (ambiente local testado, ADC real pendente) e B.6 aguarda a configuração real. Nenhum privilégio de monitor foi concedido.
 
 | ID     | Tarefa e aceite                                                                                                                                                                                                                                          | Dependência                                 | Esforço         |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------- |
@@ -48,7 +48,9 @@ Meta: o aluno entra com Google, encontra sua própria identificação em `/aluno
 
 Implementação conduz as tarefas; o responsável participa da validação interativa quando o Google solicitar acesso à sua conta. Não pedir senha, código de acesso ou chave privada em mensagens ou no PR.
 
-Na inspeção de 21/10, `.env.local` e a variável `GOOGLE_APPLICATION_CREDENTIALS` não estavam presentes no processo. Isso não comprova ausência de ADC por outro mecanismo; o acesso real do servidor ainda precisa ser verificado. Os emuladores permitem desenvolver e testar enquanto essa preparação ocorre, mas não substituem B.6.
+Na inspeção de 21/10, `.env.local` e `GOOGLE_APPLICATION_CREDENTIALS` não estavam presentes, e a tentativa de obter acesso por ADC não teve sucesso. Os testes usam variáveis demo explícitas, sem alterar o servidor local já aberto. O ciclo Google emulado → cookie → verificação foi comprovado antes da interface. O responsável recebeu a escolha entre configurar ADC com login interativo ou informar o caminho de uma credencial existente, sem compartilhar segredos. B.0 real e B.6 continuam pendentes; o PR permanece em rascunho até essa validação.
+
+A implementação inclui 22 testes de servidor/Firebase e seis cenários de navegador (três por viewport), incluindo falha de entrada, cancelamento do popup e falha de saída seguida de recuperação. A regressão de produção da landing permanece separada. Para login ADC com conta de usuário, observar o [cliente OAuth Desktop exigido pelo Firebase Auth](https://firebase.google.com/docs/admin/setup#test-with-gcloud-end-user-credentials); o login do CLI/MCP não é reutilizado como credencial do servidor.
 
 ### Fronteiras da implementação
 

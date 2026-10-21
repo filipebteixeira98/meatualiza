@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { afterEach, beforeEach, test } from "node:test";
 import { deleteApp, getApps } from "firebase/app";
-import { signInWithCustomToken, signOut } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithCustomToken,
+  signOut,
+} from "firebase/auth";
 import {
   connectFirestoreEmulator,
   doc,
@@ -103,6 +108,27 @@ test("SDK initialization is repeatable and Auth connects to the local emulator",
   assert.equal(getAdminApp(), getAdminApp());
   assert.equal(auth.emulatorConfig.host, "127.0.0.1");
   assert.equal(auth.emulatorConfig.port, 9099);
+});
+
+test("emulated Google identity can create a verified server session cookie", async () => {
+  const auth = getBrowserAuth();
+  const credential = GoogleAuthProvider.credential(
+    JSON.stringify({
+      sub: "foundation-google-session",
+      email: "google-session@example.test",
+      email_verified: true,
+      name: "Aluno Google",
+    }),
+  );
+  const { user } = await signInWithCredential(auth, credential);
+  const adminAuth = getAdminAuth(getAdminApp());
+  const cookie = await adminAuth.createSessionCookie(await user.getIdToken(), {
+    expiresIn: 5 * 24 * 60 * 60 * 1000,
+  });
+  const session = await adminAuth.verifySessionCookie(cookie, true);
+  assert.equal(session.uid, user.uid);
+  assert.equal(session.firebase.sign_in_provider, "google.com");
+  assert.equal(session.exp - session.iat, 5 * 24 * 60 * 60);
 });
 
 test("Admin writes work, while direct Firestore access is denied for every client role", async () => {

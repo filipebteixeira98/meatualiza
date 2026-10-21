@@ -80,12 +80,10 @@ test("leva ao estado real do acesso e permite voltar", async ({ page }) => {
   await page.getByRole("link", { name: "Acessar plataforma" }).last().click();
   await expect(page).toHaveURL(/\/entrar$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Estamos preparando",
+    "Seu lugar no L7.",
   );
   await expect(
-    page.getByText("O acesso à plataforma ainda não está disponível.", {
-      exact: false,
-    }),
+    page.getByRole("button", { name: "Entrar com Google" }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Voltar para a monitoria" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
