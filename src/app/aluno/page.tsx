@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/actions";
 import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
 
@@ -52,10 +55,21 @@ export default async function StudentPage() {
               </dd>
             </div>
           </dl>
-          <p className="mt-7 border-t border-border pt-6 text-sm leading-7 text-muted-foreground">
-            Em breve, você poderá escolher uma sessão e enviar sua dúvida por
-            aqui.
+        </section>
+        <section aria-labelledby="help-title" className="mt-8">
+          <h2 id="help-title" className="text-xl font-medium">
+            Em qual ponto você travou?
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">
+            Prepare o assunto e a descrição da sua dúvida. A escolha da sessão e
+            o envio serão disponibilizados na próxima etapa.
           </p>
+          <Button asChild className="mt-5 min-h-11 px-4">
+            <Link href="/aluno/duvida">
+              Preparar minha dúvida
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
         </section>
         <div className="mt-7">
           <SignOutButton />

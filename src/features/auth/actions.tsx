@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -10,18 +10,10 @@ import {
 import { LoaderCircle, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getBrowserAuth } from "@/lib/firebase/client";
+import { useHydrated } from "@/lib/use-hydrated";
 
 const unavailable =
   "Não foi possível concluir o acesso. Tente novamente em instantes.";
-
-const subscribe = () => () => {};
-function useHydrated() {
-  return useSyncExternalStore(
-    subscribe,
-    () => true,
-    () => false,
-  );
-}
 
 async function changeSession(method: "POST" | "DELETE", idToken?: string) {
   const csrfResponse = await fetch("/api/auth/csrf", { cache: "no-store" });

@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação do aluno e `/monitor` atende a conta autorizada como monitor. A entrada escolhe a área no servidor. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. Agenda e inscrições vêm nas próximas entregas.
+Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação do aluno e `/monitor` atende a conta autorizada como monitor. A entrada escolhe a área no servidor. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. `/aluno/duvida` permite preparar e revisar assunto/descrição sem enviá-los. Agenda e inscrições vêm na F4.
 
 ## Verificar
 
@@ -113,17 +113,27 @@ Configuração e verificação em 20/10/2026:
 | PostHog             | Conexão disponível com projeto ativo chamado “Default project”; ainda é necessário definir o projeto destinado à plataforma antes de instrumentar eventos e surveys.                                                   |
 | Hospedagem e GitHub | Repositório em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.                             |
 
-A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dados de alunos nesta etapa. O projeto Firebase dedicado foi criado a pedido do responsável; Sentry e PostHog permanecem sem alterações. A conta Google ativa no MCP foi confirmada como a conta do monitor; seu UID foi conferido privadamente e o privilégio de monitor foi atribuído em 22/10/2026, com confirmação no Firebase. Saia e entre novamente na branch `feat/monitor-access` para validar `/monitor`. A autorização do monitor, inscrições, painéis completos, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
+A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dados de alunos nesta etapa. O projeto Firebase dedicado foi criado a pedido do responsável; Sentry e PostHog permanecem sem alterações. A conta Google ativa no MCP foi confirmada como a conta do monitor; seu UID foi conferido privadamente e o privilégio de monitor foi atribuído em 22/10/2026, com confirmação no Firebase. O responsável confirmou o redirecionamento real para `/monitor` após o novo login. Inscrições, painéis completos, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão no [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5): sessão, perfil, entrada e saída implementados; entrada, recarga, logout e conta pessoal confirmados; celular real pendente em B.6. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. Por solicitação do responsável para prosseguir, F2-C foi implementada na branch `feat/monitor-access`, encadeada à F2-B enquanto o PR #5 segue aberto. A validação real da área do monitor e do acesso em celular permanece pendente.
+A base Firebase, o planejamento e as entregas de acesso foram integrados à `main` nos PRs #3–#6. Entrada, recarga, logout, conta pessoal e área real do monitor foram confirmados pelo responsável. OAuth em celular real permanece pendente em B.6 do [plano F2](./PLANO-F2.md). A F3 implementa a preparação do pedido de ajuda, conforme [plano F3](./PLANO-F3.md), e aguarda revisão/merge. Agenda e inscrição atômica serão a próxima entrega, em F4.
+
+## Preparação da dúvida (F3)
+
+Na área do aluno, **Preparar minha dúvida** abre `/aluno/duvida`. Escolha um dos nove assuntos aprovados ou “Outro assunto / não sei classificar”, descreva a dificuldade e revise o texto. A descrição é obrigatória, sem espaços vazios, com até 2.000 caracteres; espaços nas bordas são removidos na revisão. É possível voltar para editar sem perder os campos.
+
+O rascunho existe apenas na memória da página: sair ou recarregar o descarta. Não há envio ao monitor, gravação no Firestore ou armazenamento persistente no navegador. A interface informa esse limite. O contrato compartilhado e sua integração com a inscrição em F4 estão em [PLANO-F3.md](./PLANO-F3.md). O monitor continua em sua área própria.
+
+Execute `npm run test:domain` para validar o contrato; `npm run test:auth` inclui o fluxo do formulário em desktop/celular nos emuladores.
 
 ## Verificação das entregas
 
 Build de produção, tipagem, lint e dez verificações de navegador passaram localmente. Dois casos específicos de viewport são pulados no projeto ao qual não se aplicam. As imagens de desktop e celular foram inspecionadas visualmente.
 
 F2-B/F2-C ampliam a suíte Firebase para 28 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF, falhas e autorização/concessão/remoção do monitor. Doze testes de navegador cobrem entrada, cancelamento do popup, falhas, recuperação, ambas as áreas, remoção do privilégio e interação após carregamento dos scripts em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. F2-C acrescenta autorização do monitor, roteamento por perfil e procedimento administrativo testado. A entrada real foi confirmada pelo responsável após o ajuste NTP; recarga, logout e conta pessoal também foram confirmados; a validação real em celular permanece pendente em PLANO-F2.md.
+
+F3 acrescenta seis testes de domínio e quatro cenários de navegador, totalizando 16 no acesso/formulário. Eles cobrem validação, revisão/edição, limites, texto de código, foco, bloqueio antes da hidratação, restrição por perfil e descarte após recarga. As capturas estão em `docs/screenshots/`.
 
 `npm audit --omit=dev` não encontrou vulnerabilidades. Um override de `@grpc/grpc-js` para `^1.14.6` evita a versão antiga transitiva do SDK Firestore e o [alerta de validação de certificados](https://github.com/advisories/GHSA-m9gg-hp2v-232j); os testes exercitam o SDK com essa versão. Remover o override quando o Firebase adotar uma versão corrigida compatível.
 

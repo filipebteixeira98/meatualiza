@@ -46,7 +46,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
     page.getByRole("heading", { name: "Acesso de monitor ativo." }),
   ).toBeVisible();
   await expect(page.getByText(user.email!, { exact: true })).toBeVisible();
-  for (const path of ["/entrar", "/aluno"]) {
+  for (const path of ["/entrar", "/aluno", "/aluno/duvida"]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/monitor$/);
   }
