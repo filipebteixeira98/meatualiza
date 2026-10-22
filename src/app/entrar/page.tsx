@@ -2,10 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CodeXml } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { GoogleSignIn } from "@/features/auth/actions";
+import { getStudentProfile, SESSION_COOKIE } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Acesso à plataforma" };
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  const profile = await getStudentProfile(
+    (await cookies()).get(SESSION_COOKIE)?.value,
+  );
+  if (profile) redirect("/aluno");
   return (
     <main
       id="conteudo"
@@ -19,21 +27,19 @@ export default function SignInPage() {
         <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-muted">
           <CodeXml className="size-6" aria-hidden="true" />
         </span>
-        <p className="eyebrow mt-6">NOS VEMOS EM BREVE</p>
+        <p className="eyebrow mt-6">MONITORIA NO L7</p>
         <h1
           id="sign-in-title"
           className="mt-3 text-3xl font-medium tracking-tight"
         >
-          Estamos preparando
-          <br />
-          seu próximo passo.
+          Seu lugar no L7.
         </h1>
         <p className="mt-5 text-sm leading-7 text-muted-foreground">
-          O acesso à plataforma ainda não está disponível. Em breve, você poderá
-          entrar com sua conta Google para agendar a monitoria e acompanhar suas
-          dúvidas.
+          Entre com sua conta Google para acessar sua área de monitoria de
+          Lógica de Programação. Qualquer conta Google é bem-vinda.
         </p>
-        <Button asChild variant="outline" className="mt-7 w-full">
+        <GoogleSignIn />
+        <Button asChild variant="ghost" className="mt-4 h-11 w-full">
           <Link href="/">
             <ArrowLeft aria-hidden="true" />
             Voltar para a monitoria
