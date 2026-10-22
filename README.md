@@ -73,7 +73,7 @@ Para ADC com login de usuário, o Firebase Auth exige um cliente OAuth próprio 
 
 As regras de Firestore negam todo acesso direto do cliente, inclusive de usuários com claim de monitor. Elas foram publicadas e conferidas no projeto real. O Admin SDK ignora essas regras: as operações de sessão e perfil já verificam a identidade e a titularidade no servidor. Novas operações também deverão verificar os privilégios pertinentes. Os testes verificam escrita administrativa e recusam leitura/escrita de clientes sem login, alunos e monitores, usando somente dados fictícios nos emuladores.
 
-Google foi habilitado no projeto real por configuração administrativa; o e-mail de suporte não é versionado. Para repetir em outro projeto, habilite Google em Authentication → Sign-in method, configure marca e suporte e revise Settings → Authorized domains. No projeto atual estão autorizados os domínios Firebase, `localhost` e `127.0.0.1`; o domínio de hospedagem definitivo será definido em F8. Em 22/10/2026, o responsável confirmou entrada Google real e redirecionamento. B.6 ainda aguarda confirmação de recarga, logout, desktop/celular e conta sem vínculo institucional; os testes automatizados usam exclusivamente o Auth Emulator.
+Google foi habilitado no projeto real por configuração administrativa; o e-mail de suporte não é versionado. Para repetir em outro projeto, habilite Google em Authentication → Sign-in method, configure marca e suporte e revise Settings → Authorized domains. No projeto atual estão autorizados os domínios Firebase, `localhost` e `127.0.0.1`; o domínio de hospedagem definitivo será definido em F8. Em 22/10/2026, o responsável confirmou entrada Google real e redirecionamento. B.6 tem recarga, logout e conta pessoal confirmados; celular real ainda aguarda validação; os testes automatizados usam exclusivamente o Auth Emulator.
 
 ## Sessão do aluno
 
@@ -102,13 +102,13 @@ A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dado
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão no [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5): sessão, perfil, entrada e saída implementados; entrada real confirmada e demais cenários de B.6 aguardando confirmação. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. F2-C, com autorização do monitor, será a próxima entrega após a validação.
+A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão no [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5): sessão, perfil, entrada e saída implementados; entrada, recarga, logout e conta pessoal confirmados; celular real pendente em B.6. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. F2-C, com autorização do monitor, será a próxima entrega após a validação.
 
 ## Verificação das entregas
 
 Build de produção, tipagem, lint e dez verificações de navegador passaram localmente. Dois casos específicos de viewport são pulados no projeto ao qual não se aplicam. As imagens de desktop e celular foram inspecionadas visualmente.
 
-F2-B amplia a suíte Firebase para 22 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF e falhas. O navegador cobre o fluxo de acesso, cancelamento do popup, falhas e recuperação em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. A concessão do privilégio de monitor continua em F2-C. A entrada real foi confirmada pelo responsável após o ajuste NTP; os demais casos reais continuam identificados como pendentes em PLANO-F2.md.
+F2-B amplia a suíte Firebase para 22 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF e falhas. O navegador cobre o fluxo de acesso, cancelamento do popup, falhas e recuperação em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. A concessão do privilégio de monitor continua em F2-C. A entrada real foi confirmada pelo responsável após o ajuste NTP; recarga, logout e conta pessoal também foram confirmados; a validação real em celular permanece pendente em PLANO-F2.md.
 
 `npm audit --omit=dev` não encontrou vulnerabilidades. Um override de `@grpc/grpc-js` para `^1.14.6` evita a versão antiga transitiva do SDK Firestore e o [alerta de validação de certificados](https://github.com/advisories/GHSA-m9gg-hp2v-232j); os testes exercitam o SDK com essa versão. Remover o override quando o Firebase adotar uma versão corrigida compatível.
 
