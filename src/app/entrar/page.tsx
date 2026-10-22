@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { GoogleSignIn } from "@/features/auth/actions";
-import { getStudentProfile, SESSION_COOKIE } from "@/lib/auth/session";
+import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Acesso à plataforma" };
 
 export default async function SignInPage() {
-  const profile = await getStudentProfile(
+  const profile = await getAccountProfile(
     (await cookies()).get(SESSION_COOKIE)?.value,
   );
-  if (profile) redirect("/aluno");
+  if (profile) redirect(profile.role === "monitor" ? "/monitor" : "/aluno");
   return (
     <main
       id="conteudo"

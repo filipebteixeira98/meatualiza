@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { StudentSignOut } from "@/features/auth/actions";
-import { getStudentProfile, SESSION_COOKIE } from "@/lib/auth/session";
+import { SignOutButton } from "@/features/auth/actions";
+import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Sua área de monitoria",
@@ -10,10 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default async function StudentPage() {
-  const profile = await getStudentProfile(
+  const profile = await getAccountProfile(
     (await cookies()).get(SESSION_COOKIE)?.value,
   );
   if (!profile) redirect("/entrar");
+  if (profile.role === "monitor") redirect("/monitor");
 
   return (
     <main
@@ -57,7 +58,7 @@ export default async function StudentPage() {
           </p>
         </section>
         <div className="mt-7">
-          <StudentSignOut />
+          <SignOutButton />
         </div>
       </div>
     </main>

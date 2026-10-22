@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação da conta autenticada. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. Agenda e inscrições vêm nas próximas entregas.
+Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação do aluno e `/monitor` atende a conta autorizada como monitor. A entrada escolhe a área no servidor. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. Agenda e inscrições vêm nas próximas entregas.
 
 ## Verificar
 
@@ -79,7 +79,22 @@ Google foi habilitado no projeto real por configuração administrativa; o e-mai
 
 O popup Google fornece um ID token recente, trocado por um cookie de cinco dias após o servidor validar origem, CSRF e identidade e persistir `users/{uid}`. A gravação é idempotente e preserva `createdAt`; o cliente não informa UID ou papel. O cookie é `HttpOnly`, `SameSite=Lax`, host-only e `Secure` em produção; use HTTPS fora do desenvolvimento. O token do navegador permanece apenas em memória e é descartado após a troca, inclusive em falhas.
 
-A área `/aluno` lê somente o perfil do UID verificado e recusa sessões expiradas, revogadas ou de contas desabilitadas. Logout limpa a sessão do navegador atual, sem revogar outras sessões. A navegação é recarregada após entrada/saída para evitar dados antigos no cache. Falhas do serviço exibem nova tentativa; elas não são tratadas como uma sessão inexistente. Não há renovação automática nem concessão de privilégio de monitor nesta entrega.
+A área `/aluno` lê somente o perfil do UID verificado e recusa sessões expiradas, revogadas ou de contas desabilitadas. Logout limpa a sessão do navegador atual, sem revogar outras sessões. A navegação é recarregada após entrada/saída para evitar dados antigos no cache. Falhas do serviço exibem nova tentativa; elas não são tratadas como uma sessão inexistente. Não há renovação automática. O acesso do monitor usa a claim booleana `monitor: true` na sessão e a permissão atual no Firebase; contas sem essa autorização permanecem como aluno.
+
+## Acesso administrativo do monitor
+
+A F2-C reutiliza a mesma autenticação Google e o mesmo cookie. `/entrar` direciona a sessão para `/aluno` ou `/monitor`; o navegador não escolhe o papel. Acessar `/monitor` como aluno retorna à sua própria área, e acessar sem sessão exige login. A área inicial do monitor mostra identificação e logout; agenda, inscritos e métricas continuam nas fases seguintes.
+
+Concessão e remoção são operações administrativas locais, sem endpoint público. Confira o UID da conta Google do responsável no projeto correto, mantenha `.env.local` privado com a configuração real/ADC e execute:
+
+```sh
+npm run monitor:access -- grant UID_CONFIRMADO
+npm run monitor:access -- revoke UID_CONFIRMADO
+```
+
+Execute apenas a operação desejada. `grant` exige conta Google ativa e preserva outras claims; depois, saia e entre com Google novamente para obter uma sessão com o privilégio. `revoke` remove somente a claim de monitor e revoga as sessões da conta em todos os navegadores, sem apagar seu perfil. O comando exige UID explícito e não publica identidade ou credenciais.
+
+Uma sessão antiga de aluno não ganha acesso após a concessão. Nas leituras do monitor, o servidor verifica também a claim administrativa atual: isso bloqueia o cookie antigo após a remoção, inclusive antes de a revogação com precisão de segundos ser detectada. Essa proteção acrescenta uma consulta ao Auth por leitura do monitor. Indisponibilidade do Auth é exibida como falha de serviço; não concede acesso nem muda silenciosamente o perfil.
 
 ## Relógio do sistema e diagnóstico de acesso
 
@@ -98,17 +113,17 @@ Configuração e verificação em 20/10/2026:
 | PostHog             | Conexão disponível com projeto ativo chamado “Default project”; ainda é necessário definir o projeto destinado à plataforma antes de instrumentar eventos e surveys.                                                   |
 | Hospedagem e GitHub | Repositório em [filipebteixeira98/meatualiza](https://github.com/filipebteixeira98/meatualiza), com remoto `origin` configurado e workflow de CI para PRs. Hospedagem ainda não vinculada.                             |
 
-A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dados de alunos nesta etapa. O projeto Firebase dedicado foi criado a pedido do responsável; Sentry e PostHog permanecem sem alterações. A conta Google ativa no MCP foi confirmada como a conta do monitor; seu privilégio será atribuído pelo UID após o primeiro acesso. A autorização do monitor, inscrições, painéis completos, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
+A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dados de alunos nesta etapa. O projeto Firebase dedicado foi criado a pedido do responsável; Sentry e PostHog permanecem sem alterações. A conta Google ativa no MCP foi confirmada como a conta do monitor; seu UID foi conferido privadamente e o privilégio de monitor foi atribuído em 22/10/2026, com confirmação no Firebase. Saia e entre novamente na branch `feat/monitor-access` para validar `/monitor`. A autorização do monitor, inscrições, painéis completos, tour e avaliações seguem nas fases seguintes do [roadmap](./ROADMAP.md).
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão no [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5): sessão, perfil, entrada e saída implementados; entrada, recarga, logout e conta pessoal confirmados; celular real pendente em B.6. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. F2-C, com autorização do monitor, será a próxima entrega após a validação.
+A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão no [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5): sessão, perfil, entrada e saída implementados; entrada, recarga, logout e conta pessoal confirmados; celular real pendente em B.6. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. Por solicitação do responsável para prosseguir, F2-C foi implementada na branch `feat/monitor-access`, encadeada à F2-B enquanto o PR #5 segue aberto. A validação real da área do monitor e do acesso em celular permanece pendente.
 
 ## Verificação das entregas
 
 Build de produção, tipagem, lint e dez verificações de navegador passaram localmente. Dois casos específicos de viewport são pulados no projeto ao qual não se aplicam. As imagens de desktop e celular foram inspecionadas visualmente.
 
-F2-B amplia a suíte Firebase para 22 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF e falhas. O navegador cobre o fluxo de acesso, cancelamento do popup, falhas e recuperação em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. A concessão do privilégio de monitor continua em F2-C. A entrada real foi confirmada pelo responsável após o ajuste NTP; recarga, logout e conta pessoal também foram confirmados; a validação real em celular permanece pendente em PLANO-F2.md.
+F2-B/F2-C ampliam a suíte Firebase para 28 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF, falhas e autorização/concessão/remoção do monitor. Doze testes de navegador cobrem entrada, cancelamento do popup, falhas, recuperação, ambas as áreas, remoção do privilégio e interação após carregamento dos scripts em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. F2-C acrescenta autorização do monitor, roteamento por perfil e procedimento administrativo testado. A entrada real foi confirmada pelo responsável após o ajuste NTP; recarga, logout e conta pessoal também foram confirmados; a validação real em celular permanece pendente em PLANO-F2.md.
 
 `npm audit --omit=dev` não encontrou vulnerabilidades. Um override de `@grpc/grpc-js` para `^1.14.6` evita a versão antiga transitiva do SDK Firestore e o [alerta de validação de certificados](https://github.com/advisories/GHSA-m9gg-hp2v-232j); os testes exercitam o SDK com essa versão. Remover o override quando o Firebase adotar uma versão corrigida compatível.
 

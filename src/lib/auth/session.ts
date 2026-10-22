@@ -78,14 +78,21 @@ export async function createStudentSession(idToken: string) {
   return cookie;
 }
 
-export async function getStudentProfile(cookie?: string) {
+export async function getAccountProfile(cookie?: string) {
   if (!cookie || cookie.length > 8192) return null;
   const app = getAdminApp();
   let identity;
+  let role: "student" | "monitor" = "student";
   try {
-    identity = googleIdentity(
-      await getAuth(app).verifySessionCookie(cookie, true),
-    );
+    const auth = getAuth(app);
+    const claims = await auth.verifySessionCookie(cookie, true);
+    identity = googleIdentity(claims);
+    if (claims.monitor === true) {
+      // A revogação do Firebase tem precisão de segundos; conferir a claim atual fecha essa janela.
+      const current = await auth.getUser(identity.uid);
+      if (current.disabled) return null;
+      if (current.customClaims?.monitor === true) role = "monitor";
+    }
   } catch (error) {
     if (isInvalidSession(error)) return null;
     throw error;
@@ -106,5 +113,6 @@ export async function getStudentProfile(cookie?: string) {
     uid: identity.uid,
     displayName: profile.displayName,
     email: profile.email,
+    role,
   };
 }

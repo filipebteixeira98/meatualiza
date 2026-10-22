@@ -37,6 +37,8 @@ yarn-error.log*
 .env*
 !.env.example
 .secrets/
+client_secret_*.json
+*.un~
 .firebase/
 *-debug.log
 
