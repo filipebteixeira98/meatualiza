@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { after, afterEach, test } from "node:test";
 import { deleteApp, getApps } from "firebase/app";
 import {
@@ -19,12 +21,22 @@ import { getAdminApp } from "../../src/lib/firebase/admin.ts";
 import { getBrowserAuth } from "../../src/lib/firebase/client.ts";
 import {
   createStudentSession,
-  getStudentProfile,
+  getAccountProfile,
   SESSION_COOKIE,
   SESSION_MAX_AGE,
 } from "../../src/lib/auth/session.ts";
 import { CSRF_COOKIE, issueCsrf } from "../../src/lib/auth/http.ts";
 import { POST, DELETE } from "../../src/app/api/auth/session/route.ts";
+
+const execute = promisify(execFile);
+
+function monitorAccess(...args) {
+  return execute(process.execPath, [
+    "--conditions=react-server",
+    "scripts/monitor-access.mjs",
+    ...args,
+  ]);
+}
 
 assert.equal(process.env.GCLOUD_PROJECT, "demo-meatualiza");
 assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, "127.0.0.1:9099");
@@ -91,10 +103,11 @@ test("Google token creates a five-day session and one identity-derived profile",
   assert.equal(cookie.maxAge, SESSION_MAX_AGE);
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.equal((await response.json()).ok, true);
-  assert.deepEqual(await getStudentProfile(cookie.value), {
+  assert.deepEqual(await getAccountProfile(cookie.value), {
     uid: user.uid,
     email: user.email,
     displayName: "Aluno Sessão",
+    role: "student",
   });
   const stored = await getFirestore(getAdminApp())
     .doc(`users/${user.uid}`)
@@ -127,11 +140,11 @@ test("sessions only return the profile belonging to the verified cookie", async 
   const cookieA = await createStudentSession(a.token);
   const b = await googleUser();
   const cookieB = await createStudentSession(b.token);
-  assert.equal((await getStudentProfile(cookieA)).uid, a.uid);
-  assert.equal((await getStudentProfile(cookieB)).uid, b.uid);
-  assert.notEqual((await getStudentProfile(cookieA)).email, b.email);
-  assert.equal(await getStudentProfile(), null);
-  assert.equal(await getStudentProfile("tampered-cookie"), null);
+  assert.equal((await getAccountProfile(cookieA)).uid, a.uid);
+  assert.equal((await getAccountProfile(cookieB)).uid, b.uid);
+  assert.notEqual((await getAccountProfile(cookieA)).email, b.email);
+  assert.equal(await getAccountProfile(), null);
+  assert.equal(await getAccountProfile("tampered-cookie"), null);
 });
 
 test("invalid tokens, forged identity fields, wrong origin and invalid CSRF never create a cookie", async () => {
@@ -215,7 +228,7 @@ test("expired session cookies are rejected", async (t) => {
   const cookie = await createStudentSession(user.token);
   const now = Date.now();
   t.mock.method(Date, "now", () => now + (SESSION_MAX_AGE + 1) * 1000);
-  assert.equal(await getStudentProfile(cookie), null);
+  assert.equal(await getAccountProfile(cookie), null);
 });
 
 test("disabled and revoked sessions cannot read a profile", async () => {
@@ -223,11 +236,11 @@ test("disabled and revoked sessions cannot read a profile", async () => {
   const cookie = await createStudentSession(user.token);
   const auth = getAuth(getAdminApp());
   await auth.updateUser(user.uid, { disabled: true });
-  assert.equal(await getStudentProfile(cookie), null);
+  assert.equal(await getAccountProfile(cookie), null);
   await auth.updateUser(user.uid, { disabled: false });
   await new Promise((resolve) => setTimeout(resolve, 1100));
   await auth.revokeRefreshTokens(user.uid);
-  assert.equal(await getStudentProfile(cookie), null);
+  assert.equal(await getAccountProfile(cookie), null);
 });
 
 test("failed profile persistence returns service unavailable without issuing a session", async (t) => {
@@ -250,7 +263,7 @@ test("a database outage is not treated as a missing or invalid session", async (
   t.mock.method(getFirestore(getAdminApp()), "getAll", async () => {
     throw new Error("Database unavailable");
   });
-  await assert.rejects(getStudentProfile(cookie), /Database unavailable/);
+  await assert.rejects(getAccountProfile(cookie), /Database unavailable/);
 });
 
 test("logout clears the current browser cookie and rejects a cross-origin request", async () => {
@@ -276,4 +289,99 @@ test("CSRF tokens vary, stay out of cache, and use a secure cookie in production
   } finally {
     process.env.NODE_ENV = "test";
   }
+});
+
+test("only a boolean monitor claim in both the cookie and current account grants access", async () => {
+  const auth = getAuth(getAdminApp());
+  for (const claim of [undefined, false, "true", 1, true]) {
+    const user = await googleUser();
+    await auth.setCustomUserClaims(
+      user.uid,
+      claim === undefined ? {} : { monitor: claim },
+    );
+    const token = await getBrowserAuth().currentUser.getIdToken(true);
+    const cookie = await createStudentSession(token);
+    assert.equal(
+      (await getAccountProfile(cookie)).role,
+      claim === true ? "monitor" : "student",
+    );
+  }
+});
+
+test("profile fields cannot promote a student", async () => {
+  const user = await googleUser();
+  const cookie = await createStudentSession(user.token);
+  await getFirestore(getAdminApp())
+    .doc(`users/${user.uid}`)
+    .set({ monitor: true, role: "monitor" }, { merge: true });
+  assert.equal((await getAccountProfile(cookie)).role, "student");
+});
+
+test("administrative grant preserves claims and requires a new session; removal revokes access", async () => {
+  const user = await googleUser();
+  const auth = getAuth(getAdminApp());
+  await auth.setCustomUserClaims(user.uid, { unrelated: "preserved" });
+  const oldCookie = await createStudentSession(user.token);
+  await monitorAccess("grant", user.uid);
+  assert.deepEqual((await auth.getUser(user.uid)).customClaims, {
+    unrelated: "preserved",
+    monitor: true,
+  });
+  assert.equal((await getAccountProfile(oldCookie)).role, "student");
+  const cookie = await createStudentSession(
+    await getBrowserAuth().currentUser.getIdToken(true),
+  );
+  assert.equal((await getAccountProfile(cookie)).role, "monitor");
+  await new Promise((resolve) => setTimeout(resolve, 1100));
+  await monitorAccess("revoke", user.uid);
+  assert.deepEqual((await auth.getUser(user.uid)).customClaims, {
+    unrelated: "preserved",
+  });
+  assert.equal(await getAccountProfile(cookie), null);
+});
+
+test("removal blocks an old monitor cookie even while SDK verification still accepts it", async () => {
+  const user = await googleUser();
+  const auth = getAuth(getAdminApp());
+  await auth.setCustomUserClaims(user.uid, { monitor: true });
+  const cookie = await createStudentSession(
+    await getBrowserAuth().currentUser.getIdToken(true),
+  );
+  assert.equal((await getAccountProfile(cookie)).role, "monitor");
+  await auth.setCustomUserClaims(user.uid, {});
+  assert.equal((await auth.verifySessionCookie(cookie, true)).monitor, true);
+  assert.equal((await getAccountProfile(cookie)).role, "student");
+});
+
+test("a role lookup outage does not authorize or silently downgrade a monitor", async (t) => {
+  const user = await googleUser();
+  const auth = getAuth(getAdminApp());
+  await auth.setCustomUserClaims(user.uid, { monitor: true });
+  const cookie = await createStudentSession(
+    await getBrowserAuth().currentUser.getIdToken(true),
+  );
+  const original = auth.getUser.bind(auth);
+  let reads = 0;
+  t.mock.method(auth, "getUser", async (...args) => {
+    if (++reads === 2) throw new Error("Role lookup unavailable");
+    return original(...args);
+  });
+  await assert.rejects(getAccountProfile(cookie), /Role lookup unavailable/);
+});
+
+test("administrative command rejects invalid arguments and non-Google or disabled accounts", async () => {
+  const auth = getAuth(getAdminApp());
+  const user = await googleUser();
+  await assert.rejects(monitorAccess("grant", user.uid, "extra"));
+  const passwordless = await auth.createUser({
+    uid: `non-google-${randomUUID()}`,
+  });
+  await assert.rejects(monitorAccess("grant", passwordless.uid));
+  await auth.updateUser(user.uid, { disabled: true });
+  await assert.rejects(monitorAccess("grant", user.uid));
+  assert.equal((await auth.getUser(user.uid)).customClaims?.monitor, undefined);
+  assert.equal(
+    (await auth.getUser(passwordless.uid)).customClaims?.monitor,
+    undefined,
+  );
 });

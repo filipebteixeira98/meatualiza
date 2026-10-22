@@ -1,19 +1,32 @@
 import { randomUUID } from "node:crypto";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { googlePopup } from "./google";
 
 test.setTimeout(60_000);
 
-async function googlePopup(page: Page, email: string) {
-  const opened = page.waitForEvent("popup");
-  await page.getByRole("button", { name: "Entrar com Google" }).click();
-  const popup = await opened;
-  await popup.waitForLoadState("domcontentloaded");
-  const addAccount = popup.getByRole("button", { name: /add new account/i });
-  if (await addAccount.isVisible()) await addAccount.click();
-  await popup.getByLabel(/email/i).fill(email);
-  await popup.getByLabel(/display name/i).fill("Aluno Monitoria");
-  await popup.getByRole("button", { name: /sign in/i }).click();
-}
+test("entrada só fica disponível após os scripts tornarem a página interativa", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const scriptsReady = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/_next/static/**/*.js", async (route) => {
+    await scriptsReady;
+    await route.continue();
+  });
+  try {
+    await page.goto("/entrar", { waitUntil: "commit" });
+    await expect(
+      page.getByRole("button", { name: "Entrar com Google" }),
+    ).toBeDisabled();
+  } finally {
+    release();
+  }
+  await expect(
+    page.getByRole("button", { name: "Entrar com Google" }),
+  ).toBeEnabled();
+});
 
 test("Google, perfil persistido, recarga e saída", async ({
   page,
@@ -62,6 +75,9 @@ test("Google, perfil persistido, recarga e saída", async ({
     ),
   ).toBe(false);
   await page.screenshot({ path: info.outputPath("aluno.png"), fullPage: true });
+  await page.goto("/monitor");
+  await expect(page).toHaveURL(/\/aluno$/);
+  await expect(page.getByText("Acesso de monitor ativo.")).toHaveCount(0);
   await page.getByRole("button", { name: "Sair da conta" }).click();
   await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
   expect(
@@ -70,6 +86,7 @@ test("Google, perfil persistido, recarga e saída", async ({
     ),
   ).toBeUndefined();
   await page.goBack();
+  await expect(page).toHaveURL(/\/entrar$/);
   await expect(page.getByText(email, { exact: true })).toHaveCount(0);
   await page.goto("/aluno");
   await expect(page).toHaveURL(/\/entrar$/);
@@ -80,6 +97,7 @@ test("cancelar o Google pelo teclado permite tentar novamente", async ({
 }) => {
   await page.goto("/entrar");
   const button = page.getByRole("button", { name: "Entrar com Google" });
+  await expect(button).toBeEnabled();
   await button.focus();
   const opened = page.waitForEvent("popup");
   await page.keyboard.press("Enter");

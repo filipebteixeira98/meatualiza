@@ -1,6 +1,6 @@
 # F2 — Identidade e autorização
 
-Status: F2-A integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. F2-B está implementada nesta branch para revisão, com sessão, perfil, entrada e saída verificados nos emuladores. Ambiente privado e ADC preparados; em 22/10/2026, o responsável confirmou entrada Google real e redirecionamento após sincronizar o relógio por NTP. B.6 permanece em validação nos demais cenários; F2-C está refinada abaixo para execução após concluir B.6 e integrar o PR #5. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
+Status: F2-A integrada à `main` no [PR #3](https://github.com/filipebteixeira98/meatualiza/pull/3), em 21/10/2026. F2-B está implementada nesta branch para revisão, com sessão, perfil, entrada e saída verificados nos emuladores. Ambiente privado e ADC preparados; em 22/10/2026, o responsável confirmou entrada Google real e redirecionamento após sincronizar o relógio por NTP. B.6 permanece em validação nos demais cenários; A pedido do responsável, F2-C avançou em branch encadeada `feat/monitor-access` enquanto o PR #5 permanece aberto; o merge da entrega seguinte continua dependente da F2-B. Escopo e regras de produto permanecem em [ROADMAP.md](./ROADMAP.md) e [INSTRUCTIONS.md](./INSTRUCTIONS.md).
 
 ## Resultado esperado
 
@@ -10,15 +10,15 @@ As áreas iniciais mostram a identidade e o estado real dos recursos disponívei
 
 ## Dependências para começar
 
-| Item                  | Situação e próximo passo                                                                                                                                                                                   | Responsável                                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| Projeto Firebase      | Projeto dedicado `meatualiza-monitoria`, app Meatualiza Web e Firestore Standard em São Paulo preparados. Alias local, regras fechadas e testes reproduzíveis versionados em F2-A.                         | Concluído em F2-A                          |
-| Conta do monitor      | Confirmada pelo responsável: a mesma conta Google ativa no MCP. Após o primeiro acesso, conferir seu UID antes de atribuir privilégio. O e-mail pessoal não precisa ser versionado no repositório público. | Implementação confere UID e configura      |
-| Ambiente              | Google e domínios locais configurados; ambiente privado e ADC preparados. Entrada Google real confirmada pelo responsável após sincronização NTP em 22/10/2026.                                            | B.0 concluída; manter relógio sincronizado |
-| Verificação           | 22 testes de servidor, seis de acesso e dez da landing passaram na implementação. Entrada real confirmada; recarga, saída e conta pessoal sem vínculo institucional confirmadas; celular real pendente.    | B.6 em validação; evidências no PR #5      |
-| Acesso a alunos reais | Disponibilizar termos, informações de privacidade e preferências previstos no roadmap antes da abertura. Coleta opcional continua desabilitada até seus controles existirem.                               | Produto e implementação                    |
+| Item                  | Situação e próximo passo                                                                                                                                                                                                                               | Responsável                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| Projeto Firebase      | Projeto dedicado `meatualiza-monitoria`, app Meatualiza Web e Firestore Standard em São Paulo preparados. Alias local, regras fechadas e testes reproduzíveis versionados em F2-A.                                                                     | Concluído em F2-A                          |
+| Conta do monitor      | Confirmada pelo responsável: a mesma conta Google ativa no MCP. UID conferido privadamente e claim de monitor atribuída em 22/10/2026; a nova sessão real ainda deve ser validada. O e-mail pessoal não precisa ser versionado no repositório público. | Implementação confere UID e configura      |
+| Ambiente              | Google e domínios locais configurados; ambiente privado e ADC preparados. Entrada Google real confirmada pelo responsável após sincronização NTP em 22/10/2026.                                                                                        | B.0 concluída; manter relógio sincronizado |
+| Verificação           | 28 testes de servidor, 12 de acesso e dez da landing compõem a verificação atual. Entrada real confirmada; recarga, saída e conta pessoal sem vínculo institucional confirmadas; celular real pendente.                                                | B.6 em validação; evidências no PR #5      |
+| Acesso a alunos reais | Disponibilizar termos, informações de privacidade e preferências previstos no roadmap antes da abertura. Coleta opcional continua desabilitada até seus controles existirem.                                                                           | Produto e implementação                    |
 
-As escolhas do projeto e da conta estão confirmadas; Google e Firestore estão configurados na nuvem. F2-B implementa a sessão e o perfil; F2-C confere o UID do monitor e concede o privilégio. Nenhum privilégio foi concedido nesta preparação.
+As escolhas do projeto e da conta estão confirmadas; Google e Firestore estão configurados na nuvem. F2-B implementa a sessão e o perfil; F2-C confere o UID do monitor e concede o privilégio. O privilégio foi concedido em F2-C ao UID confirmado; a nova área real aguarda validação após novo login.
 
 ## Entregas e critérios de aceite
 
@@ -34,7 +34,7 @@ Não há histórico de velocidade nem disponibilidade de desenvolvimento informa
 
 ## Execução da F2-B
 
-Meta: o aluno entra com Google, encontra sua própria identificação em `/aluno`, mantém a sessão ao recarregar e consegue sair. Entregar esse fluxo em um único PR funcional, com testes junto de cada tarefa. O planejamento desta seção foi refinado e implementado em 21/10/2026. B.0–B.5 estão implementadas e verificadas para revisão. Em 22/10, o responsável confirmou entrada real e redirecionamento; B.6 tem entrada, recarga, saída e conta pessoal confirmadas; falta validação real em celular. Nenhum privilégio de monitor foi concedido.
+Meta: o aluno entra com Google, encontra sua própria identificação em `/aluno`, mantém a sessão ao recarregar e consegue sair. Entregar esse fluxo em um único PR funcional, com testes junto de cada tarefa. O planejamento desta seção foi refinado e implementado em 21/10/2026. B.0–B.5 estão implementadas e verificadas para revisão. Em 22/10, o responsável confirmou entrada real e redirecionamento; B.6 tem entrada, recarga, saída e conta pessoal confirmadas; falta validação real em celular. A concessão do privilégio foi implementada na entrega seguinte, F2-C.
 
 | ID     | Tarefa e aceite                                                                                                                                                                                                                                          | Dependência                                 | Esforço         |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------- |
@@ -52,7 +52,7 @@ B.0 concluída: configuração pública e administrativa coincidem com o projeto
 
 B.6 está em validação: o responsável confirmou entrada, redirecionamento, sessão mantida após recarga e logout, usando a conta Google pessoal também vinculada ao MCP, sem vínculo institucional. A validação real em celular continua pendente. Não inferir esses resultados a partir do sucesso nos emuladores; o PR #5 permanece em rascunho até completar a evidência.
 
-A implementação inclui 22 testes de servidor/Firebase e seis cenários de navegador (três por viewport), incluindo falha de entrada, cancelamento do popup e falha de saída seguida de recuperação. A regressão de produção da landing permanece separada. Para login ADC com conta de usuário, observar o [cliente OAuth Desktop exigido pelo Firebase Auth](https://firebase.google.com/docs/admin/setup#test-with-gcloud-end-user-credentials); o login do CLI/MCP não é reutilizado como credencial do servidor.
+Com F2-C, a implementação inclui 28 testes de servidor/Firebase e 12 cenários de navegador (seis por viewport), incluindo falha de entrada, cancelamento do popup e falha de saída seguida de recuperação. A regressão de produção da landing permanece separada. Para login ADC com conta de usuário, observar o [cliente OAuth Desktop exigido pelo Firebase Auth](https://firebase.google.com/docs/admin/setup#test-with-gcloud-end-user-credentials); o login do CLI/MCP não é reutilizado como credencial do servidor.
 
 ### Fronteiras da implementação
 
@@ -74,9 +74,9 @@ A implementação inclui 22 testes de servidor/Firebase e seis cenários de nave
 
 ## Execução seguinte: F2-C
 
-Resultado: a conta do monitor já definida acessa `/monitor`; estudantes continuam em `/aluno`. O privilégio não pode ser escolhido na interface nem gravado pelo aluno. Esta seção é planejamento; nenhuma tarefa de F2-C está implementada ou teve privilégio aplicado.
+Resultado: a conta do monitor já definida acessa `/monitor`; estudantes continuam em `/aluno`. O privilégio não pode ser escolhido na interface nem gravado pelo aluno. As tarefas C.1a–C.3b foram implementadas nesta branch e verificadas nos emuladores. O UID da conta Google vinculada ao MCP foi conferido privadamente. O privilégio real foi atribuído pelo procedimento administrativo e confirmado novamente no Firebase em 22/10/2026; C.3c continua em validação real.
 
-Entrada para execução: concluir os casos restantes de B.6 e integrar o [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5). Depois, abrir uma feature branch a partir da `main` atualizada e entregar F2-C em um único PR, com título/descrição em inglês, emojis e screenshots de desktop e celular. A preparação do plano pode ocorrer enquanto B.6 é validada.
+Fluxo de integração: o responsável confirmou recarga, logout e conta pessoal e solicitou avançar. F2-C usa uma branch/PR dependentes da branch do [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5), preservando a entrega anterior para revisão. Após integrar F2-B, ajustar a base do PR seguinte para `main`. Google real em celular e a nova área do monitor permanecem pendentes de validação; não marcar a fase completa apenas pelos testes emulados.
 
 | ID      | Tarefa e aceite                                                                                                                                                                                                                                                                                                                           | Dependência                                                           | Esforço         |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------- |

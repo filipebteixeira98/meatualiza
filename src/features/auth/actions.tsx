@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -13,6 +13,15 @@ import { getBrowserAuth } from "@/lib/firebase/client";
 
 const unavailable =
   "Não foi possível concluir o acesso. Tente novamente em instantes.";
+
+const subscribe = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+}
 
 async function changeSession(method: "POST" | "DELETE", idToken?: string) {
   const csrfResponse = await fetch("/api/auth/csrf", { cache: "no-store" });
@@ -46,6 +55,7 @@ function Notice({ message }: { message: string }) {
 }
 
 export function GoogleSignIn() {
+  const ready = useHydrated();
   const [stage, setStage] = useState<"idle" | "google" | "session">("idle");
   const [message, setMessage] = useState("");
 
@@ -76,7 +86,7 @@ export function GoogleSignIn() {
       if (auth) await signOut(auth).catch(() => {});
       setStage("idle");
     }
-    if (entered) window.location.replace("/aluno");
+    if (entered) window.location.replace("/entrar");
   }
 
   return (
@@ -85,7 +95,7 @@ export function GoogleSignIn() {
         type="button"
         className="h-11 w-full text-sm"
         onClick={enter}
-        disabled={stage !== "idle"}
+        disabled={!ready || stage !== "idle"}
         aria-busy={stage !== "idle"}
       >
         {stage !== "idle" ? (
@@ -107,7 +117,8 @@ export function GoogleSignIn() {
   );
 }
 
-export function StudentSignOut() {
+export function SignOutButton() {
+  const ready = useHydrated();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   useEffect(() => {
@@ -150,7 +161,7 @@ export function StudentSignOut() {
         className="h-11 w-full sm:w-auto"
         variant="outline"
         onClick={leave}
-        disabled={busy}
+        disabled={!ready || busy}
         aria-busy={busy}
       >
         {busy ? (
