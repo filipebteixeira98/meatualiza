@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação da conta autenticada. O fluxo foi implementado e testado com emuladores em F2-B; a validação OAuth real aguarda ADC do servidor. Agenda e inscrições vêm nas próximas entregas.
+Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação da conta autenticada. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. Agenda e inscrições vêm nas próximas entregas.
 
 ## Verificar
 
@@ -69,17 +69,23 @@ npx firebase apps:sdkconfig web 1:450905441860:web:6ea0a56d73d65d42bf5e11 --proj
 
 Preencha as quatro variáveis públicas correspondentes, configure `APP_ORIGIN` com a origem exata do aplicativo (protocolo, domínio e porta; `http://localhost:3000` no desenvolvimento), defina `NEXT_PUBLIC_FIREBASE_USE_EMULATORS=false` e `FIREBASE_PROJECT_ID=meatualiza-monitoria` e remova as duas variáveis `EMULATOR_HOST`. `.env.example` contém somente valores fictícios locais; `.env.local`, logs e credenciais não são versionados.
 
-Para ADC com login de usuário, o Firebase Auth exige um cliente OAuth próprio do tipo Desktop; as credenciais geradas pelo cliente padrão do gcloud não são aceitas. Siga os [requisitos de ADC do Admin SDK](https://firebase.google.com/docs/admin/setup#test-with-gcloud-end-user-credentials). A disponibilidade de ADC real foi sondada em 21/10 e não foi confirmada neste ambiente; nenhuma credencial do CLI/MCP foi copiada para a aplicação.
+Para ADC com login de usuário, o Firebase Auth exige um cliente OAuth próprio do tipo Desktop; as credenciais geradas pelo cliente padrão do gcloud não são aceitas. Siga os [requisitos de ADC do Admin SDK](https://firebase.google.com/docs/admin/setup#test-with-gcloud-end-user-credentials). ADC real foi configurada e conseguiu consultar o Firebase Auth; nenhuma credencial do CLI/MCP foi copiada para a aplicação.
 
 As regras de Firestore negam todo acesso direto do cliente, inclusive de usuários com claim de monitor. Elas foram publicadas e conferidas no projeto real. O Admin SDK ignora essas regras: as operações de sessão e perfil já verificam a identidade e a titularidade no servidor. Novas operações também deverão verificar os privilégios pertinentes. Os testes verificam escrita administrativa e recusam leitura/escrita de clientes sem login, alunos e monitores, usando somente dados fictícios nos emuladores.
 
-Google foi habilitado no projeto real por configuração administrativa; o e-mail de suporte não é versionado. Para repetir em outro projeto, habilite Google em Authentication → Sign-in method, configure marca e suporte e revise Settings → Authorized domains. No projeto atual estão autorizados os domínios Firebase, `localhost` e `127.0.0.1`; o domínio de hospedagem definitivo será definido em F8. O teste de OAuth real no navegador continua pendente em F2-B.6; os testes automatizados usam exclusivamente o Auth Emulator.
+Google foi habilitado no projeto real por configuração administrativa; o e-mail de suporte não é versionado. Para repetir em outro projeto, habilite Google em Authentication → Sign-in method, configure marca e suporte e revise Settings → Authorized domains. No projeto atual estão autorizados os domínios Firebase, `localhost` e `127.0.0.1`; o domínio de hospedagem definitivo será definido em F8. Em 22/10/2026, o responsável confirmou entrada Google real e redirecionamento. B.6 ainda aguarda confirmação de recarga, logout, desktop/celular e conta sem vínculo institucional; os testes automatizados usam exclusivamente o Auth Emulator.
 
 ## Sessão do aluno
 
 O popup Google fornece um ID token recente, trocado por um cookie de cinco dias após o servidor validar origem, CSRF e identidade e persistir `users/{uid}`. A gravação é idempotente e preserva `createdAt`; o cliente não informa UID ou papel. O cookie é `HttpOnly`, `SameSite=Lax`, host-only e `Secure` em produção; use HTTPS fora do desenvolvimento. O token do navegador permanece apenas em memória e é descartado após a troca, inclusive em falhas.
 
 A área `/aluno` lê somente o perfil do UID verificado e recusa sessões expiradas, revogadas ou de contas desabilitadas. Logout limpa a sessão do navegador atual, sem revogar outras sessões. A navegação é recarregada após entrada/saída para evitar dados antigos no cache. Falhas do serviço exibem nova tentativa; elas não são tratadas como uma sessão inexistente. Não há renovação automática nem concessão de privilégio de monitor nesta entrega.
+
+## Relógio do sistema e diagnóstico de acesso
+
+Mantenha o computador que executa o Next.js com o relógio sincronizado por NTP. Em 22/10/2026, o responsável confirmou que corrigir um adiantamento de cerca de oito minutos restabeleceu a entrada Google e o redirecionamento para sua área. A janela de autenticação recente continua em cinco minutos; não aumentá-la para contornar um relógio incorreto.
+
+`GET /api/auth/csrf` com sucesso seguido de `POST /api/auth/session` com `401` indica recusa da credencial/sessão, mas não identifica sozinho a causa. Confira relógio, correspondência do projeto e validade da autenticação antes de alterar regras ou testes. Nunca compartilhe ID tokens, cookies, arquivos ADC ou conteúdo integral de `.env.local` em logs/PRs.
 
 ## Serviços e próximas integrações
 
@@ -96,13 +102,13 @@ A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dado
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão nesta branch: sessão, perfil, entrada e saída implementados, com validação real ainda pendente. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. F2-C, com autorização do monitor, será a próxima entrega após a validação.
+A base Firebase e o planejamento refinado foram integrados à `main` nos PRs #3 e #4. F2-B está em revisão no [PR #5](https://github.com/filipebteixeira98/meatualiza/pull/5): sessão, perfil, entrada e saída implementados; entrada real confirmada e demais cenários de B.6 aguardando confirmação. O [plano da fase F2](./PLANO-F2.md) e o [quadro do roadmap](./ROADMAP.md) distinguem a implementação local dessa pendência. F2-C, com autorização do monitor, será a próxima entrega após a validação.
 
 ## Verificação das entregas
 
 Build de produção, tipagem, lint e dez verificações de navegador passaram localmente. Dois casos específicos de viewport são pulados no projeto ao qual não se aplicam. As imagens de desktop e celular foram inspecionadas visualmente.
 
-F2-B amplia a suíte Firebase para 22 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF e falhas. O navegador cobre o fluxo de acesso, cancelamento do popup, falhas e recuperação em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. A concessão do privilégio de monitor continua em F2-C; OAuth real não foi validado.
+F2-B amplia a suíte Firebase para 22 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF e falhas. O navegador cobre o fluxo de acesso, cancelamento do popup, falhas e recuperação em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. A concessão do privilégio de monitor continua em F2-C. A entrada real foi confirmada pelo responsável após o ajuste NTP; os demais casos reais continuam identificados como pendentes em PLANO-F2.md.
 
 `npm audit --omit=dev` não encontrou vulnerabilidades. Um override de `@grpc/grpc-js` para `^1.14.6` evita a versão antiga transitiva do SDK Firestore e o [alerta de validação de certificados](https://github.com/advisories/GHSA-m9gg-hp2v-232j); os testes exercitam o SDK com essa versão. Remover o override quando o Firebase adotar uma versão corrigida compatível.
 
