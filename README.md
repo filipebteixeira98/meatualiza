@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação do aluno e `/monitor` atende a conta autorizada como monitor. A entrada escolhe a área no servidor. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. `/aluno/duvida` permite preparar e revisar assunto/descrição sem enviá-los. Agenda e inscrições vêm na F4.
+Abra <http://localhost:3000>. A rota `/` apresenta a landing page compacta em tema escuro, com a lista de assuntos recolhida por padrão. `/entrar` oferece acesso Google e `/aluno` apresenta a identificação do aluno e `/monitor` atende a conta autorizada como monitor. A entrada escolhe a área no servidor. O fluxo foi implementado e testado com emuladores em F2-B; o responsável confirmou entrada Google real e redirecionamento em 22/10/2026, após sincronizar o relógio por NTP. A matriz de validação restante está no plano da F2. `/aluno/duvida` permite escolher uma sessão, revisar a dúvida e confirmar a inscrição. `/aluno/agenda` reúne calendário, inscrições e alterações; `/monitor/agenda` mostra ocupação e cancelamento/bloqueio com motivo.
 
 ## Verificar
 
@@ -117,15 +117,17 @@ A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dado
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base Firebase, o planejamento e as entregas de acesso foram integrados à `main` nos PRs #3–#6. Entrada, recarga, logout, conta pessoal e área real do monitor foram confirmados pelo responsável. OAuth em celular real permanece pendente em B.6 do [plano F2](./PLANO-F2.md). A F3 implementa a preparação do pedido de ajuda, conforme [plano F3](./PLANO-F3.md), e aguarda revisão/merge. Agenda e inscrição atômica serão a próxima entrega, em F4.
+A base Firebase, o planejamento e as entregas de acesso foram integrados à `main` nos PRs #3–#6. Entrada, recarga, logout, conta pessoal e área real do monitor foram confirmados pelo responsável. OAuth em celular real permanece pendente em B.6 do [plano F2](./PLANO-F2.md). F3 foi integrada no PR #7 e validada pelo responsável. A [F4](./PLANO-F4.md) implementa agenda e inscrição atômica nesta branch; os painéis completos, presença e avaliação serão a próxima entrega, em F5.
 
-## Preparação da dúvida (F3)
+## Agenda e inscrição (F4)
 
-Na área do aluno, **Preparar minha dúvida** abre `/aluno/duvida`. Escolha um dos nove assuntos aprovados ou “Outro assunto / não sei classificar”, descreva a dificuldade e revise o texto. A descrição é obrigatória, sem espaços vazios, com até 2.000 caracteres; espaços nas bordas são removidos na revisão. É possível voltar para editar sem perder os campos.
+Na área do aluno, **Minha agenda** abre `/aluno/agenda`, com calendário e lista das próximas quatro semanas. **Preparar minha dúvida** abre `/aluno/duvida`: escolha uma sessão, um assunto aprovado ou “Outro assunto / não sei classificar”, descreva a dificuldade, revise e confirme. O pedido e a inscrição são gravados juntos no Firestore, com confirmação automática quando houver vaga. Recarregar a agenda mantém a inscrição confirmada.
 
-O rascunho existe apenas na memória da página: sair ou recarregar o descarta. Não há envio ao monitor, gravação no Firestore ou armazenamento persistente no navegador. A interface informa esse limite. O contrato compartilhado e sua integração com a inscrição em F4 estão em [PLANO-F3.md](./PLANO-F3.md). O monitor continua em sua área própria.
+A descrição é obrigatória, com até 2.000 caracteres após remover espaços das bordas. Antes de confirmar, o texto existe apenas na página e é descartado ao sair/recarregar. Depois da confirmação, **Editar dúvida** carrega o pedido salvo sem ocupar outra vaga. A agenda oferece cancelamento com confirmação e troca de sessão; uma troca malsucedida preserva a inscrição anterior. Inscrição, edição, cancelamento e troca encerram no início do encontro, pelo relógio do servidor.
 
-Execute `npm run test:domain` para validar o contrato; `npm run test:auth` inclui o fluxo do formulário em desktop/celular nos emuladores.
+No monitor, **Gerenciar agenda** abre `/monitor/agenda`, com quantidade prevista sobre dez alunos. **Bloquear data** ou **Cancelar sessão** exige motivo, cancela as inscrições afetadas e mostra o motivo aos alunos no aplicativo. Ocupação é atualizada ao carregar, usar **Atualizar agenda** ou concluir uma alteração. Comparecimento efetivo, lista de inscritos/dúvidas e histórico de sessões passadas serão completados em F5.
+
+Não há migração ou configuração de nuvem adicional: as operações usam o Admin SDK e a autorização existentes; acesso direto do navegador ao Firestore continua negado. O contrato, as transações, a proteção de reenvios e a janela exata estão em [PLANO-F4.md](./PLANO-F4.md). Execute `npm run test:domain`, `npm run test:firebase` e `npm run test:auth` para verificar as regras e o navegador nos emuladores.
 
 ## Verificação das entregas
 
@@ -134,6 +136,8 @@ Build de produção, tipagem, lint e dez verificações de navegador passaram lo
 F2-B/F2-C ampliam a suíte Firebase para 28 testes: configuração, regras, Google emulado, sessão, isolamento, reenvios, expiração/revogação, CSRF, falhas e autorização/concessão/remoção do monitor. Doze testes de navegador cobrem entrada, cancelamento do popup, falhas, recuperação, ambas as áreas, remoção do privilégio e interação após carregamento dos scripts em desktop e celular. O CI prepara Java 21 e executa essas suítes junto à regressão da landing. F2-C acrescenta autorização do monitor, roteamento por perfil e procedimento administrativo testado. A entrada real foi confirmada pelo responsável após o ajuste NTP; recarga, logout e conta pessoal também foram confirmados; a validação real em celular permanece pendente em PLANO-F2.md.
 
 F3 acrescenta seis testes de domínio e quatro cenários de navegador, totalizando 16 no acesso/formulário. Eles cobrem validação, revisão/edição, limites, texto de código, foco, bloqueio antes da hidratação, restrição por perfil e descarte após recarga. As capturas estão em `docs/screenshots/`.
+
+F4 totaliza **81 testes locais aprovados**: 12 de domínio, 41 de Firebase/servidor, 18 de acesso/inscrições no navegador e dez da landing. Formatação, lint, tipos e build passaram. O fluxo inclui origem inválida, resposta perdida após gravação, décima vaga e cancelamentos com motivo. Evidência e limites estão em [PLANO-F4.md](./PLANO-F4.md).
 
 `npm audit --omit=dev` não encontrou vulnerabilidades. Um override de `@grpc/grpc-js` para `^1.14.6` evita a versão antiga transitiva do SDK Firestore e o [alerta de validação de certificados](https://github.com/advisories/GHSA-m9gg-hp2v-232j); os testes exercitam o SDK com essa versão. Remover o override quando o Firebase adotar uma versão corrigida compatível.
 

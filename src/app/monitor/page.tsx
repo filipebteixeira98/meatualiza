@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/features/auth/actions";
 import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
 
@@ -57,10 +59,14 @@ export default async function MonitorPage() {
             </div>
           </dl>
           <p className="mt-7 border-t border-border pt-6 text-sm leading-7 text-muted-foreground">
-            Nas próximas etapas, você poderá acompanhar a agenda, os alunos
-            inscritos e as dúvidas de cada encontro por aqui.
+            A agenda já mostra os alunos previstos por sessão e permite bloquear
+            ou cancelar datas. Lista de inscritos, dúvidas e presença chegam na
+            próxima etapa.
           </p>
         </section>
+        <Button asChild className="mt-7 min-h-11 px-4">
+          <Link href="/monitor/agenda">Gerenciar agenda</Link>
+        </Button>
         <div className="mt-7">
           <SignOutButton />
         </div>

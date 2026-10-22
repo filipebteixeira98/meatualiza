@@ -75,6 +75,8 @@ test("Google, perfil persistido, recarga e saída", async ({
     ),
   ).toBe(false);
   await page.screenshot({ path: info.outputPath("aluno.png"), fullPage: true });
+  await page.goto("/monitor/agenda");
+  await expect(page).toHaveURL(/\/aluno\/agenda$/);
   await page.goto("/monitor");
   await expect(page).toHaveURL(/\/aluno$/);
   await expect(page.getByText("Acesso de monitor ativo.")).toHaveCount(0);

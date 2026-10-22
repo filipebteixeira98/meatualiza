@@ -50,6 +50,9 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
     await page.goto(path);
     await expect(page).toHaveURL(/\/monitor$/);
   }
+  await page.goto("/monitor/agenda");
+  await expect(page).toHaveURL(/\/monitor\/agenda$/);
+  await page.goto("/monitor");
   const response = await page.reload();
   expect(response?.headers()["cache-control"]).toContain("no-store");
   await expect(
