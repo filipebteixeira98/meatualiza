@@ -29,7 +29,7 @@ async function changeSession(method: "POST" | "DELETE", idToken?: string) {
   return typeof body.message === "string" ? body.message : unavailable;
 }
 
-function Notice({ message }: { message: string }) {
+export function AuthNotice({ message }: { message: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     if (message) ref.current?.focus();
@@ -104,12 +104,12 @@ export function GoogleSignIn() {
             ? "Confirmando acesso…"
             : "Entrar com Google"}
       </Button>
-      <Notice message={message} />
+      <AuthNotice message={message} />
     </div>
   );
 }
 
-export function SignOutButton() {
+export function useSignOut() {
   const ready = useHydrated();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -146,6 +146,11 @@ export function SignOutButton() {
     }
   }
 
+  return { ready, busy, message, leave };
+}
+
+export function SignOutButton() {
+  const { ready, busy, message, leave } = useSignOut();
   return (
     <div>
       <Button
@@ -166,7 +171,7 @@ export function SignOutButton() {
         )}
         {busy ? "Saindo…" : "Sair da conta"}
       </Button>
-      <Notice message={message} />
+      <AuthNotice message={message} />
     </div>
   );
 }

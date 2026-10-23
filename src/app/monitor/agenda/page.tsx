@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SignOutButton } from "@/features/auth/actions";
 import { Agenda } from "@/features/schedule/agenda";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { getAgenda } from "@/lib/bookings";
@@ -25,12 +21,6 @@ export default async function MonitorAgendaPage() {
       className="site-container flex-1 py-10 sm:py-16"
     >
       <div className="mx-auto max-w-2xl">
-        <Button asChild variant="ghost" className="mb-8 min-h-11">
-          <Link href="/monitor">
-            <ArrowLeft aria-hidden="true" />
-            Minha área
-          </Link>
-        </Button>
         <p className="eyebrow">AGENDA DO MONITOR / L7</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
           Prepare o próximo encontro.
@@ -45,9 +35,6 @@ export default async function MonitorAgendaPage() {
           sessão.
         </p>
         <Agenda sessions={agenda.sessions} monitor />
-        <div className="mt-7">
-          <SignOutButton />
-        </div>
       </div>
     </main>
   );

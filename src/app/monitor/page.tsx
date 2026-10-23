@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SignOutButton } from "@/features/auth/actions";
 import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
+import { monitoria } from "@/lib/monitoria";
 
 export const metadata: Metadata = {
   title: "Sua área de monitor",
@@ -46,15 +44,21 @@ export default async function MonitorPage() {
           </h2>
           <dl className="mt-6 space-y-5">
             <div>
-              <dt className="eyebrow">NOME</dt>
+              <dt className="eyebrow">ENCONTROS</dt>
               <dd className="mt-2 break-words text-lg">
-                {profile.displayName}
+                Segundas e quartas · {monitoria.horario}
               </dd>
             </div>
             <div>
-              <dt className="eyebrow">CONTA GOOGLE</dt>
+              <dt className="eyebrow">LOCAL</dt>
               <dd className="mt-2 break-words text-sm text-muted-foreground">
-                {profile.email}
+                {monitoria.instituicao} · {monitoria.local}
+              </dd>
+            </div>
+            <div>
+              <dt className="eyebrow">CAPACIDADE POR SESSÃO</dt>
+              <dd className="mt-2 text-sm text-muted-foreground">
+                Até {monitoria.capacidade} alunos · atendimento em grupo
               </dd>
             </div>
           </dl>
@@ -64,12 +68,6 @@ export default async function MonitorPage() {
             próxima etapa.
           </p>
         </section>
-        <Button asChild className="mt-7 min-h-11 px-4">
-          <Link href="/monitor/agenda">Gerenciar agenda</Link>
-        </Button>
-        <div className="mt-7">
-          <SignOutButton />
-        </div>
       </div>
     </main>
   );

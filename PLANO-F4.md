@@ -9,13 +9,20 @@ revisão e merge. F3 foi integrada no PR #7 e validada pelo responsável.
 Aluno → Minha agenda → calendário ou lista
   sessão → assunto e descrição → revisão → confirmar inscrição
   inscrição confirmada → editar dúvida / cancelar / trocar sessão
-Monitor → Gerenciar agenda → quantidade prevista / 10
+Monitor → sidebar → Agenda → quantidade prevista / 10
   bloquear data ou cancelar sessão → motivo → cancelar inscrições afetadas
 ```
 
 Rotas: `/aluno/agenda`, `/aluno/duvida` e `/monitor/agenda`. Nenhum pedido é salvo
 sem inscrição. O formulário preserva os campos ao revisar/editar e em falhas de
 envio. Somente o texto ainda não confirmado fica temporário na página.
+
+A pedido do responsável, a navegação do monitor foi antecipada de F5: sidebar
+com ícones de Painel/Agenda, página ativa e menu da conta com saída no rodapé.
+No celular e tablet, abre como menu lateral e fecha ao navegar. O layout próprio
+remove a navegação pública dessas páginas; URLs e telas públicas/do aluno são
+preservadas pelo grupo `(site)`. As páginas continuam verificando autorização
+junto aos dados, mesmo quando o layout é reutilizado na navegação.
 
 ## Tempo e disponibilidade
 
@@ -93,6 +100,11 @@ visível ao aluno. Casos de inscrição no navegador usam o período real; são
 pulados quando não restam sessões suficientes para isolar os dois viewports.
 Os testes de transações mantêm cobertura com período fixo.
 
+Os testes de acesso verificam também navegação por teclado, indicação da página
+ativa, fechamento do menu móvel, retorno de foco com Escape e saída com falha de
+rede seguida de nova tentativa. Remover o privilégio do monitor bloqueia a
+próxima navegação entre páginas sem depender de recarregar o layout.
+
 Verificação local: **81 testes passaram** — 12 de domínio, 41 de servidor/Firebase,
 18 de navegador para acesso e inscrições e dez da landing de produção. Dois
 casos existentes específicos de viewport são pulados no projeto ao qual não se
@@ -101,7 +113,7 @@ foram inspecionadas em desktop e celular. O fluxo novo foi verificado nos
 emuladores; validação com contas e inscrições controladas no Firebase real fica
 para a revisão do responsável, sem publicar credenciais ou dados pessoais.
 
-Próxima entrega: **F5**, com painéis e navegação completos, lista de inscritos e
+Próxima entrega: **F5**, com painéis completos e navegação do aluno, lista de inscritos e
 dúvidas por sessão, histórico passado, presença manual, realização do encontro,
 avaliação da resolução pelo aluno e métricas documentadas. Tour, PostHog Surveys,
 privacidade e observabilidade continuam nas fases já aprovadas.

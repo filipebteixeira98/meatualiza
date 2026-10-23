@@ -5,6 +5,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { upcomingSessions, sessionLabel } from "../../src/lib/schedule";
 import { googlePopup } from "./google";
+import { openMonitorNavigation } from "./monitor-navigation";
 
 test.setTimeout(180_000);
 let app: ReturnType<typeof initializeApp>;
@@ -199,7 +200,13 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     await monitorPage.goto("http://127.0.0.1:3101/entrar");
     await googlePopup(monitorPage, monitorEmail);
     await expect(monitorPage).toHaveURL(/\/monitor$/, { timeout: 25_000 });
-    await monitorPage.getByRole("link", { name: "Gerenciar agenda" }).click();
+    await expect(
+      monitorPage.getByRole("heading", { name: "Acesso de monitor ativo." }),
+    ).toBeVisible();
+    await openMonitorNavigation(monitorPage);
+    await monitorPage
+      .getByRole("link", { name: "Agenda", exact: true })
+      .click();
     if (target.slice(0, 7) !== slots[0].slice(0, 7))
       await monitorPage.getByRole("button", { name: "Próximo mês" }).click();
     await monitorPage

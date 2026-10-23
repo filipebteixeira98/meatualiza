@@ -125,7 +125,11 @@ Na área do aluno, **Minha agenda** abre `/aluno/agenda`, com calendário e list
 
 A descrição é obrigatória, com até 2.000 caracteres após remover espaços das bordas. Antes de confirmar, o texto existe apenas na página e é descartado ao sair/recarregar. Depois da confirmação, **Editar dúvida** carrega o pedido salvo sem ocupar outra vaga. A agenda oferece cancelamento com confirmação e troca de sessão; uma troca malsucedida preserva a inscrição anterior. Inscrição, edição, cancelamento e troca encerram no início do encontro, pelo relógio do servidor.
 
-No monitor, **Gerenciar agenda** abre `/monitor/agenda`, com quantidade prevista sobre dez alunos. **Bloquear data** ou **Cancelar sessão** exige motivo, cancela as inscrições afetadas e mostra o motivo aos alunos no aplicativo. Ocupação é atualizada ao carregar, usar **Atualizar agenda** ou concluir uma alteração. Comparecimento efetivo, lista de inscritos/dúvidas e histórico de sessões passadas serão completados em F5.
+Na área do monitor, a sidebar reúne **Painel** (`/monitor`) e **Agenda** (`/monitor/agenda`), com ícones e indicação da página ativa. No celular e tablet, o botão **Abrir navegação do monitor** abre o menu lateral; selecionar uma página fecha o menu. A conta Google e a opção **Sair da conta** ficam no menu da conta, no rodapé da sidebar. Se a saída falhar, a sessão permanece ativa e o menu permite tentar novamente.
+
+A agenda do monitor mostra a quantidade prevista sobre dez alunos. **Bloquear data** ou **Cancelar sessão** exige motivo, cancela as inscrições afetadas e mostra o motivo aos alunos no aplicativo. Ocupação é atualizada ao carregar, usar **Atualizar agenda** ou concluir uma alteração. Comparecimento efetivo, lista de inscritos/dúvidas e histórico de sessões passadas serão completados em F5. Tour, preferências e feedback serão incluídos na navegação quando seus fluxos estiverem disponíveis.
+
+O grupo de rotas `(site)` mantém o cabeçalho e o rodapé públicos na landing, no acesso e na área do aluno, preservando suas URLs. `/monitor` usa layout próprio; cada página e operação mantém a autorização junto aos dados, inclusive durante navegação com layout persistente.
 
 Não há migração ou configuração de nuvem adicional: as operações usam o Admin SDK e a autorização existentes; acesso direto do navegador ao Firestore continua negado. O contrato, as transações, a proteção de reenvios e a janela exata estão em [PLANO-F4.md](./PLANO-F4.md). Execute `npm run test:domain`, `npm run test:firebase` e `npm run test:auth` para verificar as regras e o navegador nos emuladores.
 
@@ -137,7 +141,7 @@ F2-B/F2-C ampliam a suíte Firebase para 28 testes: configuração, regras, Goog
 
 F3 acrescenta seis testes de domínio e quatro cenários de navegador, totalizando 16 no acesso/formulário. Eles cobrem validação, revisão/edição, limites, texto de código, foco, bloqueio antes da hidratação, restrição por perfil e descarte após recarga. As capturas estão em `docs/screenshots/`.
 
-F4 totaliza **81 testes locais aprovados**: 12 de domínio, 41 de Firebase/servidor, 18 de acesso/inscrições no navegador e dez da landing. Formatação, lint, tipos e build passaram. O fluxo inclui origem inválida, resposta perdida após gravação, décima vaga e cancelamentos com motivo. Evidência e limites estão em [PLANO-F4.md](./PLANO-F4.md).
+F4 totaliza **81 testes locais aprovados**: 12 de domínio, 41 de Firebase/servidor, 18 de acesso/inscrições no navegador e dez da landing. Formatação, lint, tipos e build passaram. O fluxo inclui origem inválida, resposta perdida após gravação, décima vaga e cancelamentos com motivo. A navegação do monitor também verifica página ativa, teclado, foco, menu móvel, nova tentativa de saída e remoção de privilégio sem recarregar o layout. Evidência e limites estão em [PLANO-F4.md](./PLANO-F4.md).
 
 `npm audit --omit=dev` não encontrou vulnerabilidades. Um override de `@grpc/grpc-js` para `^1.14.6` evita a versão antiga transitiva do SDK Firestore e o [alerta de validação de certificados](https://github.com/advisories/GHSA-m9gg-hp2v-232j); os testes exercitam o SDK com essa versão. Remover o override quando o Firebase adotar uma versão corrigida compatível.
 
