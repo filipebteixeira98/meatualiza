@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
-import { SignOutButton } from "@/features/auth/actions";
 import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
+import { monitoria } from "@/lib/monitoria";
 
 export const metadata: Metadata = {
   title: "Sua área de monitor",
@@ -44,26 +44,30 @@ export default async function MonitorPage() {
           </h2>
           <dl className="mt-6 space-y-5">
             <div>
-              <dt className="eyebrow">NOME</dt>
+              <dt className="eyebrow">ENCONTROS</dt>
               <dd className="mt-2 break-words text-lg">
-                {profile.displayName}
+                Segundas e quartas · {monitoria.horario}
               </dd>
             </div>
             <div>
-              <dt className="eyebrow">CONTA GOOGLE</dt>
+              <dt className="eyebrow">LOCAL</dt>
               <dd className="mt-2 break-words text-sm text-muted-foreground">
-                {profile.email}
+                {monitoria.instituicao} · {monitoria.local}
+              </dd>
+            </div>
+            <div>
+              <dt className="eyebrow">CAPACIDADE POR SESSÃO</dt>
+              <dd className="mt-2 text-sm text-muted-foreground">
+                Até {monitoria.capacidade} alunos · atendimento em grupo
               </dd>
             </div>
           </dl>
           <p className="mt-7 border-t border-border pt-6 text-sm leading-7 text-muted-foreground">
-            Nas próximas etapas, você poderá acompanhar a agenda, os alunos
-            inscritos e as dúvidas de cada encontro por aqui.
+            A agenda já mostra os alunos previstos por sessão e permite bloquear
+            ou cancelar datas. Lista de inscritos, dúvidas e presença chegam na
+            próxima etapa.
           </p>
         </section>
-        <div className="mt-7">
-          <SignOutButton />
-        </div>
       </div>
     </main>
   );

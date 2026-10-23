@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { googlePopup } from "./google";
+import { upcomingSessions } from "../../src/lib/schedule";
+const available = upcomingSessions().at(-1)?.id;
+test.skip(
+  !available,
+  "Período da monitoria encerrado; o contrato continua coberto pelos testes de domínio.",
+);
 
 test.setTimeout(60_000);
 
@@ -14,6 +20,9 @@ test("aluno prepara, valida, revisa e edita a dúvida sem enviá-la", async ({
   await page.getByRole("link", { name: "Preparar minha dúvida" }).click();
   await expect(page).toHaveURL(/\/aluno\/duvida$/);
 
+  await page
+    .getByLabel("Sessão de monitoria", { exact: true })
+    .selectOption(available!);
   const topic = page.getByLabel("Assunto", { exact: true });
   const description = page.getByLabel("Sua dúvida", { exact: true });
   const review = page.getByRole("button", { name: "Revisar dúvida" });
@@ -52,12 +61,12 @@ test("aluno prepara, valida, revisa e edita a dúvida sem enviá-la", async ({
   await expect(
     page.getByRole("heading", { name: "Confira sua dúvida." }),
   ).toBeFocused();
-  await expect(page.getByRole("definition").nth(0)).toHaveText(
+  await expect(page.getByRole("definition").nth(1)).toHaveText(
     "Estruturas de repetição",
   );
-  await expect(page.getByRole("definition").nth(1)).toHaveText(doubt);
+  await expect(page.getByRole("definition").nth(2)).toHaveText(doubt);
   await expect(
-    page.getByText(/Este rascunho ainda não foi enviado/),
+    page.getByText(/Sua inscrição só será confirmada/),
   ).toBeVisible();
   await page.screenshot({
     path: info.outputPath("revisao.png"),
@@ -73,7 +82,7 @@ test("aluno prepara, valida, revisa e edita a dúvida sem enviá-la", async ({
     "<script>window.doubtExecuted = true</script>\n" + "x".repeat(300);
   await description.fill(code);
   await review.click();
-  await expect(page.getByRole("definition").nth(1)).toHaveText(code);
+  await expect(page.getByRole("definition").nth(2)).toHaveText(code);
   expect(await page.evaluate(() => "doubtExecuted" in window)).toBe(false);
   await page.setViewportSize({ width: 320, height: 800 });
   expect(
@@ -100,6 +109,9 @@ test("opção livre, limite da descrição e saída da página protegida", async
   await googlePopup(page, `outro.${randomUUID()}@example.test`);
   await expect(page).toHaveURL(/\/aluno$/, { timeout: 25_000 });
   await page.getByRole("link", { name: "Preparar minha dúvida" }).click();
+  await page
+    .getByLabel("Sessão de monitoria", { exact: true })
+    .selectOption(available!);
   const topic = page.getByLabel("Assunto", { exact: true });
   const description = page.getByLabel("Sua dúvida", { exact: true });
   await expect(topic.getByRole("option")).toHaveCount(11);
@@ -112,7 +124,7 @@ test("opção livre, limite da descrição e saída da página protegida", async
   await description.press("b");
   await expect(description).toHaveValue("a".repeat(2000));
   await page.getByRole("button", { name: "Revisar dúvida" }).click();
-  await expect(page.getByRole("definition").nth(0)).toHaveText(
+  await expect(page.getByRole("definition").nth(1)).toHaveText(
     "Outro assunto / não sei classificar",
   );
   let release!: () => void;

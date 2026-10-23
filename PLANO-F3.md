@@ -1,7 +1,6 @@
 # F3 — Preparação do pedido de ajuda
 
-Status: implementada e verificada na branch `feat/help-request-preparation`,
-aguardando revisão e merge. A próxima entrega é F4.
+Status: integrada à `main` no [PR #7](https://github.com/filipebteixeira98/meatualiza/pull/7), com validação confirmada pelo responsável. Este documento registra a preparação entregue em F3; a inscrição persistida e a agenda são implementadas na [F4](./PLANO-F4.md).
 
 Entrega: o aluno autenticado acessa **Preparar minha dúvida**, escolhe o assunto,
 descreve a dificuldade, revisa e volta para editar. `/aluno/duvida` verifica a
