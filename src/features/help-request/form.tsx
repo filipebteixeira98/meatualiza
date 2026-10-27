@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, PencilLine } from "lucide-react";
@@ -10,12 +11,43 @@ import {
   HELP_DESCRIPTION_MAX_LENGTH,
   helpRequestSchema,
   helpRequestTopics,
-  type HelpRequestDraft,
 } from "@/lib/help-request";
+import {
+  sessionIdSchema,
+  sessionLabel,
+  type SessionView,
+} from "@/lib/schedule";
+import { monitoria } from "@/lib/monitoria";
+import {
+  BookingFeedback,
+  useBookingMutation,
+} from "@/features/schedule/mutation";
+import type { z } from "zod";
 
-export function HelpRequestForm() {
+const formSchema = helpRequestSchema.extend({ sessionId: sessionIdSchema });
+type BookingDraft = z.infer<typeof formSchema>;
+
+export function HelpRequestForm({
+  sessions,
+  initialSessionId,
+}: {
+  sessions: SessionView[];
+  initialSessionId?: string;
+}) {
+  const router = useRouter();
+  const initial = sessions.find(({ id }) => id === initialSessionId);
+  const editing = initial?.registration?.status === "confirmed";
+  const { run, pending, error } = useBookingMutation();
+  const available = sessions.filter(
+    (session) =>
+      session.status === "scheduled" &&
+      (editing
+        ? session.id === initialSessionId
+        : session.enrolledCount < monitoria.capacidade &&
+          session.registration?.status !== "confirmed"),
+  );
   const ready = useHydrated();
-  const [draft, setDraft] = useState<HelpRequestDraft | null>(null);
+  const [draft, setDraft] = useState<BookingDraft | null>(null);
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const {
     register,
@@ -23,9 +55,12 @@ export function HelpRequestForm() {
     control,
     setFocus,
     formState: { errors, isSubmitSuccessful },
-  } = useForm<HelpRequestDraft>({
-    resolver: zodResolver(helpRequestSchema),
-    defaultValues: { description: "" },
+  } = useForm<BookingDraft>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      ...(editing ? initial.registration!.helpRequest : { description: "" }),
+      sessionId: initialSessionId ?? "",
+    },
   });
   const description = useWatch({ control, name: "description" });
 
@@ -36,7 +71,7 @@ export function HelpRequestForm() {
 
   return (
     <section
-      aria-label="Preparação da dúvida"
+      aria-label="Pedido de ajuda e inscrição"
       className="mt-9 rounded-2xl border border-border bg-card p-5 sm:p-8"
     >
       {draft ? (
@@ -49,6 +84,12 @@ export function HelpRequestForm() {
             Confira sua dúvida.
           </h2>
           <dl className="mt-7 space-y-6">
+            <div>
+              <dt className="eyebrow">SESSÃO</dt>
+              <dd className="mt-2 text-base capitalize">
+                {sessionLabel(draft.sessionId)} · {monitoria.horario}
+              </dd>
+            </div>
             <div>
               <dt className="eyebrow">ASSUNTO</dt>
               <dd className="mt-2 text-base">
@@ -66,22 +107,92 @@ export function HelpRequestForm() {
             </div>
           </dl>
           <p className="mt-7 border-t border-border pt-6 text-sm leading-6 text-muted-foreground">
-            Este rascunho ainda não foi enviado. A escolha da sessão e a
-            inscrição serão disponibilizadas na próxima etapa.
+            {editing
+              ? "Sua inscrição já está confirmada. Ao salvar, somente a dúvida será atualizada."
+              : "Sua inscrição só será confirmada ao concluir esta etapa."}{" "}
+            O encontro é presencial no {monitoria.instituicao},{" "}
+            {monitoria.local}. Alterações e cancelamento são permitidos até o
+            início.
           </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-6 min-h-11 px-4"
-            onClick={() => setDraft(null)}
-          >
-            <PencilLine aria-hidden="true" />
-            Editar dúvida
-          </Button>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button
+              type="button"
+              disabled={!ready || pending}
+              className="min-h-11 px-4"
+              onClick={() => {
+                const { sessionId, ...helpRequest } = draft;
+                const selected = sessions.find(({ id }) => id === sessionId);
+                run(
+                  {
+                    type: editing ? "edit" : "book",
+                    sessionId,
+                    expectedVersion: selected?.registration?.version ?? 0,
+                    helpRequest,
+                  },
+                  () => router.push("/aluno/agenda"),
+                );
+              }}
+            >
+              {pending
+                ? "Confirmando…"
+                : editing
+                  ? "Salvar dúvida"
+                  : "Confirmar inscrição"}
+            </Button>
+            <Button
+              type="button"
+              disabled={pending}
+              variant="outline"
+              className="min-h-11 px-4"
+              onClick={() => setDraft(null)}
+            >
+              <PencilLine aria-hidden="true" />
+              Editar dúvida
+            </Button>
+          </div>
+          <BookingFeedback message={error} />
         </div>
       ) : (
         <form noValidate onSubmit={handleSubmit(setDraft)}>
-          <fieldset disabled={!ready}>
+          <fieldset disabled={!ready || pending} className="min-w-0">
+            <div className="mb-7">
+              <label htmlFor="sessionId" className="text-sm font-medium">
+                Sessão de monitoria
+              </label>
+              <p
+                id="session-hint"
+                className="mt-2 text-sm leading-6 text-muted-foreground"
+              >
+                {editing
+                  ? "Sua vaga já está confirmada. A edição não ocupa outra vaga."
+                  : `${monitoria.horario} · America/Bahia · até dez alunos. A vaga é conferida ao confirmar.`}
+              </p>
+              <select
+                id="sessionId"
+                aria-required="true"
+                aria-invalid={!!errors.sessionId}
+                aria-describedby={`session-hint${errors.sessionId ? " session-error" : ""}`}
+                className="mt-3 min-h-12 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive"
+                {...register("sessionId")}
+              >
+                <option value="">Escolha uma sessão</option>
+                {available.map((session) => (
+                  <option key={session.id} value={session.id}>
+                    {sessionLabel(session.id)} ·{" "}
+                    {monitoria.capacidade - session.enrolledCount} vagas
+                  </option>
+                ))}
+              </select>
+              {errors.sessionId && (
+                <p
+                  id="session-error"
+                  role="alert"
+                  className="mt-2 text-sm text-destructive"
+                >
+                  {errors.sessionId.message}
+                </p>
+              )}
+            </div>
             <div>
               <label htmlFor="topicId" className="text-sm font-medium">
                 Assunto
@@ -168,7 +279,8 @@ export function HelpRequestForm() {
         </form>
       )}
       <p className="mt-6 text-xs leading-6 text-muted-foreground">
-        O rascunho fica apenas nesta página e será perdido ao sair ou atualizar.
+        Antes de confirmar, as alterações ficam só nesta página. Ao sair ou
+        atualizar, o texto ainda não enviado é descartado.
       </p>
     </section>
   );

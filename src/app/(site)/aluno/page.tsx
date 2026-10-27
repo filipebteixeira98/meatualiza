@@ -61,14 +61,17 @@ export default async function StudentPage() {
             Em qual ponto você travou?
           </h2>
           <p className="mt-3 text-sm leading-7 text-muted-foreground">
-            Prepare o assunto e a descrição da sua dúvida. A escolha da sessão e
-            o envio serão disponibilizados na próxima etapa.
+            Escolha uma sessão, descreva sua dúvida e confirme a inscrição. A
+            agenda também permite editar, cancelar ou trocar o encontro.
           </p>
           <Button asChild className="mt-5 min-h-11 px-4">
             <Link href="/aluno/duvida">
               Preparar minha dúvida
               <ArrowRight aria-hidden="true" />
             </Link>
+          </Button>
+          <Button asChild variant="outline" className="mt-5 ml-3 min-h-11 px-4">
+            <Link href="/aluno/agenda">Minha agenda</Link>
           </Button>
         </section>
         <div className="mt-7">
