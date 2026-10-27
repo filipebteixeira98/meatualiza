@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
   type Auth,
 } from "firebase/auth";
-import { LoaderCircle, LogIn, LogOut } from "lucide-react";
+import { LoaderCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getBrowserAuth } from "@/lib/firebase/client";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -85,7 +86,7 @@ export function GoogleSignIn() {
     <div className="mt-8">
       <Button
         type="button"
-        className="h-11 w-full text-sm"
+        className="h-12 w-full gap-2.5 rounded-full bg-google-button px-3 font-['Google_Sans',Arial,sans-serif] text-sm text-google-button-foreground hover:bg-google-button/90"
         onClick={enter}
         disabled={!ready || stage !== "idle"}
         aria-busy={stage !== "idle"}
@@ -96,7 +97,14 @@ export function GoogleSignIn() {
             aria-hidden="true"
           />
         ) : (
-          <LogIn aria-hidden="true" />
+          <Image
+            src="/brand/google-g.png"
+            alt=""
+            width={20}
+            height={20}
+            className="size-5 shrink-0 object-contain"
+            aria-hidden="true"
+          />
         )}
         {stage === "google"
           ? "Abrindo Google…"

@@ -75,7 +75,9 @@ test("permite pular a navegação pelo teclado", async ({ page }) => {
   await expect(page.getByRole("main")).toBeFocused();
 });
 
-test("leva ao estado real do acesso e permite voltar", async ({ page }) => {
+test("leva ao estado real do acesso e permite voltar", async ({
+  page,
+}, info) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Acessar plataforma" }).last().click();
   await expect(page).toHaveURL(/\/entrar$/);
@@ -85,6 +87,25 @@ test("leva ao estado real do acesso e permite voltar", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Entrar com Google" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Entrar com Google" }).locator("img"),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .getByRole("button", { name: "Entrar com Google" })
+        .locator("img")
+        .evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+    )
+    .toBe(true);
+  await page.screenshot({
+    path: info.outputPath("entrar.png"),
+    fullPage: true,
+    scale: "css",
+    animations: "disabled",
+  });
   await page.getByRole("link", { name: "Voltar para a monitoria" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Deu um nó",
@@ -132,4 +153,20 @@ test("não cria rolagem horizontal em telas pequenas e grandes", async ({
       () => document.documentElement.scrollWidth > window.innerWidth,
     ),
   ).toBe(false);
+  await page.goto("/entrar");
+  for (const width of [320, 393, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth > innerWidth,
+      ),
+      `Overflow no acesso na largura ${width}`,
+    ).toBe(false);
+    await expect(
+      page.getByRole("button", { name: "Entrar com Google" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Voltar para a monitoria" }),
+    ).toBeVisible();
+  }
 });

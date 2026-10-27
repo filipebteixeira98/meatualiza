@@ -77,6 +77,8 @@ Google foi habilitado no projeto real por configuração administrativa; o e-mai
 
 ## Sessão do aluno
 
+`/entrar` tem uma composição própria, com identidade do laboratório L7 no desktop e acesso compacto no celular. O botão usa a arte oficial do Google servida localmente; carregamento, falhas, nova tentativa e redirecionamento por perfil mantêm o mesmo fluxo de autenticação. A origem da arte está em [public/brand/README.md](./public/brand/README.md).
+
 O popup Google fornece um ID token recente, trocado por um cookie de cinco dias após o servidor validar origem, CSRF e identidade e persistir `users/{uid}`. A gravação é idempotente e preserva `createdAt`; o cliente não informa UID ou papel. O cookie é `HttpOnly`, `SameSite=Lax`, host-only e `Secure` em produção; use HTTPS fora do desenvolvimento. O token do navegador permanece apenas em memória e é descartado após a troca, inclusive em falhas.
 
 A área `/aluno` lê somente o perfil do UID verificado e recusa sessões expiradas, revogadas ou de contas desabilitadas. Logout limpa a sessão do navegador atual, sem revogar outras sessões. A navegação é recarregada após entrada/saída para evitar dados antigos no cache. Falhas do serviço exibem nova tentativa; elas não são tratadas como uma sessão inexistente. Não há renovação automática. O acesso do monitor usa a claim booleana `monitor: true` na sessão e a permissão atual no Firebase; contas sem essa autorização permanecem como aluno.
@@ -117,7 +119,7 @@ A coleta de analytics permanece desabilitada; Sentry e PostHog não recebem dado
 
 O pipeline de publicação será configurado na fase F8, após definir a hospedagem. As regras aprovadas estão em [INSTRUCTIONS.md](./INSTRUCTIONS.md), e os termos do domínio em [GLOSSARY.md](./GLOSSARY.md).
 
-A base Firebase, o planejamento e as entregas de acesso foram integrados à `main` nos PRs #3–#6. Entrada, recarga, logout, conta pessoal e área real do monitor foram confirmados pelo responsável. OAuth em celular real permanece pendente em B.6 do [plano F2](./PLANO-F2.md). F3 foi integrada no PR #7 e validada pelo responsável. A [F4](./PLANO-F4.md) implementa agenda e inscrição atômica nesta branch; os painéis completos, presença e avaliação serão a próxima entrega, em F5.
+A base Firebase, o planejamento e as entregas de acesso foram integrados à `main` nos PRs #3–#6. Entrada, recarga, logout, conta pessoal e área real do monitor foram confirmados pelo responsável. OAuth em celular real permanece pendente em B.6 do [plano F2](./PLANO-F2.md). F3 foi integrada no PR #7 e validada pelo responsável. A [F4](./PLANO-F4.md), com agenda e inscrição atômica, foi integrada no PR #8; os painéis completos, presença e avaliação serão a próxima entrega, em F5.
 
 ## Agenda e inscrição (F4)
 
@@ -129,7 +131,7 @@ Na área do monitor, a sidebar reúne **Painel** (`/monitor`) e **Agenda** (`/mo
 
 A agenda do monitor mostra a quantidade prevista sobre dez alunos. **Bloquear data** ou **Cancelar sessão** exige motivo, cancela as inscrições afetadas e mostra o motivo aos alunos no aplicativo. Ocupação é atualizada ao carregar, usar **Atualizar agenda** ou concluir uma alteração. Comparecimento efetivo, lista de inscritos/dúvidas e histórico de sessões passadas serão completados em F5. Tour, preferências e feedback serão incluídos na navegação quando seus fluxos estiverem disponíveis.
 
-O grupo de rotas `(site)` mantém o cabeçalho e o rodapé públicos na landing, no acesso e na área do aluno, preservando suas URLs. `/monitor` usa layout próprio; cada página e operação mantém a autorização junto aos dados, inclusive durante navegação com layout persistente.
+O grupo de rotas `(site)` mantém o cabeçalho e o rodapé públicos na landing e na área do aluno. `/entrar` tem apresentação própria fora desse grupo, preservando a URL. `/monitor` usa layout próprio; cada página e operação mantém a autorização junto aos dados, inclusive durante navegação com layout persistente.
 
 Não há migração ou configuração de nuvem adicional: as operações usam o Admin SDK e a autorização existentes; acesso direto do navegador ao Firestore continua negado. O contrato, as transações, a proteção de reenvios e a janela exata estão em [PLANO-F4.md](./PLANO-F4.md). Execute `npm run test:domain`, `npm run test:firebase` e `npm run test:auth` para verificar as regras e o navegador nos emuladores.
 

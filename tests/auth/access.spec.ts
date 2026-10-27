@@ -38,9 +38,15 @@ test("Google, perfil persistido, recarga e saída", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Seu lugar no L7.",
   );
+  await expect(
+    page.getByRole("button", { name: "Entrar com Google" }),
+  ).toBeEnabled();
   await page.screenshot({
     path: info.outputPath("entrar.png"),
     fullPage: true,
+    scale: "css",
+    animations: "disabled",
+    style: "nextjs-portal { display: none; }",
   });
   await googlePopup(page, email);
   await expect(page).toHaveURL(/\/aluno$/, { timeout: 25_000 });
