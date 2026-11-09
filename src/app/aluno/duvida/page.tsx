@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SignOutButton } from "@/features/auth/actions";
 import { HelpRequestForm } from "@/features/help-request/form";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { getAgenda } from "@/lib/bookings";
@@ -81,9 +80,6 @@ export default async function HelpRequestPage({
             acompanhar os próximos encontros.
           </p>
         )}
-        <div className="mt-7">
-          <SignOutButton />
-        </div>
       </div>
     </main>
   );

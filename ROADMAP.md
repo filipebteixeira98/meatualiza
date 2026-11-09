@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F3 integrada à `main` no [PR #7](https://github.com/filipebteixeira98/meatualiza/pull/7) e validada pelo responsável. F4 integrada no [PR #8](https://github.com/filipebteixeira98/meatualiza/pull/8): agenda, inscrições e sidebar do monitor. A renovação visual de `/entrar` está implementada nesta branch para revisão, antes de F5. OAuth em celular real permanece como acompanhamento da F2-B.6. Detalhes em [PLANO-F4.md](./PLANO-F4.md).
+Status: F1–F4 integradas à `main`; a renovação do acesso e o README em inglês foram integrados no [PR #9](https://github.com/filipebteixeira98/meatualiza/pull/9). **Etapa atual: F5.1b**, painel do aluno e navegação responsiva, implementada nesta branch para revisão. A próxima entrega é F5.2, com inscritos e dúvidas no painel do monitor. OAuth em celular real permanece como acompanhamento da F2-B.6.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -185,7 +185,7 @@ Cada tarefa de implementação deve gerar uma feature branch e um PR revisável,
 
 Sequência: F2 → preparação de F3 → F4 com o pedido e a inscrição salvos juntos → F5 com acompanhamento, presença e avaliação. O formulário de F3 não publica uma solicitação sem sessão. O plano de F2 divide acesso e autorização em três PRs, com validação junto de cada comportamento.
 
-A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. Novos recursos entram no menu quando forem entregues; tour, privacidade e feedback seguem em F6/F7. Os painéis completos e a navegação do aluno continuam em F5.
+A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. F5.1b reutiliza essa navegação na área do aluno, com Painel, Agenda, Nova inscrição e saída no menu da conta. Novos recursos entram no menu quando forem entregues; tour, privacidade e feedback seguem em F6/F7.
 
 | Fase                                         | Resultado                                                                                                        | Critérios de aceite                                                                                                                                                                                                    |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ Responsividade, acessibilidade, estados de interface e testes são critérios de
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1–F4 estão integradas à `main`; F3 foi validada pelo responsável e F4 foi integrada no PR #8. Antes de F5, o responsável solicitou a renovação visual do acesso, implementada nesta branch para revisão. F5 completará os painéis, inscritos/dúvidas, presença e avaliação. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
+O quadro distingue regras definidas e entregas implementadas. F1–F4 e a renovação visual do acesso estão integradas à `main`. F5.1b está implementada para revisão; F5.2–F5.6 continuam a fazer. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
 
 | A Fazer                                                                                   | Em Andamento                                                                         | Concluído                                                                                                  |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -250,7 +250,7 @@ O quadro distingue regras definidas e entregas implementadas. F1–F4 estão int
 | —                                                                                         | —                                                                                    | F4.5 — Implementar bloqueios de datas e tratamento das reservas afetadas                                   |
 | —                                                                                         | —                                                                                    | F4.6 — Testar disputa pela décima vaga, repetição pelo mesmo aluno, prazos e período da agenda             |
 | —                                                                                         | —                                                                                    | F5.1a — Sidebar do monitor com Painel/Agenda, ícones, página ativa, menu da conta e adaptação móvel        |
-| F5.1b — Completar painel do aluno e sua navegação responsiva                              | —                                                                                    | —                                                                                                          |
+| —                                                                                         | F5.1b — Painel do aluno e navegação responsiva implementados; aguardando revisão     | —                                                                                                          |
 | F5.2 — Completar agenda com inscritos e dúvidas; contagem prevista entregue em F4         | —                                                                                    | —                                                                                                          |
 | F5.3 — Implementar presença manual, realização da sessão e métricas aprovadas             | —                                                                                    | —                                                                                                          |
 | F5.4 — Implementar uma avaliação por inscrição, pelo aluno presente após sessão realizada | —                                                                                    | —                                                                                                          |
@@ -267,6 +267,20 @@ O quadro distingue regras definidas e entregas implementadas. F1–F4 estão int
 | F8.1 — Executar jornadas completas de aluno e monitor                                     | —                                                                                    | —                                                                                                          |
 | F8.2 — Verificar responsividade e acessibilidade de todos os fluxos                       | —                                                                                    | —                                                                                                          |
 | F8.3 — Configurar preview, deploy e procedimento de rollback                              | —                                                                                    | —                                                                                                          |
+
+## Entrega atual de F5
+
+O painel do aluno mostra somente suas inscrições confirmadas em sessões futuras
+agendadas, com assunto e descrição da dúvida, data, horário e local. A contagem
+exclui cancelamentos; estes aparecem separadamente, com o motivo registrado. O
+botão de cada inscrição abre a sessão correspondente na agenda. Estados sem
+inscrições ou sem novas sessões usam os dados reais, sem números de exemplo.
+
+A leitura reutiliza `getAgenda`, com autorização e isolamento pelo UID no
+servidor. A sidebar é compartilhada pelos dois perfis, enquanto páginas e ações
+continuam verificando permissões. O painel cobre a mesma janela futura de 28
+dias da agenda; histórico de sessões passadas, inscritos do monitor, presença,
+avaliações e métricas completas continuam nas próximas entregas de F5.
 
 ## Tour guiado
 

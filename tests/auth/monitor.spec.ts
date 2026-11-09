@@ -3,10 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { googlePopup } from "./google";
-import {
-  openMonitorAccount,
-  openMonitorNavigation,
-} from "./monitor-navigation";
+import { openAccount, openNavigation, signOut } from "./workspace";
 
 test.setTimeout(90_000);
 
@@ -31,7 +28,7 @@ async function enterMonitor(page: Page) {
   await auth.setCustomUserClaims(user.uid, { monitor: true });
   await page.reload();
   await expect(page).toHaveURL(/\/aluno$/);
-  await page.getByRole("button", { name: "Sair da conta" }).click();
+  await signOut(page, "aluno");
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/entrar");
   await googlePopup(page, email);
@@ -52,7 +49,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
   await expect(
     page.getByRole("heading", { name: "Acesso de monitor ativo." }),
   ).toBeVisible();
-  await openMonitorAccount(page);
+  await openAccount(page, "monitor");
   await expect(page.getByText(user.email!, { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(
@@ -70,7 +67,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
     await page.goto(path);
     await expect(page).toHaveURL(/\/monitor$/);
   }
-  await openMonitorNavigation(page);
+  await openNavigation(page, "monitor");
   await expect(
     page.getByRole("link", { name: "Painel", exact: true }),
   ).toHaveAttribute("aria-current", "page");
@@ -81,7 +78,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
     page.getByRole("heading", { name: "Prepare o próximo encontro." }),
   ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await openMonitorNavigation(page);
+  await openNavigation(page, "monitor");
   await expect(
     page.getByRole("link", { name: "Agenda", exact: true }),
   ).toHaveAttribute("aria-current", "page");
@@ -106,7 +103,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
       () => document.documentElement.scrollWidth > innerWidth,
     ),
   ).toBe(false);
-  await openMonitorNavigation(page);
+  await openNavigation(page, "monitor");
   await page.screenshot({
     path: info.outputPath("monitor-menu-mobile.png"),
     animations: "disabled",
@@ -150,7 +147,7 @@ test("remover privilégio bloqueia a navegação mesmo com layout persistente e 
 }) => {
   const user = await enterMonitor(page);
   await auth.setCustomUserClaims(user.uid, {});
-  await openMonitorNavigation(page);
+  await openNavigation(page, "monitor");
   await page.getByRole("link", { name: "Agenda", exact: true }).click();
   await expect(page).toHaveURL(/\/aluno\/agenda$/);
   await page.reload();

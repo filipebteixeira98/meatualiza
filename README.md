@@ -22,13 +22,14 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 ## ✨ Available features
 
 - **Google sign-in:** any personal or institutional Google account can join. The server selects the student or monitor workspace.
+- **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. Both workspaces have a responsive sidebar and an account menu for sign-out.
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.
 - **Help requests:** select a course topic, describe a question, review it, and save it with the registration. Editing the question does not reserve another seat.
 - **Booking changes:** edit, cancel, or move a registration before the session starts. A failed move keeps the original registration.
 - **Monitor workspace:** responsive sidebar, occupancy out of ten students, date blocking, and session cancellation with a reason visible to affected students.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
-[Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
+[Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
 
 ## 🧰 Stack
 
@@ -160,7 +161,7 @@ Do not run the emulator suites or the build/browser checks concurrently: they sh
 src/
 ├── app/                 # routes, layouts, auth endpoints, theme, and local fonts
 ├── components/          # shared brand, navigation, and UI primitives
-├── features/            # landing, authentication, help requests, monitor shell, agenda
+├── features/            # landing, authentication, help requests, workspace shell, agenda
 └── lib/                 # domain rules, validation, authorization, and Firebase clients
 tests/                   # domain, Firebase/server, and browser suites
 scripts/                 # trusted monitor access commands
@@ -169,7 +170,7 @@ docs/screenshots/        # committed desktop and mobile previews
 
 ## 📌 Roadmap and documentation
 
-Next: participant and question lists, attendance, completed sessions, student-reported question resolution, and dashboard metrics. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are planned; they are not active integrations in this release.
+Current delivery: F5.1b, the student dashboard and navigation. The dashboard uses the agenda's next-28-days window; past-session history is not included yet. Next: participant and question lists for the monitor, attendance, completed sessions, student-reported question resolution, and dashboard metrics. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are planned; they are not active integrations in this release.
 
 - [Roadmap and task board](./ROADMAP.md)
 - [Project requirements](./INSTRUCTIONS.md) and [domain glossary](./GLOSSARY.md)

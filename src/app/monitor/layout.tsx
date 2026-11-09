@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { MonitorShell } from "@/features/monitor/shell";
+import { WorkspaceShell } from "@/features/workspace/shell";
 import { getAccountProfile, SESSION_COOKIE } from "@/lib/auth/session";
 
 export default async function MonitorLayout({
@@ -16,10 +16,11 @@ export default async function MonitorLayout({
   if (profile.role !== "monitor") return children;
 
   return (
-    <MonitorShell
+    <WorkspaceShell
+      role="monitor"
       account={{ displayName: profile.displayName, email: profile.email }}
     >
       {children}
-    </MonitorShell>
+    </WorkspaceShell>
   );
 }

@@ -5,7 +5,7 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { upcomingSessions, sessionLabel } from "../../src/lib/schedule";
 import { googlePopup } from "./google";
-import { openMonitorNavigation } from "./monitor-navigation";
+import { openNavigation, signOut } from "./workspace";
 
 test.setTimeout(180_000);
 let app: ReturnType<typeof initializeApp>;
@@ -58,7 +58,8 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
   await googlePopup(page, email);
   await expect(page).toHaveURL(/\/aluno$/, { timeout: 25_000 });
   const student = await auth.getUserByEmail(email);
-  await page.getByRole("link", { name: "Minha agenda", exact: true }).click();
+  await openNavigation(page, "aluno");
+  await page.getByRole("link", { name: "Agenda", exact: true }).click();
   await expect(page.getByRole("table")).toBeVisible();
   await page.getByRole("button", { name: "Lista", exact: true }).click();
   await expect(page.getByRole("article")).toHaveCount(slots.length);
@@ -139,6 +140,37 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     style: "nextjs-portal { display: none; }",
   });
 
+  await openNavigation(page, "aluno");
+  await page.getByRole("link", { name: "Painel", exact: true }).click();
+  await expect(page.getByText("Confirmadas: 1", { exact: true })).toBeVisible();
+  const sourceCard = page.getByRole("article", {
+    name: `Inscrição de ${sessionLabel(source)}`,
+    exact: true,
+  });
+  await sourceCard.getByText("Ver minha dúvida", { exact: true }).click();
+  await expect(
+    sourceCard.getByText("Como controlar a repetição no meu algoritmo?", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("painel-aluno.png"),
+    fullPage: true,
+    scale: "css",
+    animations: "disabled",
+    style: "nextjs-portal { display: none; }",
+  });
+  await sourceCard.getByRole("link", { name: "Abrir inscrição" }).click();
+  await expect(page).toHaveURL(new RegExp(`/aluno/agenda\\?sessao=${source}$`));
+  await page.goto(`/aluno/agenda?sessao=${target}`);
+  await expect(page.getByRole("article")).toHaveAccessibleName(
+    `Sessão de ${sessionLabel(target)}`,
+  );
+  await page.goto("/aluno/agenda?sessao=invalid");
+  await expect(page.getByRole("article")).toHaveAccessibleName(
+    `Sessão de ${sessionLabel(source)}`,
+  );
+
   await page.getByRole("link", { name: "Editar dúvida", exact: true }).click();
   await expect(page.getByLabel("Sua dúvida", { exact: true })).toHaveValue(
     "Como controlar a repetição no meu algoritmo?",
@@ -170,6 +202,25 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
         .get()
     ).get("helpRequest.description"),
   ).toBe("Dúvida revisada: por que o contador não avança?");
+  await page.goto("/aluno");
+  const targetCard = page.getByRole("article", {
+    name: `Inscrição de ${sessionLabel(target)}`,
+    exact: true,
+  });
+  await expect(page.getByText("Confirmadas: 1", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("article", {
+      name: `Inscrição de ${sessionLabel(source)}`,
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await targetCard.getByText("Ver minha dúvida", { exact: true }).click();
+  await expect(
+    targetCard.getByText("Dúvida revisada: por que o contador não avança?", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await targetCard.getByRole("link", { name: "Abrir inscrição" }).click();
   await page
     .getByRole("button", { name: "Cancelar inscrição", exact: true })
     .click();
@@ -182,6 +233,14 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
   expect(
     (await database.doc(`sessions/${target}`).get()).get("enrolledCount"),
   ).toBe(0);
+  await page.goto("/aluno");
+  await expect(page.getByText("Confirmadas: 0", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Nenhuma inscrição confirmada." }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Cancelada pelo aluno.", { exact: true }),
+  ).toBeVisible();
   await book(page, target);
 
   const monitorContext = await browser.newContext({
@@ -195,7 +254,7 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     await expect(monitorPage).toHaveURL(/\/aluno$/, { timeout: 25_000 });
     const monitor = await auth.getUserByEmail(monitorEmail);
     await auth.setCustomUserClaims(monitor.uid, { monitor: true });
-    await monitorPage.getByRole("button", { name: "Sair da conta" }).click();
+    await signOut(monitorPage, "aluno");
     await expect(monitorPage).toHaveURL(/\/$/);
     await monitorPage.goto("http://127.0.0.1:3101/entrar");
     await googlePopup(monitorPage, monitorEmail);
@@ -203,7 +262,7 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     await expect(
       monitorPage.getByRole("heading", { name: "Acesso de monitor ativo." }),
     ).toBeVisible();
-    await openMonitorNavigation(monitorPage);
+    await openNavigation(monitorPage, "monitor");
     await monitorPage
       .getByRole("link", { name: "Agenda", exact: true })
       .click();
@@ -254,6 +313,24 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     await expect(
       page.getByText("0/10 inscritos", { exact: true }),
     ).toBeVisible();
+    await page.goto("/aluno");
+    await expect(
+      page.getByText("Confirmadas: 0", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("article", {
+        name: `Inscrição de ${sessionLabel(target)}`,
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("Laboratório L7 em manutenção.", { exact: true }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth > innerWidth,
+      ),
+    ).toBe(false);
   } finally {
     await monitorContext.close();
     for (const id of [source, target])
