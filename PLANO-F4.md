@@ -1,7 +1,7 @@
 # F4 — Agenda e inscrição em grupo
 
-Status: implementada na branch `feat/session-bookings`, verificada e aguardando
-revisão e merge. F3 foi integrada no PR #7 e validada pelo responsável.
+Status: integrada à `main` no PR #8. F3 foi integrada no PR #7 e validada pelo
+responsável.
 
 ## Fluxos entregues
 

@@ -34,6 +34,8 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-google-button: var(--google-button);
+  --color-google-button-foreground: var(--google-button-foreground);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -49,6 +51,8 @@
 }
 
 :root {
+  --google-button: #f2f2f2;
+  --google-button-foreground: #1f1f1f;
   --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

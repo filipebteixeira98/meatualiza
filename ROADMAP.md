@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F3 integrada à `main` no [PR #7](https://github.com/filipebteixeira98/meatualiza/pull/7) e validada pelo responsável. F4 implementada na branch `feat/session-bookings`, verificada e aguardando revisão/merge: agenda, inscrição com pedido de ajuda, edição, cancelamento, troca e bloqueio de datas. As entregas de acesso dos PRs #5/#6 continuam integradas; OAuth em celular real permanece como acompanhamento da F2-B.6. Detalhes em [PLANO-F4.md](./PLANO-F4.md).
+Status: F3 integrada à `main` no [PR #7](https://github.com/filipebteixeira98/meatualiza/pull/7) e validada pelo responsável. F4 integrada no [PR #8](https://github.com/filipebteixeira98/meatualiza/pull/8): agenda, inscrições e sidebar do monitor. A renovação visual de `/entrar` está implementada nesta branch para revisão, antes de F5. OAuth em celular real permanece como acompanhamento da F2-B.6. Detalhes em [PLANO-F4.md](./PLANO-F4.md).
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -203,7 +203,7 @@ Responsividade, acessibilidade, estados de interface e testes são critérios de
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1–F3 estão integradas à `main`; F3 foi validada pelo responsável. F4 é a entrega atual, implementada e verificada nesta branch, aguardando revisão e merge. F5 completará os painéis, inscritos/dúvidas, presença e avaliação. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
+O quadro distingue regras definidas e entregas implementadas. F1–F4 estão integradas à `main`; F3 foi validada pelo responsável e F4 foi integrada no PR #8. Antes de F5, o responsável solicitou a renovação visual do acesso, implementada nesta branch para revisão. F5 completará os painéis, inscritos/dúvidas, presença e avaliação. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
 
 | A Fazer                                                                                   | Em Andamento                                                                         | Concluído                                                                                                  |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -221,6 +221,7 @@ O quadro distingue regras definidas e entregas implementadas. F1–F3 estão int
 | —                                                                                         | —                                                                                    | F1.4 — Implementar landing page pública, horários/local, assuntos, FAQ e navegação responsiva              |
 | —                                                                                         | —                                                                                    | F1.5 — Verificar produção, teclado, menu móvel e larguras de 320 a 1440 pixels                             |
 | —                                                                                         | —                                                                                    | F1.6 — Refinar identidade do L7, tema escuro e assuntos recolhidos por padrão                              |
+| —                                                                                         | —                                                                                    | F1.7 — Renovar acesso responsivo com identidade do L7 e ícone oficial do Google no botão OAuth             |
 | —                                                                                         | —                                                                                    | Planejar F2 em três entregas com dependências e critérios de aceite documentados em PLANO-F2.md            |
 | —                                                                                         | —                                                                                    | Criar projeto Firebase dedicado meatualiza-monitoria e confirmar conta do monitor como a conta do MCP      |
 | —                                                                                         | —                                                                                    | F2.0/F2-A — Preparar Firebase, Google, Firestore fechado, SDKs e oito testes nos emuladores                |
