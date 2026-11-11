@@ -37,7 +37,7 @@ test("Google, perfil persistido, recarga e saída", async ({
   await page.goto("/");
   await page.goto("/entrar");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Seu lugar no L7.",
+    "Vamos continuar?",
   );
   await expect(
     page.getByRole("button", { name: "Entrar com Google" }),
@@ -164,6 +164,7 @@ test("falhas de entrada e saída preservam o estado e permitem nova tentativa", 
   page,
   context,
 }) => {
+  await page.setViewportSize({ width: 320, height: 480 });
   await page.goto("/entrar");
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
@@ -180,6 +181,10 @@ test("falhas de entrada e saída preservam o estado e permitem nova tentativa", 
     "Serviço indisponível",
   );
   await expect(page.getByRole("main").getByRole("alert")).toBeFocused();
+  await expect(page.getByRole("main").getByRole("alert")).toBeInViewport();
+  await expect(
+    page.getByRole("button", { name: "Entrar com Google" }),
+  ).toBeInViewport();
   expect(
     (await context.cookies()).some(
       (cookie) => cookie.name === "meatualiza_session",
