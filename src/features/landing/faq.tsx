@@ -32,7 +32,7 @@ export function Faq() {
     <section
       id="perguntas"
       aria-labelledby="faq-title"
-      className="border-t border-border py-12 sm:py-16"
+      className="border-t border-border bg-muted/50 py-12 sm:py-16"
     >
       <div className="site-container grid gap-8 lg:grid-cols-[0.8fr_1.3fr] lg:gap-20">
         <div>

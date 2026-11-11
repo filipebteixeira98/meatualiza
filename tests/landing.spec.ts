@@ -13,13 +13,11 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Deu um nó",
   );
-  await expect(
-    page.getByRole("heading", { name: "Segunda-feira", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Quarta-feira", exact: true }),
-  ).toBeVisible();
-  await expect(page.getByText("11h30–12h30", { exact: true })).toHaveCount(2);
+  const agenda = page.getByRole("complementary", {
+    name: "Agenda da monitoria",
+  });
+  await expect(agenda).toContainText("Segundas e quartas · 11h30–12h30");
+  await expect(agenda.getByText("11h30–12h30", { exact: true })).toHaveCount(1);
   const topics = page.locator("#conteudos");
   const disclosure = topics.getByRole("button", {
     name: "Explorar os 9 assuntos",
@@ -37,11 +35,12 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
     "Outro assunto / não sei classificar",
   );
   await expect(
-    page.getByText("SENAI Dendezeiros", { exact: true }).first(),
+    agenda.getByText("SENAI Dendezeiros", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Laboratório de informática L7", { exact: true }),
-  ).toBeVisible();
+    agenda.getByText("Laboratório de informática L7", { exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("contentinfo")).toHaveCount(0);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await page.screenshot({
     path: testInfo.outputPath("landing.png"),

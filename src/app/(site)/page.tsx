@@ -5,7 +5,7 @@ import { Topics } from "@/features/landing/topics";
 
 export default function Home() {
   return (
-    <main id="conteudo" tabIndex={-1}>
+    <main id="conteudo" tabIndex={-1} className="bg-background">
       <Hero />
       <HowItWorks />
       <Topics />
