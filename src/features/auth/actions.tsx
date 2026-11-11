@@ -8,7 +8,7 @@ import {
   signOut,
   type Auth,
 } from "firebase/auth";
-import { LoaderCircle, LogOut } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getBrowserAuth } from "@/lib/firebase/client";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -155,31 +155,4 @@ export function useSignOut() {
   }
 
   return { ready, busy, message, leave };
-}
-
-export function SignOutButton() {
-  const { ready, busy, message, leave } = useSignOut();
-  return (
-    <div>
-      <Button
-        type="button"
-        className="h-11 w-full sm:w-auto"
-        variant="outline"
-        onClick={leave}
-        disabled={!ready || busy}
-        aria-busy={busy}
-      >
-        {busy ? (
-          <LoaderCircle
-            className="motion-safe:animate-spin"
-            aria-hidden="true"
-          />
-        ) : (
-          <LogOut aria-hidden="true" />
-        )}
-        {busy ? "Saindo…" : "Sair da conta"}
-      </Button>
-      <AuthNotice message={message} />
-    </div>
-  );
 }

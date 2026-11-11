@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { googlePopup } from "./google";
+import { signOut } from "./workspace";
 import { upcomingSessions } from "../../src/lib/schedule";
 const available = upcomingSessions().at(-1)?.id;
 test.skip(
@@ -146,7 +147,7 @@ test("opção livre, limite da descrição e saída da página protegida", async
   }
   await expect(description).toBeEnabled();
   await expect(description).toHaveValue("");
-  await page.getByRole("button", { name: "Sair da conta" }).click();
+  await signOut(page, "aluno");
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/aluno/duvida");
   await expect(page).toHaveURL(/\/entrar$/);

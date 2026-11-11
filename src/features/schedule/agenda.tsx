@@ -312,17 +312,20 @@ function SessionCard({
 export function Agenda({
   sessions,
   monitor = false,
+  initialSessionId,
 }: {
   sessions: SessionView[];
   monitor?: boolean;
+  initialSessionId?: string;
 }) {
   const router = useRouter();
   const ready = useHydrated();
   const [refreshing, refresh] = useTransition();
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [selected, setSelected] = useState(
-    sessions.find((session) => session.registration?.status === "confirmed")
-      ?.id ??
+    sessions.find((session) => session.id === initialSessionId)?.id ??
+      sessions.find((session) => session.registration?.status === "confirmed")
+        ?.id ??
       sessions.find(
         (session) =>
           session.status === "cancelled" &&

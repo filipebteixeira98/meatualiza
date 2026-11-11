@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { googlePopup } from "./google";
+import { openAccount, openNavigation, signOut } from "./workspace";
 
 test.setTimeout(60_000);
 
@@ -50,10 +51,16 @@ test("Google, perfil persistido, recarga e saída", async ({
   });
   await googlePopup(page, email);
   await expect(page).toHaveURL(/\/aluno$/, { timeout: 25_000 });
-  await expect(page.getByText(email, { exact: true })).toBeVisible();
   await expect(
-    page.getByText("Aluno Monitoria", { exact: true }),
+    page.getByRole("heading", { name: "Nenhuma inscrição confirmada." }),
   ).toBeVisible();
+  await openAccount(page, "aluno");
+  await expect(page.getByText(email, { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Abrir menu da conta" }),
+  ).toContainText("Aluno Monitoria");
+  await page.keyboard.press("Escape");
   const cookie = (await context.cookies()).find(
     (item) => item.name === "meatualiza_session",
   );
@@ -71,22 +78,51 @@ test("Google, perfil persistido, recarga e saída", async ({
   ).toEqual([]);
   const response = await page.reload();
   expect(response?.headers()["cache-control"]).toContain("no-store");
+  await openAccount(page, "aluno");
   await expect(page.getByText(email, { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
   await expect(
-    page.getByText("Aluno Monitoria", { exact: true }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "Abrir menu da conta" }),
+  ).toContainText("Aluno Monitoria");
+  await page.keyboard.press("Escape");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth,
     ),
   ).toBe(false);
-  await page.screenshot({ path: info.outputPath("aluno.png"), fullPage: true });
+  await page.screenshot({
+    path: info.outputPath("aluno.png"),
+    fullPage: true,
+    scale: "css",
+    animations: "disabled",
+    style: "nextjs-portal { display: none; }",
+  });
+  await openNavigation(page, "aluno");
+  await expect(
+    page.getByRole("link", { name: "Painel", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "Agenda", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/aluno\/agenda$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await openNavigation(page, "aluno");
+  await expect(
+    page.getByRole("link", { name: "Agenda", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "Painel", exact: true }).click();
+  await expect(page).toHaveURL(/\/aluno$/);
+  await page.setViewportSize({ width: 320, height: 800 });
+  await openNavigation(page, "aluno");
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Abrir navegação do aluno" }),
+  ).toBeFocused();
   await page.goto("/monitor/agenda");
   await expect(page).toHaveURL(/\/aluno\/agenda$/);
   await page.goto("/monitor");
   await expect(page).toHaveURL(/\/aluno$/);
   await expect(page.getByText("Acesso de monitor ativo.")).toHaveCount(0);
-  await page.getByRole("button", { name: "Sair da conta" }).click();
+  await signOut(page, "aluno");
   await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
   expect(
     (await context.cookies()).find(
@@ -154,15 +190,16 @@ test("falhas de entrada e saída preservam o estado e permitem nova tentativa", 
   await expect(page).toHaveURL(/\/aluno$/, { timeout: 25_000 });
 
   await page.route("**/api/auth/session", (route) => route.abort("failed"));
-  await page.getByRole("button", { name: "Sair da conta" }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+  await signOut(page, "aluno");
+  await expect(page.getByRole("alert")).toContainText(
     "Sua sessão continua ativa",
   );
-  await expect(page.getByRole("main").getByRole("alert")).toBeFocused();
+  await expect(page.getByRole("alert")).toBeFocused();
   await page.reload();
+  await openAccount(page, "aluno");
   await expect(page.getByText(email, { exact: true })).toBeVisible();
   await page.unroute("**/api/auth/session");
-  await page.getByRole("button", { name: "Sair da conta" }).click();
+  await page.getByRole("menuitem", { name: "Sair da conta" }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/aluno");
   await expect(page).toHaveURL(/\/entrar$/);

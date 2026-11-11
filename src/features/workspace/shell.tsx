@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   LogOut,
   Menu,
+  MessageSquarePlus,
 } from "lucide-react";
 import { Brand } from "@/components/site/brand";
 import { Button } from "@/components/ui/button";
@@ -26,18 +27,33 @@ import {
 import { AuthNotice, useSignOut } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 
-const navigation = [
-  { href: "/monitor", label: "Painel", icon: LayoutDashboard },
-  { href: "/monitor/agenda", label: "Agenda", icon: CalendarDays },
-];
+const navigation = {
+  monitor: [
+    { href: "/monitor", label: "Painel", icon: LayoutDashboard },
+    { href: "/monitor/agenda", label: "Agenda", icon: CalendarDays },
+  ],
+  student: [
+    { href: "/aluno", label: "Painel", icon: LayoutDashboard },
+    { href: "/aluno/agenda", label: "Agenda", icon: CalendarDays },
+    { href: "/aluno/duvida", label: "Nova inscrição", icon: MessageSquarePlus },
+  ],
+};
+type Role = keyof typeof navigation;
+const roleNames = { monitor: "monitor", student: "aluno" };
 
 type Account = { displayName: string; email: string };
 
-function MonitorNavigation({ onNavigate }: { onNavigate?: () => void }) {
+function WorkspaceNavigation({
+  role,
+  onNavigate,
+}: {
+  role: Role;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Navegação do monitor" className="space-y-1">
-      {navigation.map(({ href, label, icon: Icon }) => (
+    <nav aria-label={`Navegação do ${roleNames[role]}`} className="space-y-1">
+      {navigation[role].map(({ href, label, icon: Icon }) => (
         <Link
           key={href}
           href={href}
@@ -59,9 +75,11 @@ function MonitorNavigation({ onNavigate }: { onNavigate?: () => void }) {
 
 function AccountMenu({
   account,
+  role,
   signOut,
 }: {
   account: Account;
+  role: Role;
   signOut: ReturnType<typeof useSignOut>;
 }) {
   return (
@@ -82,7 +100,7 @@ function AccountMenu({
               {account.displayName}
             </span>
             <span className="block text-xs font-normal text-muted-foreground">
-              Monitor
+              {role === "monitor" ? "Monitor" : "Aluno"}
             </span>
           </span>
           <ChevronsUpDown
@@ -134,11 +152,13 @@ function AccountMenu({
   );
 }
 
-export function MonitorShell({
+export function WorkspaceShell({
   account,
+  role,
   children,
 }: {
   account: Account;
+  role: Role;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -146,16 +166,16 @@ export function MonitorShell({
   return (
     <div className="min-h-svh flex-1 lg:pl-64">
       <aside
-        aria-label="Área do monitor"
+        aria-label={`Área do ${roleNames[role]}`}
         className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar px-4 py-6 text-sidebar-foreground lg:flex"
       >
         <div className="px-2">
           <Brand />
         </div>
         <p className="eyebrow mt-10 mb-3 px-3">MONITORIA / L7</p>
-        <MonitorNavigation />
+        <WorkspaceNavigation role={role} />
         <div className="mt-auto border-t border-sidebar-border pt-4">
-          <AccountMenu account={account} signOut={signOut} />
+          <AccountMenu account={account} role={role} signOut={signOut} />
         </div>
       </aside>
       <header className="flex min-h-18 items-center gap-3 border-b border-border px-5 sm:px-8">
@@ -165,7 +185,8 @@ export function MonitorShell({
               variant="ghost"
               size="icon"
               className="size-11 lg:hidden"
-              aria-label="Abrir navegação do monitor"
+              aria-label={`Abrir navegação do ${roleNames[role]}`}
+              disabled={!signOut.ready}
             >
               <Menu aria-hidden="true" />
             </Button>
@@ -175,22 +196,25 @@ export function MonitorShell({
             className="gap-0 overflow-y-auto bg-sidebar p-4 text-sidebar-foreground data-[side=left]:w-[min(88vw,18rem)]"
           >
             <SheetHeader className="sr-only">
-              <SheetTitle>Navegação do monitor</SheetTitle>
+              <SheetTitle>Navegação do {roleNames[role]}</SheetTitle>
               <SheetDescription>
-                Acesse o painel, a agenda e o menu da sua conta.
+                Acesse os recursos da sua área e o menu da conta.
               </SheetDescription>
             </SheetHeader>
             <div className="mt-3 px-2">
               <Brand />
             </div>
             <p className="eyebrow mt-10 mb-3 px-3">MONITORIA / L7</p>
-            <MonitorNavigation onNavigate={() => setOpen(false)} />
+            <WorkspaceNavigation
+              role={role}
+              onNavigate={() => setOpen(false)}
+            />
             <div className="mt-auto border-t border-sidebar-border pt-4">
-              <AccountMenu account={account} signOut={signOut} />
+              <AccountMenu account={account} role={role} signOut={signOut} />
             </div>
           </SheetContent>
         </Sheet>
-        <span className="text-sm font-medium">Área do monitor</span>
+        <span className="text-sm font-medium">Área do {roleNames[role]}</span>
         <span className="ml-auto hidden text-xs text-muted-foreground sm:block">
           Lógica de Programação
         </span>
