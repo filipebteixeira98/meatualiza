@@ -23,7 +23,7 @@ export function HowItWorks() {
     <section
       id="como-funciona"
       aria-labelledby="how-title"
-      className="border-y border-border py-12 sm:py-16"
+      className="border-y border-border bg-muted/50 py-12 sm:py-16"
     >
       <div className="site-container">
         <h2

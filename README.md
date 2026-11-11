@@ -29,7 +29,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Monitor workspace:** responsive sidebar, occupancy out of ten students, date blocking, and session cancellation with a reason visible to affected students.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
-[Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
+[Landing page](./docs/screenshots/landing-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
 
 ## 🧰 Stack
 
