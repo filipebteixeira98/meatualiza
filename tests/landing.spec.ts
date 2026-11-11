@@ -82,8 +82,25 @@ test("leva ao estado real do acesso e permite voltar", async ({
   await page.getByRole("link", { name: "Acessar plataforma" }).last().click();
   await expect(page).toHaveURL(/\/entrar$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Seu lugar no L7.",
+    "Vamos continuar?",
   );
+  await expect(page.getByRole("contentinfo")).toHaveCount(0);
+  await expect(
+    page.getByText(/SENAI|Laboratório|Segundas e quartas/),
+  ).toHaveCount(0);
+  const illustration = page.locator('img[src*="sign-in-illustration"]');
+  if (info.project.name === "desktop") {
+    await expect(illustration).toBeVisible();
+    await expect
+      .poll(() =>
+        illustration.evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+  } else {
+    await expect(illustration).toBeHidden();
+  }
   await expect(
     page.getByRole("button", { name: "Entrar com Google" }),
   ).toBeVisible();
@@ -133,7 +150,7 @@ test("menu móvel navega e devolve o foco ao fechar", async ({
   await expect(page).toHaveURL(/#conteudos$/);
 });
 
-test("não cria rolagem horizontal em telas pequenas e grandes", async ({
+test("mantém a landing responsiva e o acesso centralizado sem rolagem", async ({
   page,
   isMobile,
 }) => {
@@ -154,19 +171,43 @@ test("não cria rolagem horizontal em telas pequenas e grandes", async ({
     ),
   ).toBe(false);
   await page.goto("/entrar");
-  for (const width of [320, 393, 768, 1440]) {
-    await page.setViewportSize({ width, height: 900 });
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth > innerWidth,
-      ),
-      `Overflow no acesso na largura ${width}`,
-    ).toBe(false);
+  for (const [width, height] of [
+    [320, 480],
+    [320, 568],
+    [393, 851],
+    [768, 1024],
+    [844, 390],
+    [1024, 390],
+    [1024, 768],
+    [1366, 768],
+    [1440, 900],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => ({
+            horizontal: document.documentElement.scrollWidth > innerWidth,
+            vertical: document.documentElement.scrollHeight > innerHeight,
+          })),
+        { message: `Rolagem no acesso em ${width} × ${height}` },
+      )
+      .toEqual({ horizontal: false, vertical: false });
     await expect(
       page.getByRole("button", { name: "Entrar com Google" }),
-    ).toBeVisible();
+    ).toBeInViewport();
     await expect(
       page.getByRole("link", { name: "Voltar para a monitoria" }),
-    ).toBeVisible();
+    ).toBeInViewport();
+    const centerOffset = await page.getByRole("main").evaluate((main) => {
+      const bounds = main.getBoundingClientRect();
+      const form = main.querySelector("section")!.getBoundingClientRect();
+      return Math.abs(
+        form.top + form.height / 2 - (bounds.top + bounds.height / 2),
+      );
+    });
+    expect(centerOffset, `Centralização em ${width} × ${height}`).toBeLessThan(
+      1,
+    );
   }
 });
