@@ -27,9 +27,10 @@ async function book(
   page: Page,
   id: string,
   description = "Como controlar a repetição no meu algoritmo?",
+  topic = "repeticao",
 ) {
   await page.goto(`/aluno/duvida?sessao=${id}`);
-  await page.getByLabel("Assunto", { exact: true }).selectOption("repeticao");
+  await page.getByLabel("Assunto", { exact: true }).selectOption(topic);
   await page.getByLabel("Sua dúvida", { exact: true }).fill(description);
   await page.getByRole("button", { name: "Revisar dúvida" }).click();
   await page
@@ -247,7 +248,29 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     viewport: page.viewportSize() ?? undefined,
   });
   const monitorPage = await monitorContext.newPage();
+  const classmateContext = await browser.newContext();
   try {
+    const classmatePage = await classmateContext.newPage();
+    const classmateEmail = `colega.${randomUUID()}@example.test`;
+    const classmateDoubt = `Como comparar condições? DUVIDA_COLEGA_${"x".repeat(300)}`;
+    await classmatePage.goto("http://127.0.0.1:3101/entrar");
+    await googlePopup(classmatePage, classmateEmail);
+    await expect(classmatePage).toHaveURL(/\/aluno$/, { timeout: 25_000 });
+    const classmate = await auth.getUserByEmail(classmateEmail);
+    await database
+      .doc(`users/${classmate.uid}`)
+      .set({ displayName: "Beatriz Lima" }, { merge: true });
+    await book(classmatePage, target, classmateDoubt, "condicionais");
+    await page.reload();
+    await expect(
+      page.getByText("2/10 inscritos", { exact: true }),
+    ).toBeVisible();
+    expect(await page.content()).not.toContain("DUVIDA_COLEGA_");
+    expect(await page.content()).not.toContain("Beatriz Lima");
+    await expect(
+      page.getByRole("region", { name: "Inscritos e dúvidas" }),
+    ).toHaveCount(0);
+
     const monitorEmail = `agenda.monitor.${randomUUID()}@example.test`;
     await monitorPage.goto("http://127.0.0.1:3101/entrar");
     await googlePopup(monitorPage, monitorEmail);
@@ -272,13 +295,71 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
       .getByRole("button", { name: new RegExp(`^${sessionLabel(target)} —`) })
       .click();
     await expect(
-      monitorPage.getByText("1/10 inscritos", { exact: true }),
+      monitorPage.getByText("2/10 inscritos", { exact: true }),
     ).toBeVisible();
+    const roster = monitorPage.getByRole("region", {
+      name: "Inscritos e dúvidas",
+    });
+    await expect(roster.getByRole("listitem")).toHaveCount(2);
+    await expect(roster).toContainText("Beatriz Lima");
+    await expect(roster).toContainText("Estruturas condicionais");
+    await expect(roster).toContainText("Estruturas de repetição");
+    await roster.locator("summary").first().focus();
+    await monitorPage.keyboard.press("Enter");
+    await expect(
+      roster.getByText("Como controlar a repetição no meu algoritmo?", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await roster.locator("summary").last().focus();
+    await monitorPage.keyboard.press("Enter");
+    await expect(
+      roster.getByText(classmateDoubt, { exact: true }),
+    ).toBeVisible();
+    for (const width of [
+      320,
+      768,
+      info.project.name === "mobile" ? 412 : 1440,
+    ]) {
+      await monitorPage.setViewportSize({ width, height: 1000 });
+      expect(
+        await monitorPage.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+      ).toBe(false);
+    }
+    await roster.locator("summary").last().click();
+    await monitorPage.evaluate(() => {
+      if (document.activeElement instanceof HTMLElement)
+        document.activeElement.blur();
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
     await monitorPage.screenshot({
       path: info.outputPath("agenda-monitor.png"),
       fullPage: true,
       style: "nextjs-portal { display: none; }",
     });
+    await monitorPage
+      .getByRole("button", { name: "Lista", exact: true })
+      .click();
+    const listedSession = monitorPage.getByRole("article", {
+      name: `Sessão de ${sessionLabel(target)}`,
+      exact: true,
+    });
+    await expect(listedSession.getByRole("listitem")).toHaveCount(2);
+    await listedSession.locator("summary").last().click();
+    await expect(
+      listedSession.getByText(classmateDoubt, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      monitorPage.getByRole("article", {
+        name: `Sessão de ${sessionLabel(source)}`,
+        exact: true,
+      }),
+    ).toContainText("Não há inscrições confirmadas nesta sessão.");
+    await monitorPage
+      .getByRole("button", { name: "Calendário", exact: true })
+      .click();
     await monitorPage
       .getByRole("button", { name: "Cancelar sessão", exact: true })
       .click();
@@ -300,6 +381,10 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     await expect(
       monitorPage.getByText("Sessão cancelada.", { exact: true }),
     ).toBeVisible();
+    await expect(roster.getByRole("listitem")).toHaveCount(0);
+    await expect(roster).toContainText(
+      "Não há inscrições confirmadas nesta sessão.",
+    );
     await page.reload();
     await expect(
       page.getByText("Laboratório L7 em manutenção.", { exact: false }),
@@ -332,6 +417,7 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
       ),
     ).toBe(false);
   } finally {
+    await classmateContext.close();
     await monitorContext.close();
     for (const id of [source, target])
       await database.recursiveDelete(database.doc(`sessions/${id}`));

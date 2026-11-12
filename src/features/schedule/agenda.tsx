@@ -305,6 +305,54 @@ function SessionCard({
           separadamente.
         </p>
       )}
+      {monitor && (
+        <section
+          aria-labelledby={`registrations-${session.id}`}
+          className="mt-6 border-t border-border pt-5"
+        >
+          <h3
+            id={`registrations-${session.id}`}
+            className="text-base font-medium"
+          >
+            Inscritos e dúvidas
+          </h3>
+          {session.registrations?.length ? (
+            <>
+              <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                Selecione um aluno para ler a dúvida.
+              </p>
+              <ul className="mt-3 divide-y divide-border">
+                {session.registrations.map((registration) => (
+                  <li key={registration.studentId}>
+                    <details className="py-3">
+                      <summary className="cursor-pointer rounded-sm text-sm leading-6 [overflow-wrap:anywhere] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+                        <span className="font-medium">
+                          {registration.displayName}
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {
+                            helpRequestTopics.find(
+                              ({ id }) =>
+                                id === registration.helpRequest.topicId,
+                            )?.titulo
+                          }
+                        </span>
+                      </summary>
+                      <p className="mt-3 text-sm leading-7 whitespace-pre-wrap [overflow-wrap:anywhere]">
+                        {registration.helpRequest.description}
+                      </p>
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              Não há inscrições confirmadas nesta sessão.
+            </p>
+          )}
+        </section>
+      )}
     </article>
   );
 }

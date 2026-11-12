@@ -59,6 +59,41 @@ export async function getAgenda(cookie?: string, now = Date.now()) {
               ),
             )
           : [];
+      const registrations =
+        profile.role === "monitor"
+          ? await Promise.all(
+              references.map((reference) =>
+                transaction.get(
+                  reference
+                    .collection("registrations")
+                    .where("status", "==", "confirmed"),
+                ),
+              ),
+            )
+          : [];
+      const studentIds = [
+        ...new Set(
+          registrations.flatMap((snapshot) =>
+            snapshot.docs.map((row) => row.id),
+          ),
+        ),
+      ];
+      const students = studentIds.length
+        ? await transaction.getAll(
+            ...studentIds.map((id) => database.collection("users").doc(id)),
+          )
+        : [];
+      const names = new Map(
+        students.map((student) => {
+          const name = student.get("displayName");
+          return [
+            student.id,
+            typeof name === "string" && name.trim()
+              ? name.trim()
+              : "Aluno sem nome",
+          ];
+        }),
+      );
       const sessions: SessionView[] = details.map((detail, i) => {
         const state = snapshots[i].exists
           ? sessionState.parse(snapshots[i].data())
@@ -79,6 +114,22 @@ export async function getAgenda(cookie?: string, now = Date.now()) {
                 cancellationReason: saved.cancellationReason,
               }
             : null,
+          ...(profile.role === "monitor"
+            ? {
+                registrations: registrations[i].docs
+                  .map((row) => ({
+                    studentId: row.id,
+                    displayName: names.get(row.id) ?? "Aluno sem nome",
+                    helpRequest: registrationState.parse(row.data())
+                      .helpRequest,
+                  }))
+                  .sort(
+                    (a, b) =>
+                      a.displayName.localeCompare(b.displayName, "pt-BR") ||
+                      a.studentId.localeCompare(b.studentId),
+                  ),
+              }
+            : {}),
         };
       });
       return { role: profile.role, sessions };
