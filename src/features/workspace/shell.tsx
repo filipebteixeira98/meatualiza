@@ -164,7 +164,7 @@ export function WorkspaceShell({
   const [open, setOpen] = useState(false);
   const signOut = useSignOut();
   return (
-    <div className="min-h-svh flex-1 lg:pl-64">
+    <div className="flex min-h-svh flex-1 flex-col lg:pl-64">
       <aside
         aria-label={`Área do ${roleNames[role]}`}
         className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar px-4 py-6 text-sidebar-foreground lg:flex"
