@@ -26,9 +26,9 @@ export default async function MonitorAgendaPage() {
           Prepare o próximo encontro.
         </h1>
         <p className="mt-5 text-base leading-7 text-muted-foreground">
-          Acompanhe a quantidade de alunos previstos nas próximas quatro
-          semanas. Bloqueie datas ou cancele encontros com um motivo visível aos
-          inscritos.
+          Consulte os inscritos, assuntos e dúvidas de cada sessão nas próximas
+          quatro semanas. Bloqueie datas ou cancele encontros com um motivo
+          visível aos alunos.
         </p>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
           Segundas e quartas, 11h30–12h30 · America/Bahia · dez alunos por

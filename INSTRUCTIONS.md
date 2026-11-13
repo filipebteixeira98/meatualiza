@@ -31,7 +31,7 @@
 ### **3. Fluxo de Trabalho & Engenharia de Software**
 
 - **Commits Incrementais:** Seguir a convenção _Conventional Commits_ (ex: `feat(auth): add Google OAuth login`), incluindo escopo e mensagens sempre em **inglês**.
-- **Pull Requests:** Cada funcionalidade deve ser implementada em uma _feature branch_ individual e submetida via Pull Request (PR) para revisão.
+- **Pull Requests:** Cada funcionalidade deve ser implementada em uma _feature branch_ individual e submetida via Pull Request (PR) para revisão. Títulos em inglês, seguindo Conventional Commits e sem emojis, inclusive em ajustes de layout.
 - **Qualidade & CI/CD:**
   - O repositório deve conter pipeline de CI/CD automatizado com execução de testes.
   - Por orientação do responsável, desconsiderar avisos e falhas do GitHub Actions causados exclusivamente pela cobrança da conta. Eles não impedem o andamento do projeto. Manter o workflow e as verificações locais; falhas de código, configuração ou testes continuam exigindo correção.

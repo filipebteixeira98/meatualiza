@@ -4,7 +4,7 @@
     meatualiza
   </h1>
   <p>A group tutoring platform for Programming Logic at SENAI Dendezeiros.</p>
-  <img src="./docs/screenshots/f4-agenda-monitor-desktop.png" alt="Monitor calendar showing group session availability, occupancy, and cancellation controls" width="100%" />
+  <img src="./docs/screenshots/f5-inscritos-monitor-desktop.png" alt="Monitor calendar showing occupancy, enrolled students, topics, and a student's question" width="100%" />
   <p><sub>Monitor agenda with sample data from local Firebase emulators.</sub></p>
 </div>
 
@@ -26,7 +26,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.
 - **Help requests:** select a course topic, describe a question, review it, and save it with the registration. Editing the question does not reserve another seat.
 - **Booking changes:** edit, cancel, or move a registration before the session starts. A failed move keeps the original registration.
-- **Monitor workspace:** responsive sidebar, occupancy out of ten students, date blocking, and session cancellation with a reason visible to affected students.
+- **Monitor workspace:** responsive sidebar, occupancy out of ten students, confirmed student lists with names, topics and expandable questions, date blocking, and session cancellation with a reason visible to affected students. Session rosters are returned only to the authorized monitor.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
 [Landing page](./docs/screenshots/landing-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
@@ -170,7 +170,7 @@ docs/screenshots/        # committed desktop and mobile previews
 
 ## 📌 Roadmap and documentation
 
-Current delivery: F5.1b, the student dashboard and navigation. The dashboard uses the agenda's next-28-days window; past-session history is not included yet. Next: participant and question lists for the monitor, attendance, completed sessions, student-reported question resolution, and dashboard metrics. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are planned; they are not active integrations in this release.
+Current delivery: F5.2, confirmed student lists and questions in the monitor's calendar and list views. The student dashboard and monitor agenda use the next-28-days window; past-session history is not included yet. Use the existing refresh action to retrieve updates from other users. Next: attendance, completed sessions, student-reported question resolution, and dashboard metrics. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are planned; they are not active integrations in this release.
 
 - [Roadmap and task board](./ROADMAP.md)
 - [Project requirements](./INSTRUCTIONS.md) and [domain glossary](./GLOSSARY.md)

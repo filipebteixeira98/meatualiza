@@ -50,6 +50,11 @@ export type SessionView = {
   enrolledCount: number;
   cancellationReason: string | null;
   registration: RegistrationView | null;
+  registrations?: {
+    studentId: string;
+    displayName: string;
+    helpRequest: HelpRequestDraft;
+  }[];
 };
 
 export function sessionDetails(id: string) {

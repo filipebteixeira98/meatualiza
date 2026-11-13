@@ -113,14 +113,132 @@ test("consulta não cria sessões e cada aluno recebe apenas a própria dúvida"
   const other = await getAgenda(students[1].cookie, referenceTime);
   assert.equal(other.sessions[0].enrolledCount, 1);
   assert.equal(other.sessions[0].registration, null);
+  assert.equal("registrations" in other.sessions[0], false);
+  assert.equal(JSON.stringify(other).includes(doubt.description), false);
   const ownAgenda = await getAgenda(students[0].cookie, referenceTime);
   assert.deepEqual(ownAgenda.sessions[0].registration.helpRequest, doubt);
-  assert.equal(
-    JSON.stringify(await getAgenda(monitor.cookie, referenceTime)).includes(
-      doubt.description,
-    ),
-    false,
+  assert.equal("registrations" in ownAgenda.sessions[0], false);
+  const monitorAgenda = await getAgenda(monitor.cookie, referenceTime);
+  assert.deepEqual(monitorAgenda.sessions[0].registrations, [
+    {
+      studentId: students[0].uid,
+      displayName: "Aluno Agenda",
+      helpRequest: doubt,
+    },
+  ]);
+});
+
+test("monitor recebe nomes ordenados e dúvidas sem expor dados extras do perfil", async () => {
+  const users = [await account(), await account()];
+  for (const [index, name] of ["Zélia Souza", "Álvaro Lima"].entries()) {
+    await database
+      .doc(`users/${users[index].uid}`)
+      .set({ displayName: name, privateField: "não expor" }, { merge: true });
+    await execute(users[index], command(dates[0]));
+  }
+  const agenda = await getAgenda(monitor.cookie, referenceTime);
+  const registrations = agenda.sessions[0].registrations;
+  assert.deepEqual(
+    registrations.map(({ displayName }) => displayName),
+    ["Álvaro Lima", "Zélia Souza"],
   );
+  for (const registration of registrations) {
+    assert.deepEqual(Object.keys(registration).sort(), [
+      "displayName",
+      "helpRequest",
+      "studentId",
+    ]);
+    assert.deepEqual(registration.helpRequest, doubt);
+  }
+  assert.equal(JSON.stringify(registrations).includes("não expor"), false);
+  assert.deepEqual(agenda.sessions[1].registrations, []);
+});
+
+test("perfil removido ou sem nome não esconde a inscrição do monitor", async () => {
+  const user = await account();
+  await execute(user, command(dates[0]));
+  const profile = database.doc(`users/${user.uid}`);
+  for (const name of [null, 123, "   "]) {
+    await profile.set({ displayName: name }, { merge: true });
+    const agenda = await getAgenda(monitor.cookie, referenceTime);
+    assert.equal(
+      agenda.sessions[0].registrations[0].displayName,
+      "Aluno sem nome",
+    );
+  }
+  await profile.delete();
+  const agenda = await getAgenda(monitor.cookie, referenceTime);
+  assert.deepEqual(agenda.sessions[0].registrations, [
+    {
+      studentId: user.uid,
+      displayName: "Aluno sem nome",
+      helpRequest: doubt,
+    },
+  ]);
+});
+
+test("lista acompanha edição, remarcação, cancelamento e nova inscrição sem duplicar aluno", async () => {
+  const roster = async (index) =>
+    (await getAgenda(monitor.cookie, referenceTime)).sessions[index]
+      .registrations;
+  await execute(students[0], command(dates[0]));
+  await execute(students[1], command(dates[0]));
+  await execute(students[0], {
+    type: "edit",
+    sessionId: dates[0],
+    expectedVersion: 1,
+    helpRequest: { topicId: "condicionais", description: "Quando usar senão?" },
+  });
+  assert.equal((await roster(0)).length, 2);
+  assert.equal(
+    (await roster(0)).find(({ studentId }) => studentId === students[0].uid)
+      .helpRequest.description,
+    "Quando usar senão?",
+  );
+  await execute(students[0], {
+    type: "move",
+    sessionId: dates[0],
+    targetSessionId: dates[1],
+    expectedVersion: 2,
+  });
+  assert.deepEqual(
+    (await roster(0)).map(({ studentId }) => studentId),
+    [students[1].uid],
+  );
+  assert.equal((await roster(1))[0].helpRequest.topicId, "condicionais");
+  await execute(students[1], {
+    type: "cancel",
+    sessionId: dates[0],
+    expectedVersion: 1,
+  });
+  assert.deepEqual(await roster(0), []);
+  await execute(students[0], {
+    type: "cancel",
+    sessionId: dates[1],
+    expectedVersion: 1,
+  });
+  await execute(students[0], command(dates[1], { expectedVersion: 2 }));
+  assert.equal((await roster(1)).length, 1);
+  await execute(monitor, {
+    type: "cancel-session",
+    sessionId: dates[1],
+    reason: "Sem laboratório.",
+  });
+  assert.deepEqual(await roster(1), []);
+});
+
+test("remover privilégio impede leitura das dúvidas mesmo com cookie antigo", async () => {
+  await execute(students[0], command(dates[0]));
+  const auth = getAuth(getAdminApp());
+  try {
+    await auth.setCustomUserClaims(monitor.uid, {});
+    const agenda = await getAgenda(monitor.cookie, referenceTime);
+    assert.equal(agenda.role, "student");
+    assert.equal("registrations" in agenda.sessions[0], false);
+    assert.equal(JSON.stringify(agenda).includes(doubt.description), false);
+  } finally {
+    await auth.setCustomUserClaims(monitor.uid, { monitor: true });
+  }
 });
 
 test("após o término, a agenda fica vazia sem criar novas sessões", async () => {
@@ -187,6 +305,13 @@ test("disputa pela décima vaga confirma só um aluno e não cria pedidos órfã
     .get();
   assert.equal(rows.size, 10);
   for (const row of rows.docs) assert.deepEqual(row.data().helpRequest, doubt);
+  const agenda = await getAgenda(monitor.cookie, referenceTime);
+  assert.equal(agenda.sessions[0].registrations.length, 10);
+  assert.equal(
+    new Set(agenda.sessions[0].registrations.map(({ studentId }) => studentId))
+      .size,
+    10,
+  );
 });
 
 test("edição preserva a vaga e cancelamento a libera, mantendo histórico", async () => {
