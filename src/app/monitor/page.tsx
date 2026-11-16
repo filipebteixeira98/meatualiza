@@ -24,7 +24,7 @@ export default async function MonitorPage() {
       className="site-container flex-1 py-14 sm:py-20"
     >
       <div className="mx-auto max-w-2xl">
-        <p className="eyebrow">ÁREA DO MONITOR · L7</p>
+        <p className="eyebrow">ÁREA DO MONITOR</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
           Seu próximo encontro começa aqui.
         </h1>

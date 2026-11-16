@@ -44,7 +44,7 @@ export default async function HelpRequestPage({
             Ver agenda
           </Link>
         </Button>
-        <p className="eyebrow">LÓGICA DE PROGRAMAÇÃO / L7</p>
+        <p className="eyebrow">LÓGICA DE PROGRAMAÇÃO</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
           Qual é a sua dúvida?
         </h1>

@@ -52,7 +52,10 @@ function WorkspaceNavigation({
 }) {
   const pathname = usePathname();
   return (
-    <nav aria-label={`Navegação do ${roleNames[role]}`} className="space-y-1">
+    <nav
+      aria-label={`Navegação do ${roleNames[role]}`}
+      className="mt-8 space-y-1"
+    >
       {navigation[role].map(({ href, label, icon: Icon }) => (
         <Link
           key={href}
@@ -172,53 +175,42 @@ export function WorkspaceShell({
         <div className="px-2">
           <Brand />
         </div>
-        <p className="eyebrow mt-10 mb-3 px-3">MONITORIA / L7</p>
         <WorkspaceNavigation role={role} />
         <div className="mt-auto border-t border-sidebar-border pt-4">
           <AccountMenu account={account} role={role} signOut={signOut} />
         </div>
       </aside>
-      <header className="flex min-h-18 items-center gap-3 border-b border-border px-5 sm:px-8">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-11 lg:hidden"
-              aria-label={`Abrir navegação do ${roleNames[role]}`}
-              disabled={!signOut.ready}
-            >
-              <Menu aria-hidden="true" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="gap-0 overflow-y-auto bg-sidebar p-4 text-sidebar-foreground data-[side=left]:w-[min(88vw,18rem)]"
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mt-4 ml-5 size-11 shrink-0 self-start sm:ml-8 lg:hidden"
+            aria-label={`Abrir navegação do ${roleNames[role]}`}
+            disabled={!signOut.ready}
           >
-            <SheetHeader className="sr-only">
-              <SheetTitle>Navegação do {roleNames[role]}</SheetTitle>
-              <SheetDescription>
-                Acesse os recursos da sua área e o menu da conta.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-3 px-2">
-              <Brand />
-            </div>
-            <p className="eyebrow mt-10 mb-3 px-3">MONITORIA / L7</p>
-            <WorkspaceNavigation
-              role={role}
-              onNavigate={() => setOpen(false)}
-            />
-            <div className="mt-auto border-t border-sidebar-border pt-4">
-              <AccountMenu account={account} role={role} signOut={signOut} />
-            </div>
-          </SheetContent>
-        </Sheet>
-        <span className="text-sm font-medium">Área do {roleNames[role]}</span>
-        <span className="ml-auto hidden text-xs text-muted-foreground sm:block">
-          Lógica de Programação
-        </span>
-      </header>
+            <Menu aria-hidden="true" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="left"
+          className="gap-0 overflow-y-auto bg-sidebar p-4 text-sidebar-foreground data-[side=left]:w-[min(88vw,18rem)]"
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Navegação do {roleNames[role]}</SheetTitle>
+            <SheetDescription>
+              Acesse os recursos da sua área e o menu da conta.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-3 px-2">
+            <Brand />
+          </div>
+          <WorkspaceNavigation role={role} onNavigate={() => setOpen(false)} />
+          <div className="mt-auto border-t border-sidebar-border pt-4">
+            <AccountMenu account={account} role={role} signOut={signOut} />
+          </div>
+        </SheetContent>
+      </Sheet>
       {children}
     </div>
   );

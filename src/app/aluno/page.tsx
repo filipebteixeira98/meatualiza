@@ -41,7 +41,7 @@ export default async function StudentPage() {
       className="site-container flex-1 py-10 sm:py-16"
     >
       <div className="mx-auto max-w-4xl">
-        <p className="eyebrow">SEU PAINEL / L7</p>
+        <p className="eyebrow">SEU PAINEL</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
           Seu ponto de partida.
         </h1>

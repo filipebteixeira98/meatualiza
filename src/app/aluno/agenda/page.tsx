@@ -26,7 +26,7 @@ export default async function StudentAgendaPage({
       className="site-container flex-1 py-10 sm:py-16"
     >
       <div className="mx-auto max-w-2xl">
-        <p className="eyebrow">SUA AGENDA / L7</p>
+        <p className="eyebrow">SUA AGENDA</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
           Um horário para destravar.
         </h1>

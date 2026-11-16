@@ -21,7 +21,7 @@ export default async function MonitorAgendaPage() {
       className="site-container flex-1 py-10 sm:py-16"
     >
       <div className="mx-auto max-w-2xl">
-        <p className="eyebrow">AGENDA DO MONITOR / L7</p>
+        <p className="eyebrow">AGENDA DO MONITOR</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
           Prepare o próximo encontro.
         </h1>

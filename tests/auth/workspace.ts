@@ -2,8 +2,14 @@ import { expect, type Page } from "@playwright/test";
 
 export async function openNavigation(page: Page, role: "aluno" | "monitor") {
   await expect(
-    page.getByRole("banner").getByText(`Área do ${role}`, { exact: true }),
-  ).toBeVisible();
+    page
+      .getByRole("navigation", {
+        name: `Navegação do ${role}`,
+        exact: true,
+        includeHidden: true,
+      })
+      .first(),
+  ).toBeAttached();
   const trigger = page.getByRole("button", {
     name: `Abrir navegação do ${role}`,
   });
@@ -13,6 +19,9 @@ export async function openNavigation(page: Page, role: "aluno" | "monitor") {
   ) {
     await trigger.click();
   }
+  await expect(
+    page.getByRole("navigation", { name: `Navegação do ${role}`, exact: true }),
+  ).toBeVisible();
 }
 
 export async function openAccount(page: Page, role: "aluno" | "monitor") {
