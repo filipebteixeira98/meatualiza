@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { monitoria } from "@/lib/monitoria";
+import { LearningCarousel } from "./learning-carousel";
 
 export function Hero() {
   return (
@@ -41,35 +42,30 @@ export function Hero() {
           </Button>
         </div>
       </div>
-      <aside
-        aria-label="Agenda da monitoria"
-        className="rounded-2xl border border-border bg-card p-6 sm:p-8"
-      >
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="eyebrow">PONTO DE ENCONTRO</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {monitoria.instituicao}
-            </p>
-          </div>
-          <span className="font-mono text-7xl leading-none font-medium tracking-[-0.1em]">
-            <span className="sr-only">Laboratório </span>
-            L7
-            <span aria-hidden="true" className="text-muted-foreground">
-              .
+      <div className="min-w-0">
+        <LearningCarousel />
+        <aside
+          aria-label="Agenda da monitoria"
+          className="mt-5 border-t border-border pt-5"
+        >
+          <p className="text-sm font-medium">
+            <span>{monitoria.instituicao}</span>
+            <span className="text-muted-foreground">
+              {" "}
+              · <span className="sr-only">Laboratório </span>L7
             </span>
-          </span>
-        </div>
-        <p className="mt-6 border-y border-border py-4 text-sm text-muted-foreground">
-          Segundas e quartas <span aria-hidden="true">·</span>{" "}
-          <span className="font-mono text-xs text-foreground">
-            {monitoria.horario}
-          </span>
-        </p>
-        <p className="mt-5 text-xs text-muted-foreground">
-          Presencial · 60 minutos · até {monitoria.capacidade} alunos
-        </p>
-      </aside>
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Segundas e quartas <span aria-hidden="true">·</span>{" "}
+            <span className="font-mono text-xs text-foreground">
+              {monitoria.horario}
+            </span>
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Presencial · 60 minutos · até {monitoria.capacidade} alunos
+          </p>
+        </aside>
+      </div>
     </section>
   );
 }

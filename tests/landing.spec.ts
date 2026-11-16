@@ -42,11 +42,69 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
   ).toHaveCount(0);
   await expect(page.getByRole("contentinfo")).toHaveCount(0);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await expect
+    .poll(() =>
+      page
+        .locator('img[src*="untangle"]')
+        .evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+    )
+    .toBe(true);
   await page.screenshot({
     path: testInfo.outputPath("landing.png"),
     fullPage: true,
+    scale: "css",
+    animations: "disabled",
   });
   expect(errors).toEqual([]);
+});
+
+test("navega no carrossel por botões, teclado e rolagem", async ({ page }) => {
+  await page.goto("/");
+  const carousel = page.getByRole("region", {
+    name: "Imagens para destravar a lógica",
+  });
+  const track = carousel.getByRole("group", { name: "Galeria de imagens" });
+  const previous = carousel.getByRole("button", { name: "Imagem anterior" });
+  const next = carousel.getByRole("button", { name: "Próxima imagem" });
+  await carousel.scrollIntoViewIfNeeded();
+  await expect(previous).toBeDisabled();
+  await expect(carousel.getByText("Desate a dúvida.")).toBeVisible();
+
+  await next.click();
+  await expect(carousel.getByText("Conecte as ideias.")).toBeVisible();
+  await track.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(carousel.getByText("Um passo adiante.")).toBeVisible();
+  await expect(next).toBeDisabled();
+  await page.keyboard.press("ArrowLeft");
+  await expect(carousel.getByText("Conecte as ideias.")).toBeVisible();
+  await previous.click();
+  await expect(previous).toBeDisabled();
+
+  await track.evaluate((element) => {
+    element.scrollTo({ left: element.clientWidth * 2, behavior: "instant" });
+  });
+  await expect(carousel.getByText("Um passo adiante.")).toBeVisible();
+  const currentSlide = carousel.getByRole("group", { name: "Imagem 3 de 3" });
+  await expect(currentSlide).toBeInViewport();
+  await expect(carousel.getByRole("img")).toHaveCount(1);
+  await expect
+    .poll(() =>
+      currentSlide
+        .getByRole("img")
+        .evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+    )
+    .toBe(true);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(track).toHaveCSS("scroll-behavior", "auto");
+  await track.focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect(carousel.getByText("Conecte as ideias.")).toBeVisible();
 });
 
 test("abre as perguntas frequentes por teclado", async ({ page }) => {
