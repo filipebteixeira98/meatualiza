@@ -164,8 +164,8 @@ export function HelpRequestForm({
                 className="mt-2 text-sm leading-6 text-muted-foreground"
               >
                 {editing
-                  ? "Sua vaga já está confirmada. A edição não ocupa outra vaga."
-                  : `${monitoria.horario} · America/Bahia · até dez alunos. A vaga é conferida ao confirmar.`}
+                  ? "Sua vaga permanece confirmada."
+                  : `${monitoria.horario} · ${monitoria.fuso}`}
               </p>
               <select
                 id="sessionId"
@@ -278,10 +278,6 @@ export function HelpRequestForm({
           </fieldset>
         </form>
       )}
-      <p className="mt-6 text-xs leading-6 text-muted-foreground">
-        Antes de confirmar, as alterações ficam só nesta página. Ao sair ou
-        atualizar, o texto ainda não enviado é descartado.
-      </p>
     </section>
   );
 }
