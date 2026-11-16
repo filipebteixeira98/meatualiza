@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  List,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { monitoria } from "@/lib/monitoria";
 import { sessionLabel, type SessionView } from "@/lib/schedule";
@@ -433,24 +439,34 @@ export function Agenda({
             </div>
           ))}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div aria-label="Visualização da agenda" className="flex gap-2">
+        <div
+          role="group"
+          aria-label="Visualização da agenda"
+          className="flex gap-2"
+        >
           <Button
             variant={view === "calendar" ? "secondary" : "ghost"}
+            size="icon"
+            aria-label="Calendário"
+            title="Calendário"
             aria-pressed={view === "calendar"}
-            className="min-h-11 px-4"
+            className="size-11"
             disabled={!ready}
             onClick={() => setView("calendar")}
           >
-            Calendário
+            <CalendarDays aria-hidden="true" />
           </Button>
           <Button
             variant={view === "list" ? "secondary" : "ghost"}
+            size="icon"
+            aria-label="Lista"
+            title="Lista"
             aria-pressed={view === "list"}
-            className="min-h-11 px-4"
+            className="size-11"
             disabled={!ready}
             onClick={() => setView("list")}
           >
-            Lista
+            <List aria-hidden="true" />
           </Button>
         </div>
         <Button

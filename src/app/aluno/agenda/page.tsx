@@ -31,12 +31,7 @@ export default async function StudentAgendaPage({
           Um horário para destravar.
         </h1>
         <p className="mt-5 text-base leading-7 text-muted-foreground">
-          Segundas e quartas, {monitoria.horario}. Encontros em grupo no{" "}
-          {monitoria.instituicao}, {monitoria.local}. Horários em America/Bahia.
-        </p>
-        <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Próximas quatro semanas, até {monitoria.termino}. Inscrição, edição,
-          cancelamento e troca encerram no início da sessão.
+          Próximas quatro semanas · horários em {monitoria.fuso}.
         </p>
         <Agenda
           sessions={agenda.sessions}
