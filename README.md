@@ -22,7 +22,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 ## ✨ Available features
 
 - **Public landing:** compact dark layout with original illustrations, a prominent image carousel with overlaid captions, arrow controls and navigation dots, session details, and expandable course topics. Images advance every five seconds; visitors can pause, navigate manually, or use reduced motion to disable automatic advancement.
-- **Interactive cube:** orbit a 3×3 cube, turn its faces by pointer or keyboard, shuffle, and reset. Three.js loads near the viewport and renders on demand using one instanced mesh, with capped pixel density, reduced motion, and a fallback when WebGL is unavailable.
+- **Interactive cube:** a monochrome 3×3 sculpture using the application's theme colors, with rotation by drag, touch, or arrow keys. Three.js loads near the viewport and renders on demand using one static instanced mesh, with capped pixel density and a fallback when WebGL is unavailable.
 - **Google sign-in:** any personal or institutional Google account can join. The server selects the student or monitor workspace.
 - **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. Both workspaces have a responsive sidebar and an account menu for sign-out.
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.
