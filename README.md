@@ -21,7 +21,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 
 ## ✨ Available features
 
-- **Public landing:** compact dark layout with original illustrations, a manually controlled image carousel, session details, and expandable course topics.
+- **Public landing:** compact dark layout with original illustrations, an image carousel with overlaid captions and controls, session details, and expandable course topics. Images advance every five seconds; visitors can pause, navigate manually, or use reduced motion to disable automatic advancement.
 - **Google sign-in:** any personal or institutional Google account can join. The server selects the student or monitor workspace.
 - **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. Both workspaces have a responsive sidebar and an account menu for sign-out.
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.

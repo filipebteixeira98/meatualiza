@@ -66,29 +66,34 @@ test("navega no carrossel por botões, teclado e rolagem", async ({ page }) => {
     name: "Imagens para destravar a lógica",
   });
   const track = carousel.getByRole("group", { name: "Galeria de imagens" });
+  const currentSlide = carousel.getByRole("group", {
+    name: /^Imagem \d de 3$/,
+  });
   const previous = carousel.getByRole("button", { name: "Imagem anterior" });
   const next = carousel.getByRole("button", { name: "Próxima imagem" });
   await carousel.scrollIntoViewIfNeeded();
   await expect(previous).toBeDisabled();
-  await expect(carousel.getByText("Desate a dúvida.")).toBeVisible();
+  await expect(currentSlide.getByText("Desate a dúvida.")).toBeVisible();
 
   await next.click();
-  await expect(carousel.getByText("Conecte as ideias.")).toBeVisible();
+  await expect(currentSlide.getByText("Conecte as ideias.")).toBeVisible();
   await track.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(carousel.getByText("Um passo adiante.")).toBeVisible();
+  await expect(currentSlide.getByText("Um passo adiante.")).toBeVisible();
   await expect(next).toBeDisabled();
   await page.keyboard.press("ArrowLeft");
-  await expect(carousel.getByText("Conecte as ideias.")).toBeVisible();
+  await expect(currentSlide.getByText("Conecte as ideias.")).toBeVisible();
   await previous.click();
   await expect(previous).toBeDisabled();
+  await expect
+    .poll(() => track.evaluate((element) => element.scrollLeft))
+    .toBe(0);
 
   await track.evaluate((element) => {
     element.scrollTo({ left: element.clientWidth * 2, behavior: "instant" });
   });
-  await expect(carousel.getByText("Um passo adiante.")).toBeVisible();
-  const currentSlide = carousel.getByRole("group", { name: "Imagem 3 de 3" });
-  await expect(currentSlide).toBeInViewport();
+  await expect(currentSlide.getByText("Um passo adiante.")).toBeVisible();
+  await expect(currentSlide).toBeInViewport({ ratio: 0.98 });
   await expect(carousel.getByRole("img")).toHaveCount(1);
   await expect
     .poll(() =>
@@ -104,7 +109,109 @@ test("navega no carrossel por botões, teclado e rolagem", async ({ page }) => {
   await expect(track).toHaveCSS("scroll-behavior", "auto");
   await track.focus();
   await page.keyboard.press("ArrowLeft");
-  await expect(carousel.getByText("Conecte as ideias.")).toBeVisible();
+  await expect(currentSlide.getByText("Conecte as ideias.")).toBeVisible();
+});
+
+test("avança automaticamente a cada cinco segundos e permite pausar", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/");
+  const carousel = page.getByRole("region", {
+    name: "Imagens para destravar a lógica",
+  });
+  const currentSlide = carousel.getByRole("group", {
+    name: /^Imagem \d de 3$/,
+  });
+  await expect(
+    carousel.getByRole("button", { name: "Pausar avanço automático" }),
+  ).toBeEnabled();
+
+  for (const index of [2, 3, 1]) {
+    await page.clock.fastForward(5_000);
+    await expect(currentSlide).toHaveAccessibleName(`Imagem ${index} de 3`);
+    await expect(currentSlide).toBeInViewport({ ratio: 0.98 });
+  }
+  await carousel
+    .getByRole("button", { name: "Pausar avanço automático" })
+    .click();
+  await page.mouse.move(0, 0);
+  await expect(
+    carousel.getByRole("button", { name: "Iniciar avanço automático" }),
+  ).toBeEnabled();
+  await page.clock.fastForward(15_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 1 de 3");
+
+  await carousel
+    .getByRole("button", { name: "Iniciar avanço automático" })
+    .click();
+  await page.mouse.move(0, 0);
+  await page.clock.fastForward(4_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 1 de 3");
+  await page.clock.fastForward(1_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 2 de 3");
+});
+
+test("pausa ao apontar o mouse e mantém a pausa após interação por teclado", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/");
+  const carousel = page.getByRole("region", {
+    name: "Imagens para destravar a lógica",
+  });
+  const currentSlide = carousel.getByRole("group", {
+    name: /^Imagem \d de 3$/,
+  });
+  await expect(
+    carousel.getByRole("button", { name: "Pausar avanço automático" }),
+  ).toBeEnabled();
+  await carousel.hover();
+  await page.clock.fastForward(15_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 1 de 3");
+  await page.mouse.move(0, 0);
+  await page.clock.fastForward(5_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 2 de 3");
+
+  await page.keyboard.press("Tab");
+  await carousel.getByRole("group", { name: "Galeria de imagens" }).focus();
+  await expect(
+    carousel.getByRole("button", { name: "Iniciar avanço automático" }),
+  ).toBeEnabled();
+  await page.getByRole("main").focus();
+  await page.clock.fastForward(15_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 2 de 3");
+});
+
+test("desativa o avanço automático com movimento reduzido e preserva os controles manuais", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install();
+  await page.goto("/");
+  const carousel = page.getByRole("region", {
+    name: "Imagens para destravar a lógica",
+  });
+  const currentSlide = carousel.getByRole("group", {
+    name: /^Imagem \d de 3$/,
+  });
+  const rotation = carousel.getByRole("button", {
+    name: "Avanço automático desativado por movimento reduzido",
+  });
+  await expect(rotation).toBeDisabled();
+  await page.clock.fastForward(15_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 1 de 3");
+  await carousel.getByRole("button", { name: "Próxima imagem" }).click();
+  await expect(currentSlide).toHaveAccessibleName("Imagem 2 de 3");
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await carousel
+    .getByRole("button", { name: "Iniciar avanço automático" })
+    .click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(rotation).toBeDisabled();
+  await page.clock.fastForward(15_000);
+  await expect(currentSlide).toHaveAccessibleName("Imagem 2 de 3");
 });
 
 test("abre as perguntas frequentes por teclado", async ({ page }) => {
