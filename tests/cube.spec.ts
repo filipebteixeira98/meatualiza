@@ -6,8 +6,9 @@ declare global {
   }
 }
 
-test("o cubo gira faces, permite embaralhar e reiniciar, e não renderiza ocioso", async ({
+test("o cubo é visual, gira por arraste e teclado e não renderiza ocioso", async ({
   page,
+  isMobile,
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -22,20 +23,26 @@ test("o cubo gira faces, permite embaralhar e reiniciar, e não renderiza ocioso
   await page.goto("/");
   const cube = page.getByRole("figure", { name: "Cubo mágico interativo" });
   await cube.scrollIntoViewIfNeeded();
-  const shuffle = cube.getByRole("button", { name: "Embaralhar cubo" });
-  const reset = cube.getByRole("button", { name: "Reiniciar cubo" });
-  await expect(shuffle).toBeEnabled();
+  const canvas = cube.getByRole("application");
+  await expect(canvas).toBeVisible();
+  await expect(cube.getByRole("status")).toHaveCount(0);
   await expect
     .poll(() => page.evaluate(() => window.cubeDrawCalls))
     .toBeGreaterThan(0);
-  const canvas = cube.getByRole("application");
-  await expect(cube.getByRole("status")).toHaveText("Cubo organizado.");
+  await expect(cube.getByRole("button")).toHaveCount(0);
+  await expect(cube.locator("details, figcaption")).toHaveCount(0);
+  await cube.screenshot({
+    path: info.outputPath("cube.png"),
+    scale: "css",
+    animations: "disabled",
+  });
+
   await canvas.focus();
   expect(
     await canvas.evaluate((element) =>
       element.dispatchEvent(
         new KeyboardEvent("keydown", {
-          key: "f",
+          key: "ArrowRight",
           ctrlKey: true,
           bubbles: true,
           cancelable: true,
@@ -43,31 +50,41 @@ test("o cubo gira faces, permite embaralhar e reiniciar, e não renderiza ocioso
       ),
     ),
   ).toBe(true);
-  await page.keyboard.press("f");
-  await expect(cube.getByRole("status")).toHaveText("Cubo embaralhado.");
-  await page.keyboard.press("Shift+f");
-  await expect(cube.getByRole("status")).toHaveText("Cubo organizado.");
-
-  const bounds = await canvas.boundingBox();
-  await canvas.click({
-    position: { x: bounds!.width / 2, y: bounds!.height / 2 },
-  });
-  await expect(cube.getByRole("status")).toHaveText("Cubo embaralhado.");
-  await reset.click();
-  await expect(cube.getByRole("status")).toHaveText("Cubo organizado.");
-  await page.evaluate(() => {
-    Math.random = () => 0.25;
-  });
-  await shuffle.click();
-  await expect(cube.getByRole("status")).toHaveText("Cubo embaralhado.");
-  await reset.click();
-  await expect(cube.getByRole("status")).toHaveText("Cubo organizado.");
-
-  await cube.locator("summary").click();
-  await cube.getByRole("button", { name: "Girar face: Direita" }).click();
-  await expect(cube.getByRole("status")).toHaveText("Cubo embaralhado.");
-  await reset.click();
-  await cube.locator("summary").click();
+  const initial = await canvas.screenshot();
+  await page.keyboard.press("ArrowRight");
+  const rotated = await canvas.screenshot();
+  expect(rotated.equals(initial)).toBe(false);
+  await page.keyboard.press("ArrowLeft");
+  const beforeDrag = await canvas.screenshot();
+  const bounds = (await canvas.boundingBox())!;
+  const x = bounds.x + bounds.width / 2,
+    y = bounds.y + bounds.height / 2;
+  if (isMobile) {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    for (let step = 1; step <= 8; step++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: x + step * 9, y: y + step * 3 }],
+      });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await cdp.detach();
+  } else {
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 72, y + 24, { steps: 8 });
+    await page.mouse.up();
+  }
+  const afterDrag = await canvas.screenshot();
+  expect(afterDrag.equals(beforeDrag)).toBe(false);
 
   const idle = await page.evaluate(async () => {
     await new Promise(requestAnimationFrame);
@@ -77,22 +94,11 @@ test("o cubo gira faces, permite embaralhar e reiniciar, e não renderiza ocioso
     return { before, after: window.cubeDrawCalls };
   });
   expect(idle.after).toBe(idle.before);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await canvas.focus();
-  const before = await page.evaluate(() => window.cubeDrawCalls);
-  await page.keyboard.press("r");
-  await expect(cube.getByRole("status")).toHaveText("Cubo embaralhado.");
-  await page.evaluate(() => new Promise(requestAnimationFrame));
-  expect(
-    (await page.evaluate(() => window.cubeDrawCalls)) - before,
-  ).toBeLessThanOrEqual(1);
-  await reset.click();
-  await expect(cube.getByRole("status")).toHaveText("Cubo organizado.");
-  await cube.screenshot({
-    path: info.outputPath("cube.png"),
-    scale: "css",
-    animations: "disabled",
-  });
+  await page.getByRole("link", { name: "Acessar plataforma" }).first().click();
+  await expect(page).toHaveURL(/\/entrar$/);
+  await page.goBack();
+  await cube.scrollIntoViewIfNeeded();
+  await expect(cube.locator("canvas")).toHaveCount(1);
   expect(errors).toEqual([]);
 });
 
@@ -106,9 +112,8 @@ test("carrega perto da área visível e trata perda do contexto gráfico", async
   const cube = page.getByRole("figure", { name: "Cubo mágico interativo" });
   if (isMobile) await expect(cube.locator("canvas")).toHaveCount(0);
   await cube.scrollIntoViewIfNeeded();
-  await expect(
-    cube.getByRole("button", { name: "Embaralhar cubo" }),
-  ).toBeEnabled();
+  await expect(cube.getByRole("application")).toBeVisible();
+  await expect(cube.getByRole("status")).toHaveCount(0);
   await cube.locator("canvas").evaluate((canvas: HTMLCanvasElement) => {
     canvas
       .getContext("webgl2")!
