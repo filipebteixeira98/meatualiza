@@ -22,6 +22,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 ## ✨ Available features
 
 - **Public landing:** compact dark layout with original illustrations, a prominent image carousel with overlaid captions, arrow controls and navigation dots, session details, and expandable course topics. Images advance every five seconds; visitors can pause, navigate manually, or use reduced motion to disable automatic advancement.
+- **Interactive cube:** orbit a 3×3 cube, turn its faces by pointer or keyboard, shuffle, and reset. Three.js loads near the viewport and renders on demand using one instanced mesh, with capped pixel density, reduced motion, and a fallback when WebGL is unavailable.
 - **Google sign-in:** any personal or institutional Google account can join. The server selects the student or monitor workspace.
 - **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. Both workspaces have a responsive sidebar and an account menu for sign-out.
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.
@@ -30,12 +31,13 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Monitor workspace:** responsive sidebar, occupancy out of ten students, confirmed student lists with names, topics and expandable questions, date blocking, and session cancellation with a reason visible to affected students. Session rosters are returned only to the authorized monitor.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
-[Landing page](./docs/screenshots/landing-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
+[Landing page](./docs/screenshots/landing-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
 
 ## 🧰 Stack
 
 - Next.js 16 App Router, React 19, and TypeScript
 - Tailwind CSS 4, shadcn/ui, Radix UI, and Lucide icons
+- Three.js for interactive 3D rendering on demand
 - React Hook Form and Zod
 - Firebase Authentication, Firestore, and the Firebase Admin SDK
 - Playwright, Node.js test runner, and Firebase Local Emulator Suite

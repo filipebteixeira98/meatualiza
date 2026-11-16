@@ -32,22 +32,26 @@ export function HowItWorks() {
         >
           Você traz a dúvida. A gente pensa junto.
         </h2>
-        <ol className="mt-8 grid gap-7 md:grid-cols-3 md:gap-10">
-          {steps.map((step) => (
-            <li key={step.number} className="border-t border-border pt-6">
-              <span className="font-mono text-xs text-muted-foreground">
-                /{step.number}
-              </span>
-              <h3 className="mt-4 text-base font-medium tracking-tight">
-                {step.title}
-              </h3>
-              <p className="mt-2 max-w-sm text-sm leading-7 text-muted-foreground">
-                {step.description}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-8 grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <RubiksCube />
+          <ol className="grid gap-7">
+            {steps.map((step) => (
+              <li key={step.number} className="border-t border-border pt-6">
+                <span className="font-mono text-xs text-muted-foreground">
+                  /{step.number}
+                </span>
+                <h3 className="mt-4 text-base font-medium tracking-tight">
+                  {step.title}
+                </h3>
+                <p className="mt-2 max-w-sm text-sm leading-7 text-muted-foreground">
+                  {step.description}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </section>
   );
 }
+import { RubiksCube } from "./rubiks-cube";

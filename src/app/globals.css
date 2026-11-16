@@ -151,6 +151,16 @@
   @apply font-mono text-[10px] font-medium tracking-[0.12em] text-muted-foreground;
 }
 
+.rubiks-cube {
+  --cube-body: #17191c;
+  --cube-U: #e4e5df;
+  --cube-D: #d8b84b;
+  --cube-F: #54997f;
+  --cube-B: #5a82b8;
+  --cube-R: #d4614c;
+  --cube-L: #cc8442;
+}
+
 @utility section-title {
   @apply text-3xl leading-[1.15] font-medium tracking-[-0.045em] sm:text-4xl;
 }
