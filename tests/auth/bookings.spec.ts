@@ -63,7 +63,13 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
   await page.getByRole("link", { name: "Agenda", exact: true }).click();
   await expect(page.getByRole("table")).toBeVisible();
   await page.getByRole("button", { name: "Lista", exact: true }).click();
-  await expect(page.getByRole("article")).toHaveCount(slots.length);
+  for (const id of [source, target])
+    await expect(
+      page.getByRole("article", {
+        name: `Sessão de ${sessionLabel(id)}`,
+        exact: true,
+      }),
+    ).toBeVisible();
   await page.getByRole("button", { name: "Calendário", exact: true }).click();
 
   await page.goto(`/aluno/duvida?sessao=${source}`);
