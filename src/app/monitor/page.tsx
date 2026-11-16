@@ -62,11 +62,6 @@ export default async function MonitorPage() {
               </dd>
             </div>
           </dl>
-          <p className="mt-7 border-t border-border pt-6 text-sm leading-7 text-muted-foreground">
-            A agenda já mostra os alunos previstos por sessão e permite bloquear
-            ou cancelar datas. Lista de inscritos, dúvidas e presença chegam na
-            próxima etapa.
-          </p>
         </section>
       </div>
     </main>

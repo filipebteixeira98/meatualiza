@@ -165,10 +165,6 @@ export default async function StudentPage() {
             </div>
           </section>
         )}
-        <p className="mt-10 border-t border-border pt-6 text-sm leading-7 text-muted-foreground">
-          {monitoria.instituicao} · {monitoria.local}. Atendimento presencial em
-          grupo, às segundas e quartas, {monitoria.horario}.
-        </p>
       </div>
     </main>
   );
