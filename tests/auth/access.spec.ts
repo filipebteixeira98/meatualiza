@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { googlePopup } from "./google";
-import { openAccount, openNavigation, signOut } from "./workspace";
+import {
+  checkCollapsibleSidebar,
+  openAccount,
+  openNavigation,
+  signOut,
+} from "./workspace";
 
 test.setTimeout(60_000);
 
@@ -54,6 +59,8 @@ test("Google, perfil persistido, recarga e saída", async ({
   await expect(
     page.getByRole("heading", { name: "Nenhuma inscrição confirmada." }),
   ).toBeVisible();
+  if (info.project.name === "desktop")
+    await checkCollapsibleSidebar(page, "aluno", info);
   await openAccount(page, "aluno");
   await expect(page.getByText(email, { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");

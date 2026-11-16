@@ -13,6 +13,8 @@ import {
   LogOut,
   Menu,
   MessageSquarePlus,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { Brand } from "@/components/site/brand";
 import { Button } from "@/components/ui/button";
@@ -46,9 +48,11 @@ type Account = { displayName: string; email: string };
 function WorkspaceNavigation({
   role,
   onNavigate,
+  collapsed = false,
 }: {
   role: Role;
   onNavigate?: () => void;
+  collapsed?: boolean;
 }) {
   const pathname = usePathname();
   return (
@@ -61,15 +65,17 @@ function WorkspaceNavigation({
           key={href}
           href={href}
           aria-current={pathname === href ? "page" : undefined}
+          title={collapsed ? label : undefined}
           onClick={onNavigate}
           className={cn(
-            "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring",
+            "flex min-h-11 items-center gap-3 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring",
+            collapsed ? "justify-center px-0" : "px-3",
             pathname === href &&
               "bg-sidebar-accent font-medium text-sidebar-accent-foreground",
           )}
         >
           <Icon className="size-4 shrink-0" aria-hidden="true" />
-          {label}
+          <span className={collapsed ? "sr-only" : undefined}>{label}</span>
         </Link>
       ))}
     </nav>
@@ -80,25 +86,31 @@ function AccountMenu({
   account,
   role,
   signOut,
+  collapsed = false,
 }: {
   account: Account;
   role: Role;
   signOut: ReturnType<typeof useSignOut>;
+  collapsed?: boolean;
 }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <Button
           variant="ghost"
-          className="h-auto min-h-14 w-full justify-start gap-3 px-2 text-left"
+          className={cn(
+            "h-auto min-h-14 w-full gap-3 text-left",
+            collapsed ? "justify-center px-0" : "justify-start px-2",
+          )}
           aria-label="Abrir menu da conta"
+          title={collapsed ? account.displayName : undefined}
           disabled={!signOut.ready}
         >
           <CircleUserRound
             className="size-8 shrink-0 text-muted-foreground"
             aria-hidden="true"
           />
-          <span className="min-w-0 flex-1">
+          <span className={collapsed ? "sr-only" : "min-w-0 flex-1"}>
             <span className="block truncate text-sm font-medium">
               {account.displayName}
             </span>
@@ -106,10 +118,12 @@ function AccountMenu({
               {role === "monitor" ? "Monitor" : "Aluno"}
             </span>
           </span>
-          <ChevronsUpDown
-            className="size-4 shrink-0 text-muted-foreground"
-            aria-hidden="true"
-          />
+          {!collapsed && (
+            <ChevronsUpDown
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+          )}
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
@@ -165,19 +179,60 @@ export function WorkspaceShell({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const signOut = useSignOut();
   return (
-    <div className="flex min-h-svh flex-1 flex-col lg:pl-64">
+    <div
+      className={cn(
+        "flex min-h-svh flex-1 flex-col",
+        collapsed ? "lg:pl-20" : "lg:pl-64",
+      )}
+    >
       <aside
+        id="workspace-sidebar"
         aria-label={`Área do ${roleNames[role]}`}
-        className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar px-4 py-6 text-sidebar-foreground lg:flex"
+        className={cn(
+          "fixed inset-y-0 left-0 hidden flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar py-6 text-sidebar-foreground lg:flex",
+          collapsed ? "w-20 px-3" : "w-64 px-4",
+        )}
       >
-        <div className="px-2">
-          <Brand />
+        <div
+          className={cn(
+            "flex items-center gap-3",
+            collapsed ? "flex-col" : "justify-between",
+          )}
+        >
+          <Brand compact={collapsed} />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11"
+            aria-label={
+              collapsed ? "Expandir menu lateral" : "Recolher menu lateral"
+            }
+            title={
+              collapsed ? "Expandir menu lateral" : "Recolher menu lateral"
+            }
+            aria-expanded={!collapsed}
+            aria-controls="workspace-sidebar"
+            disabled={!signOut.ready}
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? (
+              <PanelLeftOpen aria-hidden="true" />
+            ) : (
+              <PanelLeftClose aria-hidden="true" />
+            )}
+          </Button>
         </div>
-        <WorkspaceNavigation role={role} />
+        <WorkspaceNavigation role={role} collapsed={collapsed} />
         <div className="mt-auto border-t border-sidebar-border pt-4">
-          <AccountMenu account={account} role={role} signOut={signOut} />
+          <AccountMenu
+            account={account}
+            role={role}
+            signOut={signOut}
+            collapsed={collapsed}
+          />
         </div>
       </aside>
       <Sheet open={open} onOpenChange={setOpen}>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CodeXml } from "lucide-react";
 
-export function Brand() {
+export function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link
       href="/"
@@ -11,7 +11,11 @@ export function Brand() {
       <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <CodeXml className="size-5" strokeWidth={1.75} aria-hidden="true" />
       </span>
-      <span className="text-xl font-semibold tracking-[-0.055em]">
+      <span
+        className={
+          compact ? "sr-only" : "text-xl font-semibold tracking-[-0.055em]"
+        }
+      >
         meatualiza<span className="text-muted-foreground">.</span>
       </span>
     </Link>

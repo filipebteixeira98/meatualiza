@@ -3,7 +3,12 @@ import { expect, test, type Page } from "@playwright/test";
 import { deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { googlePopup } from "./google";
-import { openAccount, openNavigation, signOut } from "./workspace";
+import {
+  checkCollapsibleSidebar,
+  openAccount,
+  openNavigation,
+  signOut,
+} from "./workspace";
 
 test.setTimeout(90_000);
 
@@ -46,6 +51,8 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
   await page.goto("/monitor");
   await expect(page).toHaveURL(/\/entrar$/);
   const user = await enterMonitor(page);
+  if (info.project.name === "desktop")
+    await checkCollapsibleSidebar(page, "monitor", info);
   await expect(
     page.getByRole("heading", { name: "Acesso de monitor ativo." }),
   ).toBeVisible();
