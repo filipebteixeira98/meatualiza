@@ -25,18 +25,21 @@ export function HowItWorks() {
       aria-labelledby="how-title"
       className="border-y border-border bg-muted/50 py-12 sm:py-16"
     >
-      <div className="site-container">
-        <h2
-          id="how-title"
-          className="text-2xl font-medium tracking-tight sm:text-3xl"
-        >
-          Você traz a dúvida. A gente pensa junto.
-        </h2>
-        <div className="mt-8 grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <RubiksCube />
-          <ol className="grid gap-7">
+      <div className="site-container grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        <RubiksCube />
+        <div>
+          <h2
+            id="how-title"
+            className="text-2xl font-medium tracking-tight sm:text-3xl"
+          >
+            Você traz a dúvida. A gente pensa junto.
+          </h2>
+          <ol className="mt-8 grid gap-7">
             {steps.map((step) => (
-              <li key={step.number} className="border-t border-border pt-6">
+              <li
+                key={step.number}
+                className="border-t border-border pt-6 first:border-t-0 first:pt-0"
+              >
                 <span className="font-mono text-xs text-muted-foreground">
                   /{step.number}
                 </span>
