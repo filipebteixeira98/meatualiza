@@ -8,7 +8,7 @@ export function Hero() {
   return (
     <section
       aria-labelledby="hero-title"
-      className="site-container grid items-center gap-12 py-16 sm:py-20 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20 lg:py-24"
+      className="site-container grid items-center gap-12 py-16 sm:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:py-24"
     >
       <div>
         <p className="eyebrow mb-6">LÓGICA DE PROGRAMAÇÃO / MONITORIA</p>

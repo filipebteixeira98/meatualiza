@@ -112,6 +112,38 @@ test("navega no carrossel por botões, teclado e rolagem", async ({ page }) => {
   await expect(currentSlide.getByText("Conecte as ideias.")).toBeVisible();
 });
 
+test("seleciona imagens pelos dots com mouse e teclado", async ({ page }) => {
+  await page.goto("/");
+  const carousel = page.getByRole("region", {
+    name: "Imagens para destravar a lógica",
+  });
+  const dots = carousel
+    .getByRole("group", { name: "Escolher imagem" })
+    .getByRole("button");
+  const currentSlide = carousel.getByRole("group", {
+    name: /^Imagem \d de 3$/,
+  });
+  await expect(dots).toHaveCount(3);
+  await expect(dots.first()).toHaveAttribute("aria-current", "true");
+  await expect(carousel.getByText(/^\d \/ \d$/)).toHaveCount(0);
+
+  await dots.last().click();
+  await expect(currentSlide).toHaveAccessibleName("Imagem 3 de 3");
+  await expect(currentSlide).toBeInViewport({ ratio: 0.98 });
+  await expect(dots.last()).toHaveAttribute("aria-current", "true");
+  await expect(dots.first()).not.toHaveAttribute("aria-current");
+  await expect(
+    carousel.getByRole("button", { name: "Iniciar avanço automático" }),
+  ).toBeEnabled();
+
+  await dots.first().focus();
+  await page.keyboard.press("Enter");
+  await expect(currentSlide).toHaveAccessibleName("Imagem 1 de 3");
+  await expect(currentSlide).toBeInViewport({ ratio: 0.98 });
+  await expect(dots.first()).toHaveAttribute("aria-current", "true");
+  await expect(dots.last()).not.toHaveAttribute("aria-current");
+});
+
 test("avança automaticamente a cada cinco segundos e permite pausar", async ({
   page,
 }) => {
@@ -131,6 +163,11 @@ test("avança automaticamente a cada cinco segundos e permite pausar", async ({
     await page.clock.fastForward(5_000);
     await expect(currentSlide).toHaveAccessibleName(`Imagem ${index} de 3`);
     await expect(currentSlide).toBeInViewport({ ratio: 0.98 });
+    await expect(
+      carousel.getByRole("button", {
+        name: new RegExp(`^Mostrar imagem ${index}:`),
+      }),
+    ).toHaveAttribute("aria-current", "true");
   }
   await carousel
     .getByRole("button", { name: "Pausar avanço automático" })

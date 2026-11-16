@@ -139,7 +139,7 @@ export function LearningCarousel() {
               src={slide.src}
               alt={slide.alt}
               fill
-              sizes="(min-width: 1216px) 430px, (min-width: 1024px) calc(40vw - 58px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
+              sizes="(min-width: 1216px) 608px, (min-width: 1024px) calc(55vw - 62px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
               loading={index === 0 ? "eager" : "lazy"}
               draggable={false}
               className="object-cover"
@@ -158,12 +158,33 @@ export function LearningCarousel() {
       >
         {slides[active].title} {active + 1} de {slides.length}
       </p>
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-5 left-5 font-mono text-xs text-foreground/70"
+      <div
+        role="group"
+        aria-label="Escolher imagem"
+        className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2"
       >
-        {active + 1} / {slides.length}
-      </span>
+        {slides.map((slide, index) => (
+          <Button
+            key={slide.src}
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-11 rounded-full hover:bg-background/40 dark:hover:bg-background/40"
+            aria-label={`Mostrar imagem ${index + 1}: ${slide.title}`}
+            aria-current={index === active ? "true" : undefined}
+            disabled={!ready}
+            onClick={() => {
+              setPlaying(false);
+              goTo(index);
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className={`rounded-full ${index === active ? "size-2 bg-foreground" : "size-1.5 bg-foreground/40"}`}
+            />
+          </Button>
+        ))}
+      </div>
       <Button
         type="button"
         variant="ghost"
