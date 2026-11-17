@@ -4,6 +4,8 @@ export default defineConfig({
   testDir: "./tests",
   testIgnore: ["**/firebase/**", "**/auth/**", "**/domain/**"],
   fullyParallel: true,
+  // Limit contention between software WebGL contexts in local and CI runs.
+  workers: 2,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   use: {
