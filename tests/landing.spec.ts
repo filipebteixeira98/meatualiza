@@ -19,18 +19,17 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
   await expect(agenda).toContainText("Segundas e quartas · 11h30–12h30");
   await expect(agenda.getByText("11h30–12h30", { exact: true })).toHaveCount(1);
   const topics = page.locator("#conteudos");
-  const disclosure = topics.getByRole("button", {
-    name: "Explorar os 9 assuntos",
-  });
-  await expect(disclosure).toHaveAttribute("aria-expanded", "false");
-  await expect(topics.getByRole("list")).not.toBeVisible();
-  await disclosure.click();
+  await expect(
+    topics.getByRole("list", { name: "Assuntos da monitoria" }),
+  ).toBeVisible();
   await expect(topics.getByRole("listitem")).toHaveCount(9);
   await expect(
-    topics.getByText("Teste de mesa e depuração", { exact: true }),
+    topics.getByRole("button", {
+      name: "Teste de mesa e depuração",
+      exact: true,
+    }),
   ).toBeVisible();
-  await disclosure.click();
-  await expect(topics.getByRole("list")).not.toBeVisible();
+  await expect(topics.getByRole("button")).toHaveCount(9);
   await expect(page.locator("#conteudos")).toContainText(
     "Outro assunto / não sei classificar",
   );
@@ -58,6 +57,59 @@ test("apresenta a monitoria e os assuntos aprovados", async ({
     animations: "disabled",
   });
   expect(errors).toEqual([]);
+});
+
+test("revela os assuntos por hover, teclado e toque", async ({
+  page,
+  isMobile,
+}, info) => {
+  await page.goto("/#conteudos");
+  const topics = page.locator("#conteudos");
+  const first = topics.getByRole("button", {
+    name: "Algoritmos e representação",
+    exact: true,
+  });
+  const second = topics.getByRole("button", {
+    name: "Variáveis e tipos",
+    exact: true,
+  });
+  const label = page.getByRole("tooltip");
+  await expect(label).toHaveCount(0);
+  if (isMobile) await first.tap();
+  else await first.hover();
+  await expect(label).toHaveText("Algoritmos e representação");
+  await expect(page.locator('[data-slot="topic-tooltip"]')).toBeVisible();
+  if (!isMobile) {
+    await page.locator('[data-slot="topic-tooltip"]').hover();
+    await expect(label).toHaveText("Algoritmos e representação");
+  }
+  await topics.screenshot({
+    path: info.outputPath("topics.png"),
+    scale: "css",
+    animations: "disabled",
+  });
+  if (isMobile) await second.tap();
+  else {
+    await second.hover();
+    const bounds = (await second.boundingBox())!;
+    await page.mouse.move(
+      bounds.x + bounds.width / 2 + 1,
+      bounds.y + bounds.height / 2,
+    );
+  }
+  await expect(label).toHaveCount(1);
+  await expect(label).toHaveText("Variáveis e tipos");
+  await topics.getByRole("heading", { level: 2 }).click();
+  await expect(label).toHaveCount(0);
+
+  await first.focus();
+  await expect(label).toHaveText("Algoritmos e representação");
+  await page.keyboard.press("Escape");
+  await expect(label).toHaveCount(0);
+  await expect(first).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(second).toBeFocused();
+  await expect(label).toHaveText("Variáveis e tipos");
 });
 
 test("navega no carrossel por botões, teclado e rolagem", async ({ page }) => {
@@ -365,7 +417,23 @@ test("mantém a landing responsiva e o acesso centralizado sem rolagem", async (
     expect(hasOverflow, `Overflow horizontal na largura ${width}`).toBe(false);
   }
   await page.setViewportSize({ width: 320, height: 900 });
-  await page.getByRole("button", { name: "Explorar os 9 assuntos" }).click();
+  await page
+    .locator("#conteudos")
+    .evaluate((section) =>
+      section.scrollIntoView({ behavior: "instant", block: "center" }),
+    );
+  await page
+    .locator("#conteudos")
+    .getByRole("button", { name: "Teste de mesa e depuração", exact: true })
+    .hover();
+  await expect(page.getByRole("tooltip")).toHaveText(
+    "Teste de mesa e depuração",
+  );
+  const tooltipBounds = (await page
+    .locator('[data-slot="topic-tooltip"]')
+    .boundingBox())!;
+  expect(tooltipBounds.x).toBeGreaterThanOrEqual(0);
+  expect(tooltipBounds.x + tooltipBounds.width).toBeLessThanOrEqual(320);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,

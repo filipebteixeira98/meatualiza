@@ -21,7 +21,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 
 ## ✨ Available features
 
-- **Public landing:** compact dark layout with original illustrations, a prominent image carousel with overlaid captions, arrow controls and navigation dots, session details, and expandable course topics. Images advance every five seconds; visitors can pause, navigate manually, or use reduced motion to disable automatic advancement.
+- **Public landing:** compact dark layout with original illustrations, a prominent image carousel with overlaid captions, arrow controls and navigation dots, session details, and topic icons with labels available on hover, keyboard focus, or touch. Images advance every five seconds; visitors can pause, navigate manually, or use reduced motion to disable automatic advancement.
 - **Interactive cube:** a monochrome 3×3 sculpture with slow automatic rotation and manual rotation by drag, touch, or arrow keys. Click, tap, or press Space to pause/resume. Automatic rotation runs at up to 30 fps and pauses offscreen, in hidden tabs, during interaction, or with reduced motion. Three.js loads near the viewport and uses one static instanced mesh with capped pixel density and a fallback without WebGL.
 - **Google sign-in:** any personal or institutional Google account can join. The server selects the student or monitor workspace.
 - **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. Both workspaces have a responsive sidebar and an account menu for sign-out.
@@ -31,7 +31,7 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Monitor workspace:** responsive sidebar, occupancy out of ten students, confirmed student lists with names, topics and expandable questions, date blocking, and session cancellation with a reason visible to affected students. Session rosters are returned only to the authorized monitor.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
-[Landing page](./docs/screenshots/landing-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
+[Landing page](./docs/screenshots/landing-desktop.png) · [Topic icons](./docs/screenshots/topics-icons-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
 
 ## 🧰 Stack
 
