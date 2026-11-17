@@ -34,7 +34,7 @@ export function createCubeScene(
   canvas.setAttribute("role", "application");
   canvas.setAttribute(
     "aria-label",
-    "Cubo mágico em 3D. Arraste ou use as setas para girar a visualização.",
+    "Cubo mágico em 3D. Arraste ou use as setas para girar. Clique, toque ou pressione Espaço para pausar ou retomar a rotação automática.",
   );
   const scene = new Scene();
   const camera = new PerspectiveCamera(33, 1, 0.1, 100);
@@ -43,6 +43,7 @@ export function createCubeScene(
   controls.enableDamping = false;
   controls.enablePan = false;
   controls.enableZoom = false;
+  controls.autoRotateSpeed = 0.35;
   controls.minPolarAngle = 0.25;
   controls.maxPolarAngle = Math.PI - 0.25;
   controls.update();
@@ -114,24 +115,84 @@ export function createCubeScene(
 
   let frame = 0;
   let disposed = false;
-  let visible = true;
+  let visible = false;
+  let paused = false;
+  let interacting = false;
+  let dragged = false;
+  let lastTime: number | null = null;
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   function requestRender() {
     if (!disposed && !frame && visible && !document.hidden)
       frame = requestAnimationFrame(render);
   }
-  function render() {
-    frame = 0;
+  function render(time: number) {
+    if (disposed || !visible || document.hidden) {
+      frame = 0;
+      lastTime = null;
+      return;
+    }
+    if (
+      controls.autoRotate &&
+      lastTime !== null &&
+      time - lastTime < 1000 / 30 - 0.5
+    ) {
+      frame = 0;
+      requestRender();
+      return;
+    }
+    if (controls.autoRotate)
+      controls.update(
+        lastTime === null ? 0 : Math.min((time - lastTime) / 1000, 0.1),
+      );
+    lastTime = time;
     renderer.render(scene, camera);
+    frame = 0;
+    if (controls.autoRotate) requestRender();
+  }
+  function syncAnimation() {
+    cancelAnimationFrame(frame);
+    frame = 0;
+    lastTime = null;
+    controls.autoRotate = !paused && !interacting && !motion.matches;
+    requestRender();
+  }
+  function toggleAnimation() {
+    paused = !paused;
+    syncAnimation();
+  }
+  function onInteractionStart() {
+    interacting = true;
+    dragged = false;
+    syncAnimation();
+  }
+  function onInteractionEnd() {
+    interacting = false;
+    syncAnimation();
+  }
+  function onControlsChange() {
+    if (interacting) dragged = true;
+    requestRender();
+  }
+  function onClick(event: MouseEvent) {
+    if (!dragged || event.detail === 0) toggleAnimation();
+  }
+  function onFocus() {
+    if (canvas.matches(":focus-visible")) {
+      paused = true;
+      syncAnimation();
+    }
   }
   function onKeyDown(event: KeyboardEvent) {
-    if (
-      event.ctrlKey ||
-      event.metaKey ||
-      event.altKey ||
-      !event.key.startsWith("Arrow")
-    )
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key === " ") {
+      event.preventDefault();
+      if (!event.repeat) toggleAnimation();
       return;
+    }
+    if (!event.key.startsWith("Arrow")) return;
     event.preventDefault();
+    paused = true;
+    syncAnimation();
     const orbit = new Spherical().setFromVector3(camera.position);
     if (event.key === "ArrowLeft") orbit.theta -= 0.2;
     if (event.key === "ArrowRight") orbit.theta += 0.2;
@@ -151,7 +212,7 @@ export function createCubeScene(
   }
   const viewport = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
-    if (visible) requestRender();
+    syncAnimation();
   });
   const resize = new ResizeObserver(() => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -162,11 +223,16 @@ export function createCubeScene(
   });
   viewport.observe(host);
   resize.observe(host);
-  controls.addEventListener("change", requestRender);
+  controls.addEventListener("change", onControlsChange);
+  controls.addEventListener("start", onInteractionStart);
+  controls.addEventListener("end", onInteractionEnd);
+  canvas.addEventListener("click", onClick);
+  canvas.addEventListener("focus", onFocus);
   canvas.addEventListener("keydown", onKeyDown);
   canvas.addEventListener("webglcontextlost", onContextLost);
-  document.addEventListener("visibilitychange", requestRender);
-  requestRender();
+  document.addEventListener("visibilitychange", syncAnimation);
+  motion.addEventListener("change", syncAnimation);
+  syncAnimation();
 
   function dispose() {
     if (disposed) return;
@@ -175,9 +241,15 @@ export function createCubeScene(
     resize.disconnect();
     viewport.disconnect();
     controls.dispose();
+    controls.removeEventListener("change", onControlsChange);
+    controls.removeEventListener("start", onInteractionStart);
+    controls.removeEventListener("end", onInteractionEnd);
+    canvas.removeEventListener("click", onClick);
+    canvas.removeEventListener("focus", onFocus);
     canvas.removeEventListener("keydown", onKeyDown);
     canvas.removeEventListener("webglcontextlost", onContextLost);
-    document.removeEventListener("visibilitychange", requestRender);
+    document.removeEventListener("visibilitychange", syncAnimation);
+    motion.removeEventListener("change", syncAnimation);
     mesh.dispose();
     geometry.dispose();
     material.dispose();

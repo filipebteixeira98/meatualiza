@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 declare global {
   interface Window {
@@ -6,12 +6,7 @@ declare global {
   }
 }
 
-test("o cubo é visual, gira por arraste e teclado e não renderiza ocioso", async ({
-  page,
-  isMobile,
-}, info) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
+async function watchDraws(page: Page) {
   await page.addInitScript(() => {
     window.cubeDrawCalls = 0;
     const original = WebGL2RenderingContext.prototype.drawArraysInstanced;
@@ -20,6 +15,30 @@ test("o cubo é visual, gira por arraste e teclado e não renderiza ocioso", asy
       return original.apply(this, args);
     };
   });
+}
+
+async function observeDraws(page: Page) {
+  return page.evaluate(async () => {
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    const before = window.cubeDrawCalls;
+    const start = performance.now();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return {
+      draws: window.cubeDrawCalls - before,
+      elapsed: performance.now() - start,
+    };
+  });
+}
+
+test("o cubo permite interação manual sem animação com movimento reduzido", async ({
+  page,
+  isMobile,
+}, info) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await watchDraws(page);
   await page.goto("/");
   const cube = page.getByRole("figure", { name: "Cubo mágico interativo" });
   await cube.scrollIntoViewIfNeeded();
@@ -86,19 +105,101 @@ test("o cubo é visual, gira por arraste e teclado e não renderiza ocioso", asy
   const afterDrag = await canvas.screenshot();
   expect(afterDrag.equals(beforeDrag)).toBe(false);
 
-  const idle = await page.evaluate(async () => {
-    await new Promise(requestAnimationFrame);
-    await new Promise(requestAnimationFrame);
-    const before = window.cubeDrawCalls;
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    return { before, after: window.cubeDrawCalls };
-  });
-  expect(idle.after).toBe(idle.before);
+  expect((await observeDraws(page)).draws).toBe(0);
   await page.getByRole("link", { name: "Acessar plataforma" }).first().click();
   await expect(page).toHaveURL(/\/entrar$/);
   await page.goBack();
   await cube.scrollIntoViewIfNeeded();
   await expect(cube.locator("canvas")).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
+test("o cubo gira lentamente e pausa por interação e movimento reduzido", async ({
+  page,
+  isMobile,
+}) => {
+  // Software WebGL shares CPU with the other parallel browser tests.
+  test.setTimeout(60_000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await watchDraws(page);
+  await page.setViewportSize({
+    width: page.viewportSize()!.width,
+    height: 600,
+  });
+  await page.goto("/");
+  const cube = page.getByRole("figure", { name: "Cubo mágico interativo" });
+  await cube.scrollIntoViewIfNeeded();
+  const canvas = cube.getByRole("application");
+  await expect(canvas).toBeVisible();
+  await expect(cube.getByRole("status")).toHaveCount(0);
+  await expect
+    .poll(() => page.evaluate(() => window.cubeDrawCalls))
+    .toBeGreaterThan(0);
+  const initial = await canvas.screenshot();
+  const motion = await observeDraws(page);
+  expect(motion.draws).toBeGreaterThan(0);
+  expect(motion.draws).toBeLessThanOrEqual(
+    Math.ceil((motion.elapsed / 1000) * 30) + 1,
+  );
+  expect((await canvas.screenshot()).equals(initial)).toBe(false);
+
+  if (isMobile) await canvas.tap();
+  else await canvas.click();
+  expect((await observeDraws(page)).draws).toBe(0);
+  await canvas.press("Space");
+  await canvas.dispatchEvent("keydown", { key: " ", repeat: true });
+  expect((await observeDraws(page)).draws).toBeGreaterThan(0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect((await observeDraws(page)).draws).toBe(0);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  expect((await observeDraws(page)).draws).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});
+
+test("pausa a rotação fora da tela, em abas ocultas e ao sair da página", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await watchDraws(page);
+  await page.setViewportSize({
+    width: page.viewportSize()!.width,
+    height: 600,
+  });
+  await page.goto("/");
+  const cube = page.getByRole("figure", { name: "Cubo mágico interativo" });
+  await cube.scrollIntoViewIfNeeded();
+  await expect(cube.getByRole("application")).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => window.cubeDrawCalls))
+    .toBeGreaterThan(0);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  expect((await observeDraws(page)).draws).toBe(0);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: false,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  expect((await observeDraws(page)).draws).toBeGreaterThan(0);
+  await page.locator("#perguntas").scrollIntoViewIfNeeded();
+  expect((await observeDraws(page)).draws).toBe(0);
+  await cube.scrollIntoViewIfNeeded();
+  expect((await observeDraws(page)).draws).toBeGreaterThan(0);
+  await page
+    .getByRole("link", { name: "Acessar plataforma" })
+    .first()
+    .evaluate((link: HTMLAnchorElement) => link.click());
+  await expect(page).toHaveURL(/\/entrar$/);
+  expect((await observeDraws(page)).draws).toBe(0);
   expect(errors).toEqual([]);
 });
 
