@@ -16,6 +16,7 @@ import { sessionLabel, type SessionView } from "@/lib/schedule";
 import { helpRequestTopics } from "@/lib/help-request";
 import { useHydrated } from "@/lib/use-hydrated";
 import { BookingFeedback, useBookingMutation } from "./mutation";
+import { AttendanceControl, CompleteSession } from "./attendance";
 
 function RegistrationActions({
   session,
@@ -221,13 +222,16 @@ function SessionCard({
   sessions,
   monitor,
   onMove,
+  now,
 }: {
   session: SessionView;
   sessions: SessionView[];
   monitor: boolean;
   onMove: (id: string) => void;
+  now: number;
 }) {
   const active = session.registration?.status === "confirmed";
+  const started = Date.parse(session.startsAt) <= now;
   return (
     <article
       aria-label={`Sessão de ${sessionLabel(session.id)}`}
@@ -282,7 +286,12 @@ function SessionCard({
               />
             </div>
           ) : monitor ? (
-            <CancelSession session={session} />
+            <>
+              <CancelSession session={session} />
+              {Date.parse(session.endsAt) <= now && (
+                <CompleteSession sessionId={session.id} />
+              )}
+            </>
           ) : (
             <div className="mt-5">
               {session.registration?.status === "cancelled" && (
@@ -307,8 +316,9 @@ function SessionCard({
       )}
       {monitor && session.status === "scheduled" && (
         <p className="mt-4 text-xs leading-6 text-muted-foreground">
-          Quantidade prevista de alunos; o comparecimento será registrado
-          separadamente.
+          {started
+            ? "Aguardando registro de realização."
+            : "Comparecimento disponível após o início do encontro."}
         </p>
       )}
       {monitor && (
@@ -348,6 +358,12 @@ function SessionCard({
                         {registration.helpRequest.description}
                       </p>
                     </details>
+                    {started && session.status !== "cancelled" && (
+                      <AttendanceControl
+                        sessionId={session.id}
+                        registration={registration}
+                      />
+                    )}
                   </li>
                 ))}
               </ul>
@@ -364,18 +380,38 @@ function SessionCard({
 }
 
 export function Agenda({
-  sessions,
+  sessions: allSessions,
   monitor = false,
   initialSessionId,
+  now = 0,
 }: {
   sessions: SessionView[];
   monitor?: boolean;
   initialSessionId?: string;
+  now?: number;
 }) {
   const router = useRouter();
   const ready = useHydrated();
   const [refreshing, refresh] = useTransition();
   const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [period, setPeriod] = useState<"upcoming" | "recent">(
+    allSessions.some(
+      (session) =>
+        session.id === initialSessionId && Date.parse(session.startsAt) <= now,
+    ) ||
+      (monitor &&
+        !allSessions.some((session) => Date.parse(session.startsAt) > now))
+      ? "recent"
+      : "upcoming",
+  );
+  const sessions = monitor
+    ? allSessions.filter((session) =>
+        period === "recent"
+          ? Date.parse(session.startsAt) <= now
+          : Date.parse(session.startsAt) > now,
+      )
+    : allSessions;
+  if (monitor && period === "recent") sessions.reverse();
   const [selected, setSelected] = useState(
     sessions.find((session) => session.id === initialSessionId)?.id ??
       sessions.find((session) => session.registration?.status === "confirmed")
@@ -388,7 +424,7 @@ export function Agenda({
       sessions[0]?.id ??
       "",
   );
-  const months = [...new Set(sessions.map(({ id }) => id.slice(0, 7)))];
+  const months = [...new Set(sessions.map(({ id }) => id.slice(0, 7)))].sort();
   const [month, setMonth] = useState(selected.slice(0, 7));
   const visibleMonth = months.includes(month) ? month : (months[0] ?? "");
   const select = (id: string) => {
@@ -406,9 +442,45 @@ export function Agenda({
     { length: Math.ceil((leading + lastDay) / 7) * 7 },
     (_, index) => index - leading + 1,
   );
-  const current = sessions.find(({ id }) => id === selected);
+  const current = sessions.find(({ id }) => id === selected) ?? sessions[0];
   return (
     <section className="mt-8" aria-label="Agenda de monitoria">
+      {monitor && (
+        <div
+          role="group"
+          aria-label="Período da agenda"
+          className="mb-5 flex flex-wrap gap-2"
+        >
+          {(
+            [
+              ["upcoming", "Próximas"],
+              ["recent", "Recentes · 28 dias"],
+            ] as const
+          ).map(([value, label]) => (
+            <Button
+              key={value}
+              variant={period === value ? "secondary" : "ghost"}
+              aria-pressed={period === value}
+              disabled={!ready}
+              className="min-h-11 px-4"
+              onClick={() => {
+                setPeriod(value);
+                const firstSession =
+                  value === "recent"
+                    ? allSessions.findLast(
+                        (session) => Date.parse(session.startsAt) <= now,
+                      )
+                    : allSessions.find(
+                        (session) => Date.parse(session.startsAt) > now,
+                      );
+                select(firstSession?.id ?? "");
+              }}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      )}
       {!monitor &&
         sessions
           .filter(
@@ -487,8 +559,9 @@ export function Agenda({
           role="status"
           className="rounded-2xl border border-border p-6 text-sm leading-7 text-muted-foreground"
         >
-          Não há sessões futuras disponíveis no período da monitoria, que
-          termina em {monitoria.termino}.
+          {monitor && period === "recent"
+            ? "Nenhuma sessão registrada nos últimos 28 dias."
+            : `Não há sessões futuras disponíveis no período da monitoria, que termina em ${monitoria.termino}.`}
         </p>
       ) : view === "list" ? (
         <div className="space-y-5">
@@ -498,6 +571,7 @@ export function Agenda({
               session={session}
               sessions={sessions}
               monitor={monitor}
+              now={now}
               onMove={select}
             />
           ))}
@@ -574,10 +648,10 @@ export function Agenda({
                             <button
                               type="button"
                               disabled={!ready}
-                              aria-pressed={selected === id}
-                              aria-label={`${sessionLabel(id)} — ${slot.status === "cancelled" ? "cancelada" : `${slot.enrolledCount} de ${monitoria.capacidade} inscritos`}`}
+                              aria-pressed={current?.id === id}
+                              aria-label={`${sessionLabel(id)} — ${slot.status === "cancelled" ? "cancelada" : slot.status === "completed" ? "realizada" : `${slot.enrolledCount} de ${monitoria.capacidade} inscritos`}`}
                               onClick={() => select(id)}
-                              className={`min-h-12 w-full rounded-lg border border-border px-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected === id ? "bg-primary text-primary-foreground" : "bg-card hover:bg-secondary"}`}
+                              className={`min-h-12 w-full rounded-lg border border-border px-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring ${current?.id === id ? "bg-primary text-primary-foreground" : "bg-card hover:bg-secondary"}`}
                             >
                               <span
                                 className={
@@ -594,9 +668,13 @@ export function Agenda({
                               >
                                 {slot.status === "cancelled"
                                   ? "×"
-                                  : slot.registration?.status === "confirmed"
-                                    ? "✓"
-                                    : `${monitoria.capacidade - slot.enrolledCount}v`}
+                                  : monitor && period === "recent"
+                                    ? slot.status === "completed"
+                                      ? "✓"
+                                      : "·"
+                                    : slot.registration?.status === "confirmed"
+                                      ? "✓"
+                                      : `${monitoria.capacidade - slot.enrolledCount}v`}
                               </span>
                             </button>
                           ) : (
@@ -612,7 +690,9 @@ export function Agenda({
               </tbody>
             </table>
             <p className="mt-4 text-xs leading-6 text-muted-foreground">
-              v = vagas · ✓ = sua inscrição · × = sessão cancelada
+              {monitor && period === "recent"
+                ? "✓ = realizada · = aguardando realização × = cancelada"
+                : "v = vagas · ✓ = sua inscrição · × = sessão cancelada"}
             </p>
           </div>
           {current && (
@@ -621,6 +701,7 @@ export function Agenda({
               session={current}
               sessions={sessions}
               monitor={monitor}
+              now={now}
               onMove={select}
             />
           )}

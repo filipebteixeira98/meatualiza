@@ -289,7 +289,9 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     await googlePopup(monitorPage, monitorEmail);
     await expect(monitorPage).toHaveURL(/\/monitor$/, { timeout: 25_000 });
     await expect(
-      monitorPage.getByRole("heading", { name: "Acesso de monitor ativo." }),
+      monitorPage.getByRole("heading", {
+        name: "Sua monitoria, em perspectiva.",
+      }),
     ).toBeVisible();
     await openNavigation(monitorPage, "monitor");
     await monitorPage

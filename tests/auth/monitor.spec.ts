@@ -39,7 +39,7 @@ async function enterMonitor(page: Page) {
   await googlePopup(page, email);
   await expect(page).toHaveURL(/\/monitor$/, { timeout: 25_000 });
   await expect(
-    page.getByRole("heading", { name: "Acesso de monitor ativo." }),
+    page.getByRole("heading", { name: "Sua monitoria, em perspectiva." }),
   ).toBeVisible();
   return user;
 }
@@ -54,7 +54,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
   if (info.project.name === "desktop")
     await checkCollapsibleSidebar(page, "monitor", info);
   await expect(
-    page.getByRole("heading", { name: "Acesso de monitor ativo." }),
+    page.getByRole("heading", { name: "Sua monitoria, em perspectiva." }),
   ).toBeVisible();
   await openAccount(page, "monitor");
   await expect(page.getByText(user.email!, { exact: true })).toBeVisible();
@@ -97,7 +97,7 @@ test("monitor tem área própria, recarga, direcionamento e saída", async ({
   const response = await page.reload();
   expect(response?.headers()["cache-control"]).toContain("no-store");
   await expect(
-    page.getByRole("heading", { name: "Acesso de monitor ativo." }),
+    page.getByRole("heading", { name: "Sua monitoria, em perspectiva." }),
   ).toBeVisible();
   await page.screenshot({
     path: info.outputPath("monitor.png"),
@@ -159,7 +159,7 @@ test("remover privilégio bloqueia a navegação mesmo com layout persistente e 
   await expect(page).toHaveURL(/\/aluno\/agenda$/);
   await page.reload();
   await expect(page).toHaveURL(/\/aluno\/agenda$/);
-  await expect(page.getByText("Acesso de monitor ativo.")).toHaveCount(0);
+  await expect(page.getByText("Sua monitoria, em perspectiva.")).toHaveCount(0);
   await page.goto("/monitor");
   await expect(page).toHaveURL(/\/aluno$/);
 });

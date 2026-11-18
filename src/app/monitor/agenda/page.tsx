@@ -10,8 +10,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function MonitorAgendaPage() {
-  const agenda = await getAgenda((await cookies()).get(SESSION_COOKIE)?.value);
+export default async function MonitorAgendaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sessao?: string }>;
+}) {
+  const agenda = await getAgenda(
+    (await cookies()).get(SESSION_COOKIE)?.value,
+    undefined,
+    true,
+  );
   if (!agenda) redirect("/entrar");
   if (agenda.role !== "monitor") redirect("/aluno/agenda");
   return (
@@ -26,15 +34,19 @@ export default async function MonitorAgendaPage() {
           Prepare o próximo encontro.
         </h1>
         <p className="mt-5 text-base leading-7 text-muted-foreground">
-          Consulte os inscritos, assuntos e dúvidas de cada sessão nas próximas
-          quatro semanas. Bloqueie datas ou cancele encontros com um motivo
-          visível aos alunos.
+          Inscritos, dúvidas e comparecimento. Consulte os próximos encontros e
+          as sessões registradas nos últimos 28 dias.
         </p>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
           Segundas e quartas, 11h30–12h30 · America/Bahia · dez alunos por
           sessão.
         </p>
-        <Agenda sessions={agenda.sessions} monitor />
+        <Agenda
+          sessions={agenda.sessions}
+          monitor
+          now={agenda.asOf}
+          initialSessionId={(await searchParams).sessao}
+        />
       </div>
     </main>
   );
