@@ -173,7 +173,7 @@ docs/screenshots/        # committed desktop and mobile previews
 
 ## 📌 Roadmap and documentation
 
-Current delivery: F5.2, confirmed student lists and questions in the monitor's calendar and list views. The student dashboard and monitor agenda use the next-28-days window; past-session history is not included yet. Use the existing refresh action to retrieve updates from other users. Next: attendance, completed sessions, student-reported question resolution, and dashboard metrics. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are planned; they are not active integrations in this release.
+Current delivery: F5.2, confirmed student lists and questions in the monitor's calendar and list views. The student dashboard and monitor agenda use the next-28-days window; past-session history is not included yet. Use the existing refresh action to retrieve updates from other users. Next: attendance, completed sessions, student-reported question resolution, and dashboard metrics. After this work, F6 introduces an asynchronous forum for students and monitors, with course-topic discussions, replies, and moderation. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are also planned.
 
 - [Roadmap and task board](./ROADMAP.md)
 - [Project requirements](./INSTRUCTIONS.md) and [domain glossary](./GLOSSARY.md)

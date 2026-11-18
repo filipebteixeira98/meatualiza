@@ -106,7 +106,8 @@ Depois, seguir na ordem:
 1. **F3 — Pedido de ajuda:** reutilizar assuntos aprovados, definir formulário e validação de assunto/descrição e o contrato vinculado à inscrição. Não salvar pedidos avulsos sem sessão.
 2. **F4 — Agenda e inscrição:** sessões de segunda/quarta, 11h30–12h30, America/Bahia, quatro semanas, dez alunos e término previsto. Persistir pedido e inscrição juntos, com unicidade e concorrência; completar cancelamento e remarcação consistentes.
 3. **F5 — Operação da monitoria:** inscritos e dúvidas por sessão, quantidade prevista, presença, realização, avaliação pelo aluno e métricas com definições documentadas.
-4. **F6–F8 — Adoção e publicação:** tour dos recursos disponíveis, preferências/termos antes de receber alunos reais, PostHog Surveys separado da avaliação pedagógica, observabilidade, validação final e hospedagem.
+4. **F6 — Fórum colaborativo:** tópicos e respostas entre alunos e monitores, com acesso autenticado, autoria e moderação.
+5. **F7–F9 — Adoção e publicação:** tour dos recursos disponíveis, preferências/termos antes de receber alunos reais, PostHog Surveys separado da avaliação pedagógica, observabilidade, validação final e hospedagem.
 
 Sem prazo prometido: esforços são relativos e as dependências definem a sequência. Não antecipar chat, anexos, notificações, lista de espera, gestão de vários monitores ou telas com dados fictícios.
 
@@ -139,7 +140,7 @@ Essa é a proposta técnica inicial para F2, baseada na documentação oficial; 
 - Criar/atualizar o perfil de forma idempotente, preservando sua data de criação. Uma falha de persistência deve permitir nova tentativa sem cadastros duplicados e sem confirmar acesso funcional antes de o perfil necessário existir.
 - Proposta de acesso aos dados: navegador usa Firebase Auth; operações da aplicação acessam Firestore pelo servidor. Como o Admin SDK não está sujeito às Security Rules, cada operação de servidor valida identidade, titularidade e privilégio. Regras negam acessos diretos do cliente por padrão.
 - Em F2, o aluno consulta somente seu perfil. A área do monitor comprova autorização, sem expor uma listagem de alunos antes de haver necessidade nas funcionalidades da monitoria.
-- Autenticação e perfil são dados operacionais. Não ativar Firebase Analytics, PostHog ou Sentry nesta entrega; a instrumentação continua na F7.
+- Autenticação e perfil são dados operacionais. Não ativar Firebase Analytics, PostHog ou Sentry nesta entrega; a instrumentação continua na F8.
 
 ## Verificação da entrega
 

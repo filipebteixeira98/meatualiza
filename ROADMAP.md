@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F1–F4 e F5.1b integradas à `main`; o painel do aluno foi integrado no [PR #10](https://github.com/filipebteixeira98/meatualiza/pull/10), seguido dos ajustes de acesso e landing nos PRs #11 e #12. **Etapa atual: F5.2**, inscritos e dúvidas por sessão na agenda do monitor, implementada nesta branch para revisão. A próxima entrega é F5.3, com presença manual, realização da sessão e métricas. OAuth em celular real permanece como acompanhamento da F2-B.6.
+Status: F1–F4 e F5.1–F5.2 integradas à `main`, incluindo inscritos e dúvidas por sessão no [PR #13](https://github.com/filipebteixeira98/meatualiza/pull/13). **Próxima entrega: F5.3**, presença manual, realização da sessão e métricas. O fórum colaborativo está planejado para F6, seguido do tour em F7, privacidade/feedback/observabilidade em F8 e validação/publicação em F9. OAuth em celular real permanece como acompanhamento da F2-B.6.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -23,6 +23,7 @@ Organizar a procura por reforço em **Lógica de Programação**, permitindo ao 
 - Lista inicial de assuntos da disciplina aprovada pelo monitor, apresentada neste documento.
 - Resolução informada pelo próprio aluno em uma avaliação por inscrição/sessão, considerando o pedido de ajuda como um todo, com resultado e comentário opcional.
 - Avaliação disponível após sessão realizada e presença registrada; ausência de resposta não bloqueia novos agendamentos.
+- Fórum para interação assíncrona e colaboração entre alunos e monitores sobre Lógica de Programação.
 - Onboarding e tour guiado por perfil, que pode ser pulado e reaberto.
 - PostHog Surveys para sugestões e relatos de problemas da plataforma.
 - Aplicativo responsivo, com acessibilidade e estados de carregamento, vazio e erro.
@@ -144,6 +145,7 @@ Oferecer também “Outro assunto / não sei classificar”, exigindo a descriç
 - Acompanhar suas solicitações e seus atendimentos.
 - Consultar a resolução do pedido de ajuda e avaliá-lo após a sessão realizada e a presença registrada, com comentário opcional e sem bloqueio de novos agendamentos por falta de avaliação.
 - Cancelar ou remarcar antes do início da sessão; editar a descrição das dúvidas sem outra inscrição.
+- Criar tópicos e responder às dúvidas de outros participantes no fórum.
 - Reabrir o tour, ajustar preferências e enviar feedback da plataforma.
 
 ### Monitor
@@ -156,6 +158,7 @@ Oferecer também “Outro assunto / não sei classificar”, exigindo a descriç
 - Acompanhar avaliações recebidas e aguardadas, além de dúvidas parcialmente ou não resolvidas; não inferir o resultado de alunos que não responderam.
 - Bloquear datas ou cancelar sessões com motivo, cancelando suas inscrições e mantendo o histórico visível aos alunos afetados.
 - Consultar demanda por assunto e métricas de operação.
+- Participar das discussões e moderar publicações no fórum.
 - Acessar os resultados dos surveys no PostHog. Espelhar respostas dentro da aplicação não faz parte desta primeira versão.
 
 ### Métricas planejadas para o monitor
@@ -183,9 +186,9 @@ Exemplo de apresentação: “Segunda, 11h30–12h30 — 8/10 alunos previstos �
 
 Cada tarefa de implementação deve gerar uma feature branch e um PR revisável, com Conventional Commits em inglês. Testes relevantes entram junto com o comportamento que validam.
 
-Sequência: F2 → preparação de F3 → F4 com o pedido e a inscrição salvos juntos → F5 com acompanhamento, presença e avaliação. O formulário de F3 não publica uma solicitação sem sessão. O plano de F2 divide acesso e autorização em três PRs, com validação junto de cada comportamento.
+Sequência: F2 → preparação de F3 → F4 com o pedido e a inscrição salvos juntos → F5 com acompanhamento, presença e avaliação. Após F5, seguir com F6 — fórum colaborativo → F7 — tour → F8 — privacidade, feedback e observabilidade → F9 — validação e publicação. O formulário de F3 não publica uma solicitação sem sessão. O plano de F2 divide acesso e autorização em três PRs, com validação junto de cada comportamento.
 
-A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. F5.1b reutiliza essa navegação na área do aluno, com Painel, Agenda, Nova inscrição e saída no menu da conta. Novos recursos entram no menu quando forem entregues; tour, privacidade e feedback seguem em F6/F7.
+A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. F5.1b reutiliza essa navegação na área do aluno, com Painel, Agenda, Nova inscrição e saída no menu da conta. Novos recursos entram no menu quando forem entregues. O fórum será incluído para ambos os perfis em F6, com tour em F7 e privacidade/feedback em F8.
 
 F5.2 apresenta as inscrições confirmadas em cada sessão, com nome, assunto e descrição expansível da dúvida, no calendário e na lista do monitor. A leitura usa a mesma janela de quatro semanas e o botão “Atualizar agenda” para buscar alterações feitas por outros usuários. Dados da turma são selecionados somente para o monitor autorizado; alunos recebem apenas a própria inscrição. Perfis removidos ou sem nome não ocultam inscrições: o monitor vê “Aluno sem nome”. Presença e histórico de sessões anteriores ficam para as próximas entregas.
 
@@ -197,15 +200,16 @@ F5.2 apresenta as inscrições confirmadas em cada sessão, com nome, assunto e 
 | F3 — Preparação das solicitações             | Assuntos aprovados, formulário, validação e contrato do pedido vinculado à inscrição                             | Formulário preparado sem criar pedidos avulsos; gravação do pedido entregue junto à inscrição em F4; acompanhamento e resolução completos em F5                                                                        |
 | F4 — Sessões e inscrições                    | Calendário de quatro semanas, sessões até o término informado, confirmação automática, cancelamento e remarcação | Até dez alunos distintos por sessão, inclusive sob concorrência; alterações pelo aluno encerram no início; remarcação falha preserva a inscrição anterior; cancelamento da sessão afeta suas inscrições e exibe motivo |
 | F5 — Painéis, avaliação e navegação          | Painéis, inscritos, total por sessão, presença manual, avaliação do atendimento e acompanhamento da resolução    | O aluno avalia seu pedido uma vez por inscrição após realização e presença; monitor acompanha; falta de resposta não bloqueia agendamentos; resultados e falhas preservam dados e permissões                           |
-| F6 — Onboarding e tour                       | Apresentação dos fluxos reais para cada perfil                                                                   | Tour pode ser pulado e reaberto; conclusão é persistida; teclado e celular funcionam; não cria agendamentos de teste reais                                                                                             |
-| F7 — Privacidade, feedback e observabilidade | Termos/preferências, PostHog Surveys, Sentry e eventos definidos                                                 | Captura opcional respeita escolhas; resposta de teste chega ao survey; erro de teste chega ao Sentry sem dados pessoais desnecessários                                                                                 |
-| F8 — Validação e publicação                  | Verificar jornadas, preparar preview, publicação e rollback                                                      | Fluxos de aluno e monitor, concorrência, responsividade e acessibilidade verificados; deploy automatizado e operação documentados                                                                                      |
+| F6 — Fórum e colaboração assíncrona          | Tópicos por assunto, respostas entre alunos e monitores e moderação                                              | Participantes autenticados publicam e respondem; autoria e permissões são verificadas no servidor; navegação funciona por teclado e em celulares                                                                       |
+| F7 — Onboarding e tour                       | Apresentação dos fluxos reais para cada perfil                                                                   | Tour pode ser pulado e reaberto; conclusão é persistida; teclado e celular funcionam; não cria agendamentos de teste reais                                                                                             |
+| F8 — Privacidade, feedback e observabilidade | Termos/preferências, PostHog Surveys, Sentry e eventos definidos                                                 | Captura opcional respeita escolhas; resposta de teste chega ao survey; erro de teste chega ao Sentry sem dados pessoais desnecessários                                                                                 |
+| F9 — Validação e publicação                  | Verificar jornadas, preparar preview, publicação e rollback                                                      | Fluxos de aluno e monitor, colaboração no fórum, concorrência, responsividade e acessibilidade verificados; deploy automatizado e operação documentados                                                                |
 
 Responsividade, acessibilidade, estados de interface e testes são critérios de cada fase. A apresentação de termos e preferências deve estar pronta antes de receber alunos reais; a coleta opcional só pode ser habilitada depois de seus controles funcionarem.
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1–F4, F5.1b e os ajustes de acesso/landing estão integrados à `main`. F5.2 está implementada para revisão; F5.3–F5.6 continuam a fazer. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
+O quadro distingue regras definidas e entregas implementadas. F1–F4, F5.1–F5.2 e os ajustes de acesso/landing estão integrados à `main`. F5.3–F5.6 e o fórum de F6 continuam a fazer. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
 
 | A Fazer                                                                                   | Em Andamento                                                                         | Concluído                                                                                                  |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -253,22 +257,27 @@ O quadro distingue regras definidas e entregas implementadas. F1–F4, F5.1b e o
 | —                                                                                         | —                                                                                    | F4.6 — Testar disputa pela décima vaga, repetição pelo mesmo aluno, prazos e período da agenda             |
 | —                                                                                         | —                                                                                    | F5.1a — Sidebar do monitor com Painel/Agenda, ícones, página ativa, menu da conta e adaptação móvel        |
 | —                                                                                         | —                                                                                    | F5.1b — Painel do aluno e navegação responsiva integrados no PR #10                                        |
-| —                                                                                         | F5.2 — Inscritos e dúvidas na agenda do monitor; aguardando revisão                  | —                                                                                                          |
+| —                                                                                         | —                                                                                    | F5.2 — Inscritos e dúvidas na agenda do monitor integrados no PR #13                                       |
 | F5.3 — Implementar presença manual, realização da sessão e métricas aprovadas             | —                                                                                    | —                                                                                                          |
 | F5.4 — Implementar uma avaliação por inscrição, pelo aluno presente após sessão realizada | —                                                                                    | —                                                                                                          |
 | F5.5 — Persistir avaliação e exibir resolução e avaliações aguardadas nos painéis         | —                                                                                    | —                                                                                                          |
 | F5.6 — Verificar permissões, reenvios, falhas e contagens da avaliação                    | —                                                                                    | —                                                                                                          |
-| F6.1 — Escrever passos do onboarding e do tour para cada perfil                           | —                                                                                    | —                                                                                                          |
-| F6.2 — Implementar pular, reabrir e persistir conclusão do tour                           | —                                                                                    | —                                                                                                          |
-| F6.3 — Verificar foco, teclado, movimento reduzido e telas móveis                         | —                                                                                    | —                                                                                                          |
-| F7.1 — Implementar termos, preferências, recusa e revogação                               | —                                                                                    | —                                                                                                          |
-| F7.2 — Definir eventos e responsabilidades de Firebase Analytics e PostHog                | —                                                                                    | —                                                                                                          |
-| F7.3 — Criar survey de feedback e integrar acesso pela aplicação                          | —                                                                                    | —                                                                                                          |
-| F7.4 — Verificar envio, erro e chegada da resposta de teste no PostHog                    | —                                                                                    | —                                                                                                          |
-| F7.5 — Integrar Sentry e filtrar dados pessoais                                           | —                                                                                    | —                                                                                                          |
-| F8.1 — Executar jornadas completas de aluno e monitor                                     | —                                                                                    | —                                                                                                          |
-| F8.2 — Verificar responsividade e acessibilidade de todos os fluxos                       | —                                                                                    | —                                                                                                          |
-| F8.3 — Configurar preview, deploy e procedimento de rollback                              | —                                                                                    | —                                                                                                          |
+| F6.1 — Definir dados de tópicos/respostas, autoria, visibilidade e regras de moderação    | —                                                                                    | —                                                                                                          |
+| F6.2 — Implementar listagem paginada, criação de tópicos por assunto e respostas          | —                                                                                    | —                                                                                                          |
+| F6.3 — Permitir edição pelo autor e ocultação de publicações pelo monitor                 | —                                                                                    | —                                                                                                          |
+| F6.4 — Integrar Fórum às sidebars e verificar estados, teclado e responsividade           | —                                                                                    | —                                                                                                          |
+| F6.5 — Verificar autorização, renderização segura, reenvios e colaboração entre contas    | —                                                                                    | —                                                                                                          |
+| F7.1 — Escrever passos do onboarding e do tour para cada perfil                           | —                                                                                    | —                                                                                                          |
+| F7.2 — Implementar pular, reabrir e persistir conclusão do tour                           | —                                                                                    | —                                                                                                          |
+| F7.3 — Verificar foco, teclado, movimento reduzido e telas móveis                         | —                                                                                    | —                                                                                                          |
+| F8.1 — Implementar termos, preferências, recusa e revogação                               | —                                                                                    | —                                                                                                          |
+| F8.2 — Definir eventos e responsabilidades de Firebase Analytics e PostHog                | —                                                                                    | —                                                                                                          |
+| F8.3 — Criar survey de feedback e integrar acesso pela aplicação                          | —                                                                                    | —                                                                                                          |
+| F8.4 — Verificar envio, erro e chegada da resposta de teste no PostHog                    | —                                                                                    | —                                                                                                          |
+| F8.5 — Integrar Sentry e filtrar dados pessoais                                           | —                                                                                    | —                                                                                                          |
+| F9.1 — Executar jornadas de aluno e monitor, incluindo colaboração no fórum               | —                                                                                    | —                                                                                                          |
+| F9.2 — Verificar responsividade e acessibilidade de todos os fluxos                       | —                                                                                    | —                                                                                                          |
+| F9.3 — Configurar preview, deploy e procedimento de rollback                              | —                                                                                    | —                                                                                                          |
 
 ## Entrega atual de F5
 
@@ -281,15 +290,30 @@ inscrições ou sem novas sessões usam os dados reais, sem números de exemplo.
 A leitura reutiliza `getAgenda`, com autorização e isolamento pelo UID no
 servidor. A sidebar é compartilhada pelos dois perfis, enquanto páginas e ações
 continuam verificando permissões. O painel cobre a mesma janela futura de 28
-dias da agenda; histórico de sessões passadas, inscritos do monitor, presença,
-avaliações e métricas completas continuam nas próximas entregas de F5.
+dias da agenda. A agenda do monitor já mostra os inscritos, assuntos e dúvidas
+por sessão. Histórico de sessões passadas, presença, avaliações e métricas
+completas continuam nas próximas entregas de F5.
+
+## Fórum e colaboração assíncrona — F6
+
+O fórum amplia a monitoria com discussões sobre Lógica de Programação entre alunos e monitores. A fase vem após os fluxos de atendimento de F5 e antes do tour de F7, que também apresentará a colaboração assíncrona.
+
+Escopo proposto para a primeira entrega, a detalhar em F6.1 antes da implementação.
+
+- Participantes autenticados com Google podem ler, criar tópicos e publicar respostas, independentemente de inscrição em uma sessão presencial.
+- Cada tópico contém título, assunto do programa aprovado e descrição. As respostas formam uma conversa simples, com identificação do autor e do perfil de monitor quando aplicável.
+- O autor pode editar suas publicações. O monitor pode ocultar conteúdo inadequado, com registro da ação de moderação. As permissões são verificadas no servidor.
+- A listagem usa paginação. Fórum aparece na sidebar de ambos os perfis, com estados de carregamento, vazio, envio e falha, acesso por teclado e apresentação responsiva.
+- Publicações são compartilhadas entre os participantes autenticados. A publicação exige uma ação explícita do autor. Pedidos vinculados a inscrições e avaliações de atendimento têm acesso restrito ao aluno titular e ao monitor.
+
+Em F6.1, definir limites de conteúdo, identificação exibida, ordenação e comportamento de edição/moderação antes de implementar. O aceite inclui uma conversa entre duas contas de aluno e a conta do monitor, com persistência das respostas, proteção contra alterações por outro autor e reenvios sem duplicação.
 
 ## Tour guiado
 
 O tour apresenta apenas recursos já disponíveis para o perfil. Recursos futuros do roadmap não devem aparecer como ações utilizáveis.
 
-- Aluno: painel → solicitar ajuda e escolher assunto → calendário/agendamento → acompanhar pedidos → avaliação do atendimento quando disponível → ajuda e feedback.
-- Monitor: resumo de demandas → consultar dúvidas → agenda, total por sessão e lista de inscritos → bloqueios → presença, avaliações e resolução → resultados e métricas → ajuda e feedback.
+- Aluno: painel → solicitar ajuda e escolher assunto → calendário/agendamento → acompanhar pedidos → avaliação do atendimento quando disponível → fórum → ajuda e feedback.
+- Monitor: resumo de demandas → consultar dúvidas → agenda, total por sessão e lista de inscritos → bloqueios → presença, avaliações e resolução → resultados e métricas → fórum e moderação → ajuda e feedback.
 - Exibir convite no primeiro acesso; permitir pular e reabrir pelo menu de ajuda.
 - Persistir conclusão por usuário e perfil; separar esse estado da conclusão de cadastro e das preferências de privacidade.
 - Tratar elementos fora da área visível, menus móveis fechados e mudanças de tamanho da tela.
@@ -329,7 +353,7 @@ Definir responsabilidades antes de instrumentar: PostHog para comportamento e su
 
 ## Segurança e consistência
 
-- Aluno consulta seus próprios registros; o monitor recebe o acesso necessário para gerir a monitoria.
+- Inscrições, pedidos vinculados e avaliações são acessíveis ao aluno titular e ao monitor. Publicações do fórum são compartilhadas entre participantes autenticados, com edição pelo autor e moderação pelo monitor.
 - A autorização deve existir junto das operações e dos dados, além da navegação por perfil.
 - A atribuição do perfil de monitor deve ocorrer por configuração confiável, fora do controle do aluno.
 - Validar assunto, descrição, identidade, horário, disponibilidade e transições de estado nas fronteiras de escrita.
@@ -340,11 +364,11 @@ Definir responsabilidades antes de instrumentar: PostHog para comportamento e su
 - Alterações de status e métricas devem distinguir inscrição futura, cancelamento, sessão realizada, presença registrada e resultado da resolução, conforme as regras aprovadas.
 - Somente o aluno titular pode enviar a avaliação de sua inscrição; o monitor consulta a resposta. Validar na escrita a sessão realizada e a presença registrada; impedir respostas para inscrição cancelada ou aluno ausente/sem presença registrada.
 - Garantir uma avaliação por inscrição e preservar o resultado em reenvios ou falhas, sem alterar sua vinculação à sessão nem o contexto avaliado.
-- O acesso aberto com Google não torna públicas as dúvidas ou a lista de participantes para outros alunos; esses detalhes ficam com o próprio aluno e com o monitor.
+- O acesso aberto com Google preserva a privacidade das dúvidas vinculadas a inscrições e da lista de participantes das sessões. Textos compartilhados no fórum são publicados explicitamente pelo autor.
 
 ## Verificação mínima
 
-- Permissões: aluno A não lê nem altera dados do aluno B e não executa ações do monitor.
+- Permissões: aluno A não lê inscrições, pedidos vinculados ou avaliações do aluno B e não executa ações do monitor. No fórum, lê publicações compartilhadas e edita somente as próprias.
 - Inscrição coletiva: dois alunos diferentes podem se inscrever na mesma sessão com vagas; a quantidade prevista aumenta em dois.
 - Contagem: reenvios, edição das dúvidas e tentativas simultâneas do mesmo aluno não geram duas inscrições ativas nem ocupam duas vagas; cancelados saem da previsão.
 - Capacidade: com nove inscritos, duas tentativas concorrentes de alunos diferentes permitem somente uma nova inscrição; o total nunca supera dez.
@@ -360,6 +384,7 @@ Definir responsabilidades antes de instrumentar: PostHog para comportamento e su
 - Dados: rejeitar assunto inválido e dúvida sem conteúdo; preservar registros existentes em falhas.
 - Métricas: verificar alunos distintos, cancelamentos, sessão sem inscritos e ocupação de 0%, 80% e 100%; distinguir sessões realizadas, participações individuais, avaliações recebidas/aguardadas e resultado da resolução.
 - Experiência: executar o fluxo aluno → solicitação/inscrição → sessão coletiva → consulta dos inscritos pelo monitor → realização e presença → avaliação pelo fluxo aprovado → resolução exibida no painel.
+- Fórum: criar tópico e trocar respostas entre alunos e monitor; verificar autenticação, edição pelo autor, moderação, paginação, reenvios sem duplicação, conteúdo seguro e uso por teclado/celular.
 - Tour: pular, concluir e reabrir em desktop e celular, usando teclado.
 - Privacidade/feedback: testar recusa e revogação de coleta e verificar uma resposta de survey no PostHog.
 - CI: lint, tipos, testes relevantes e build antes da integração das mudanças.
