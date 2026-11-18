@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F1–F4 e F5.1–F5.2 integradas à `main`, incluindo inscritos e dúvidas por sessão no [PR #13](https://github.com/filipebteixeira98/meatualiza/pull/13). **Próxima entrega: F5.3**, presença manual, realização da sessão e métricas. O fórum colaborativo está planejado para F6, seguido do tour em F7, privacidade/feedback/observabilidade em F8 e validação/publicação em F9. OAuth em celular real permanece como acompanhamento da F2-B.6.
+Status: F1–F4 e F5.1–F5.2 integradas à `main`, incluindo inscritos e dúvidas por sessão no [PR #13](https://github.com/filipebteixeira98/meatualiza/pull/13). **Entrega atual: F5.3**, presença manual, realização da sessão, histórico recente e métricas implementados para revisão. A próxima entrega é F5.4, avaliação do atendimento pelo aluno. O fórum colaborativo está planejado para F6, seguido do tour em F7, privacidade/feedback/observabilidade em F8 e validação/publicação em F9. OAuth em celular real permanece como acompanhamento da F2-B.6.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -161,19 +161,21 @@ Oferecer também “Outro assunto / não sei classificar”, exigindo a descriç
 - Participar das discussões e moderar publicações no fórum.
 - Acessar os resultados dos surveys no PostHog. Espelhar respostas dentro da aplicação não faz parte desta primeira versão.
 
-### Métricas planejadas para o monitor
+### Métricas do monitor
+
+F5.3 apresenta previsões para as próximas quatro semanas e realização/comparecimento nas sessões registradas iniciadas nos últimos 28 dias. Resultados de resolução e avaliações aguardadas serão entregues em F5.4–F5.6.
 
 As métricas usam os registros da aplicação; preferências de analytics não podem alterar a contagem operacional de solicitações e reservas.
 
 | Métrica                     | Definição                                                                                                                                                                      | Dependência                                                             |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| Solicitações recebidas      | Número de solicitações criadas no período                                                                                                                                      | Registro de criação e filtro de período                                 |
+| Solicitações recebidas      | Inscrições criadas nos últimos 28 dias, uma por aluno/sessão, incluindo canceladas e destinos de remarcação                                                                    | Registro de criação e filtro de período                                 |
 | Solicitações a atender      | Pedidos de ajuda vinculados a inscrições confirmadas em sessões futuras não canceladas                                                                                         | Estados base de sessão e inscrição                                      |
 | Alunos previstos por sessão | Quantidade de alunos distintos com inscrição ativa na sessão, de zero a dez; excluir cancelados e não multiplicar por quantidade de dúvidas                                    | Uma inscrição ativa por aluno e sessão, conforme Q9                     |
 | Próximas sessões            | Sessões futuras não canceladas, com acesso ao total de alunos previstos de cada uma                                                                                            | Sessões de 60 minutos nas janelas confirmadas                           |
 | Sessões realizadas          | Sessões explicitamente marcadas como realizadas no período; uma sessão coletiva conta uma vez                                                                                  | Registro de conclusão                                                   |
 | Presenças registradas       | Quantidade de alunos com comparecimento registrado manualmente em cada sessão, separada da previsão de presença                                                                | Registro manual pelo monitor, conforme Q12                              |
-| Assuntos mais demandados    | Número de solicitações por assunto, no período                                                                                                                                 | Conteúdo programático aprovado                                          |
+| Assuntos mais demandados    | Número de inscrições confirmadas por assunto nas sessões futuras da janela de quatro semanas                                                                                   | Conteúdo programático aprovado                                          |
 | Ocupação da sessão          | Alunos previstos divididos por dez; por exemplo, oito inscritos equivalem a 80%                                                                                                | Capacidade de dez alunos, conforme Q7                                   |
 | Resultado da resolução      | Contagem de respostas resolvida, parcialmente resolvida e não resolvida, uma por inscrição; manter sem resposta em categoria separada                                          | O próprio aluno avalia o pedido de ajuda como um todo, conforme Q15–Q16 |
 | Avaliações aguardadas       | Inscrições de alunos com presença registrada em sessões realizadas, sem avaliação recebida; não incluir sessões futuras, canceladas ou alunos ausentes/sem presença registrada | Disponibilidade confirmada em Q17                                       |
@@ -190,7 +192,7 @@ Sequência: F2 → preparação de F3 → F4 com o pedido e a inscrição salvos
 
 A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. F5.1b reutiliza essa navegação na área do aluno, com Painel, Agenda, Nova inscrição e saída no menu da conta. Novos recursos entram no menu quando forem entregues. O fórum será incluído para ambos os perfis em F6, com tour em F7 e privacidade/feedback em F8.
 
-F5.2 apresenta as inscrições confirmadas em cada sessão, com nome, assunto e descrição expansível da dúvida, no calendário e na lista do monitor. A leitura usa a mesma janela de quatro semanas e o botão “Atualizar agenda” para buscar alterações feitas por outros usuários. Dados da turma são selecionados somente para o monitor autorizado; alunos recebem apenas a própria inscrição. Perfis removidos ou sem nome não ocultam inscrições: o monitor vê “Aluno sem nome”. Presença e histórico de sessões anteriores ficam para as próximas entregas.
+F5.2 apresenta as inscrições confirmadas em cada sessão, com nome, assunto e descrição expansível da dúvida, no calendário e na lista do monitor. A leitura usa a mesma janela de quatro semanas e o botão “Atualizar agenda” para buscar alterações feitas por outros usuários. Dados da turma são selecionados somente para o monitor autorizado; alunos recebem apenas a própria inscrição. Perfis removidos ou sem nome não ocultam inscrições: o monitor vê “Aluno sem nome”. F5.3 acrescenta registro de presença e consulta das sessões persistidas iniciadas nos últimos 28 dias.
 
 | Fase                                         | Resultado                                                                                                        | Critérios de aceite                                                                                                                                                                                                    |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -209,7 +211,7 @@ Responsividade, acessibilidade, estados de interface e testes são critérios de
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1–F4, F5.1–F5.2 e os ajustes de acesso/landing estão integrados à `main`. F5.3–F5.6 e o fórum de F6 continuam a fazer. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
+O quadro distingue regras definidas e entregas implementadas. F1–F4, F5.1–F5.2 e os ajustes de acesso/landing estão integrados à `main`. F5.3 está implementada para revisão. F5.4–F5.6 e o fórum de F6 continuam a fazer. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
 
 | A Fazer                                                                                   | Em Andamento                                                                         | Concluído                                                                                                  |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -258,7 +260,7 @@ O quadro distingue regras definidas e entregas implementadas. F1–F4, F5.1–F5
 | —                                                                                         | —                                                                                    | F5.1a — Sidebar do monitor com Painel/Agenda, ícones, página ativa, menu da conta e adaptação móvel        |
 | —                                                                                         | —                                                                                    | F5.1b — Painel do aluno e navegação responsiva integrados no PR #10                                        |
 | —                                                                                         | —                                                                                    | F5.2 — Inscritos e dúvidas na agenda do monitor integrados no PR #13                                       |
-| F5.3 — Implementar presença manual, realização da sessão e métricas aprovadas             | —                                                                                    | —                                                                                                          |
+| —                                                                                         | F5.3 — Presença, realização, histórico recente e métricas implementados para revisão | —                                                                                                          |
 | F5.4 — Implementar uma avaliação por inscrição, pelo aluno presente após sessão realizada | —                                                                                    | —                                                                                                          |
 | F5.5 — Persistir avaliação e exibir resolução e avaliações aguardadas nos painéis         | —                                                                                    | —                                                                                                          |
 | F5.6 — Verificar permissões, reenvios, falhas e contagens da avaliação                    | —                                                                                    | —                                                                                                          |
@@ -291,8 +293,19 @@ A leitura reutiliza `getAgenda`, com autorização e isolamento pelo UID no
 servidor. A sidebar é compartilhada pelos dois perfis, enquanto páginas e ações
 continuam verificando permissões. O painel cobre a mesma janela futura de 28
 dias da agenda. A agenda do monitor já mostra os inscritos, assuntos e dúvidas
-por sessão. Histórico de sessões passadas, presença, avaliações e métricas
-completas continuam nas próximas entregas de F5.
+por sessão. A entrega F5.3 acrescenta ao monitor as sessões persistidas iniciadas
+nos últimos 28 dias, inclusive quando já terminou a oferta de novas sessões.
+
+- O monitor registra presente, ausente ou não registrado a partir das 11h30. Registros antigos sem esse campo são lidos como não registrados.
+- A realização é confirmada manualmente a partir das 12h30. Inscrições e comparecimentos preservam seus estados quando a sessão é marcada como realizada.
+- O monitor pode corrigir comparecimento após a realização. Cada alteração registra autoria e horário, verifica a versão atual e preserva a contagem de inscritos.
+- Reenvios da mesma operação são conferidos no servidor. Uma versão antiga é rejeitada após outra alteração, com orientação para atualizar a agenda.
+- A agenda oferece Próximas e Recentes, além de calendário/lista. Recentes começa pelo encontro mais recente e mostra somente sessões já persistidas.
+- O painel apresenta solicitações a atender, sessões futuras, ocupação, demanda por assunto, pedidos recebidos, sessões realizadas, presenças, ausências e comparecimentos sem registro.
+- Pedidos recebidos usam a criação da inscrição, incluindo canceladas e destinos de remarcação. Reinscrever o mesmo aluno na mesma sessão preserva a data de criação do registro.
+- Ocupação é a soma dos inscritos futuros dividida pela capacidade total das sessões futuras agendadas, incluindo sessões vazias. Comparecimento usa inscrições confirmadas de sessões recentes agendadas/realizadas e exclui cancelamentos.
+
+Avaliação pelo aluno e acompanhamento da resolução seguem em F5.4–F5.6.
 
 ## Fórum e colaboração assíncrona — F6
 
