@@ -2,7 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, Info } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarCheck,
+  CalendarDays,
+  ChartPie,
+  ClipboardList,
+  Inbox,
+  Info,
+  MessageSquareText,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { getAgenda } from "@/lib/bookings";
@@ -49,15 +60,30 @@ export default async function MonitorPage() {
           </h2>
           <dl className="mt-4 grid gap-3 sm:grid-cols-3">
             {[
-              ["Solicitações a atender", summary.expected],
-              ["Sessões agendadas", summary.upcoming.length],
-              ["Ocupação prevista", `${summary.occupancy}%`],
-            ].map(([label, value]) => (
+              {
+                label: "Solicitações a atender",
+                value: summary.expected,
+                icon: MessageSquareText,
+              },
+              {
+                label: "Sessões agendadas",
+                value: summary.upcoming.length,
+                icon: CalendarDays,
+              },
+              {
+                label: "Ocupação prevista",
+                value: `${summary.occupancy}%`,
+                icon: ChartPie,
+              },
+            ].map(({ label, value, icon: Icon }) => (
               <div
                 key={label}
                 className="rounded-xl border border-border bg-card p-5"
               >
-                <dt className="text-sm text-muted-foreground">{label}</dt>
+                <dt className="flex items-start justify-between gap-3 text-sm text-muted-foreground">
+                  <span>{label}</span>
+                  <Icon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                </dt>
                 <dd className="mt-3 font-mono text-3xl tracking-tight">
                   {value}
                 </dd>
@@ -132,17 +158,32 @@ export default async function MonitorPage() {
           </h2>
           <dl className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {[
-              ["Pedidos recebidos", agenda.receivedRequests],
-              ["Sessões realizadas", summary.completed],
-              ["Presenças", summary.present],
-              ["Ausências", summary.absent],
-              ["Comparecimentos sem registro", summary.unrecorded],
-            ].map(([label, value]) => (
+              {
+                label: "Pedidos recebidos",
+                value: agenda.receivedRequests,
+                icon: Inbox,
+              },
+              {
+                label: "Sessões realizadas",
+                value: summary.completed,
+                icon: CalendarCheck,
+              },
+              { label: "Presenças", value: summary.present, icon: UserCheck },
+              { label: "Ausências", value: summary.absent, icon: UserX },
+              {
+                label: "Comparecimentos sem registro",
+                value: summary.unrecorded,
+                icon: ClipboardList,
+              },
+            ].map(({ label, value, icon: Icon }) => (
               <div
                 key={label}
                 className="rounded-xl border border-border bg-card p-5"
               >
-                <dt className="text-sm text-muted-foreground">{label}</dt>
+                <dt className="flex items-start justify-between gap-3 text-sm text-muted-foreground">
+                  <span>{label}</span>
+                  <Icon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                </dt>
                 <dd className="mt-3 font-mono text-3xl tracking-tight">
                   {value}
                 </dd>
