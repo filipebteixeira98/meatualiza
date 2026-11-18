@@ -9,6 +9,7 @@ import { helpRequestSchema } from "./help-request.ts";
 import { monitoria } from "./monitoria.ts";
 import {
   bookingChangeSchema,
+  attendanceSchema,
   isOpenForBooking,
   sessionDetails,
   upcomingSessions,
@@ -31,6 +32,7 @@ const registrationState = z.object({
   cancellationReason: z.string().nullable(),
   lastOperationId: z.string(),
   lastOperationHash: z.string(),
+  attendance: attendanceSchema.default("unrecorded"),
 });
 const emptySession: z.infer<typeof sessionState> = {
   status: "scheduled",
@@ -38,18 +40,47 @@ const emptySession: z.infer<typeof sessionState> = {
   cancellationReason: null,
 };
 
-export async function getAgenda(cookie?: string, now = Date.now()) {
+export async function getAgenda(
+  cookie?: string,
+  now = Date.now(),
+  includeHistory = false,
+) {
   const profile = await getAccountProfile(cookie);
   if (!profile) return null;
   const database = getFirestore(getAdminApp());
-  const details = upcomingSessions(now);
-  if (!details.length)
-    return { role: profile.role, sessions: [] as SessionView[] };
-  const references = details.map(({ id }) =>
-    database.collection("sessions").doc(id),
-  );
   return database.runTransaction(
     async (transaction) => {
+      const details = upcomingSessions(now);
+      if (profile.role === "monitor" && includeHistory) {
+        const recent = await transaction.get(
+          database
+            .collection("sessions")
+            .where(
+              "startsAt",
+              ">=",
+              new Date(now - 28 * 86_400_000).toISOString(),
+            )
+            .where("startsAt", "<=", new Date(now).toISOString()),
+        );
+        details.unshift(
+          ...recent.docs
+            .flatMap((row) => {
+              const detail = sessionDetails(row.id);
+              return detail ? [detail] : [];
+            })
+            .sort((a, b) => a.id.localeCompare(b.id)),
+        );
+      }
+      if (!details.length)
+        return {
+          role: profile.role,
+          sessions: [] as SessionView[],
+          receivedRequests: 0,
+          asOf: now,
+        };
+      const references = details.map(({ id }) =>
+        database.collection("sessions").doc(id),
+      );
       const snapshots = await transaction.getAll(...references);
       const own =
         profile.role === "student"
@@ -63,18 +94,16 @@ export async function getAgenda(cookie?: string, now = Date.now()) {
         profile.role === "monitor"
           ? await Promise.all(
               references.map((reference) =>
-                transaction.get(
-                  reference
-                    .collection("registrations")
-                    .where("status", "==", "confirmed"),
-                ),
+                transaction.get(reference.collection("registrations")),
               ),
             )
           : [];
       const studentIds = [
         ...new Set(
           registrations.flatMap((snapshot) =>
-            snapshot.docs.map((row) => row.id),
+            snapshot.docs
+              .filter((row) => row.get("status") === "confirmed")
+              .map((row) => row.id),
           ),
         ),
       ];
@@ -112,17 +141,23 @@ export async function getAgenda(cookie?: string, now = Date.now()) {
                 helpRequest: saved.helpRequest,
                 version: saved.version,
                 cancellationReason: saved.cancellationReason,
+                attendance: saved.attendance,
               }
             : null,
           ...(profile.role === "monitor"
             ? {
                 registrations: registrations[i].docs
-                  .map((row) => ({
-                    studentId: row.id,
-                    displayName: names.get(row.id) ?? "Aluno sem nome",
-                    helpRequest: registrationState.parse(row.data())
-                      .helpRequest,
-                  }))
+                  .filter((row) => row.get("status") === "confirmed")
+                  .map((row) => {
+                    const saved = registrationState.parse(row.data());
+                    return {
+                      studentId: row.id,
+                      displayName: names.get(row.id) ?? "Aluno sem nome",
+                      helpRequest: saved.helpRequest,
+                      version: saved.version,
+                      attendance: saved.attendance,
+                    };
+                  })
                   .sort(
                     (a, b) =>
                       a.displayName.localeCompare(b.displayName, "pt-BR") ||
@@ -132,7 +167,16 @@ export async function getAgenda(cookie?: string, now = Date.now()) {
             : {}),
         };
       });
-      return { role: profile.role, sessions };
+      const receivedRequests = registrations.reduce(
+        (total, snapshot) =>
+          total +
+          snapshot.docs.filter((row) => {
+            const createdAt = row.get("createdAt")?.toMillis();
+            return createdAt >= now - 28 * 86_400_000 && createdAt <= now;
+          }).length,
+        0,
+      );
+      return { role: profile.role, sessions, receivedRequests, asOf: now };
     },
     { readOnly: true },
   );
@@ -151,13 +195,20 @@ export async function changeBooking(
   if (!parsed.success || !operation.success)
     throw new BookingError("Confira os dados da solicitação.");
   const command = parsed.data;
-  if ((command.type === "cancel-session") !== (profile.role === "monitor"))
+  const monitorCommand = [
+    "cancel-session",
+    "complete-session",
+    "attendance",
+  ].includes(command.type);
+  if (monitorCommand !== (profile.role === "monitor"))
     throw new BookingError("Sua conta não pode realizar esta operação.");
   const details = sessionDetails(command.sessionId);
   if (!details) throw new BookingError("Sessão inválida.");
   const database = getFirestore(getAdminApp());
   const reference = database.collection("sessions").doc(command.sessionId);
-  const ownReference = reference.collection("registrations").doc(profile.uid);
+  const ownReference = reference
+    .collection("registrations")
+    .doc(command.type === "attendance" ? command.studentId : profile.uid);
   const hash = createHash("sha256")
     .update(JSON.stringify(command))
     .digest("hex");
@@ -172,18 +223,82 @@ export async function changeBooking(
       ? sessionState.parse(sessionSnapshot.data())
       : emptySession;
     const ownSnapshot =
-      command.type !== "cancel-session"
+      command.type !== "cancel-session" && command.type !== "complete-session"
         ? await transaction.get(ownReference)
         : null;
     const own = ownSnapshot?.exists
       ? registrationState.parse(ownSnapshot.data())
       : null;
-    const previousOperation = command.type === "cancel-session" ? state : own;
+    const previousOperation =
+      command.type === "cancel-session" || command.type === "complete-session"
+        ? state
+        : own;
     if (previousOperation?.lastOperationId === operation.data) {
       if (previousOperation.lastOperationHash !== hash)
         throw new BookingError(
           "Esta tentativa já foi utilizada. Atualize a agenda.",
         );
+      return;
+    }
+
+    if (command.type === "complete-session") {
+      if (
+        !sessionSnapshot.exists ||
+        state.status !== "scheduled" ||
+        clock() < Date.parse(details.endsAt)
+      )
+        throw new BookingError(
+          "A sessão precisa ter terminado e estar agendada para registrar sua realização.",
+        );
+      const stamp = FieldValue.serverTimestamp();
+      transaction.update(reference, {
+        status: "completed",
+        completedAt: stamp,
+        completedBy: profile.uid,
+        updatedAt: stamp,
+        ...operationFields,
+      });
+      transaction.create(reference.collection("history").doc(operation.data), {
+        type: "completed",
+        by: profile.uid,
+        at: stamp,
+      });
+      return;
+    }
+
+    if (command.type === "attendance") {
+      if (
+        !sessionSnapshot.exists ||
+        !own ||
+        own.status !== "confirmed" ||
+        state.status === "cancelled" ||
+        clock() < Date.parse(details.startsAt)
+      )
+        throw new BookingError(
+          "Registre o comparecimento de um aluno inscrito após o início de uma sessão válida.",
+        );
+      if (own.version !== command.expectedVersion)
+        throw new BookingError(
+          "O registro mudou. Atualize a agenda antes de continuar.",
+        );
+      const stamp = FieldValue.serverTimestamp();
+      transaction.update(ownReference, {
+        attendance: command.attendance,
+        attendanceRecordedAt: stamp,
+        attendanceRecordedBy: profile.uid,
+        version: own.version + 1,
+        updatedAt: stamp,
+        ...operationFields,
+      });
+      transaction.create(
+        ownReference.collection("history").doc(operation.data),
+        {
+          type: "attendance",
+          attendance: command.attendance,
+          by: profile.uid,
+          at: stamp,
+        },
+      );
       return;
     }
 

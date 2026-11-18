@@ -4,8 +4,8 @@
     meatualiza
   </h1>
   <p>A group tutoring platform for Programming Logic at SENAI Dendezeiros.</p>
-  <img src="./docs/screenshots/f5-inscritos-monitor-desktop.png" alt="Monitor calendar showing occupancy, enrolled students, topics, and a student's question" width="100%" />
-  <p><sub>Monitor agenda with sample data from local Firebase emulators.</sub></p>
+  <img src="./docs/screenshots/f5-metrics-monitor-desktop.png" alt="Monitor dashboard showing upcoming sessions, topic demand, occupancy, completed sessions, and attendance" width="100%" />
+  <p><sub>Monitor dashboard with sample data from local Firebase emulators.</sub></p>
 </div>
 
 ## 📚 About
@@ -28,10 +28,11 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.
 - **Help requests:** select a course topic, describe a question, review it, and save it with the registration. Editing the question does not reserve another seat.
 - **Booking changes:** edit, cancel, or move a registration before the session starts. A failed move keeps the original registration.
-- **Monitor workspace:** responsive sidebar, occupancy out of ten students, confirmed student lists with names, topics and expandable questions, date blocking, and session cancellation with a reason visible to affected students. Session rosters are returned only to the authorized monitor.
+- **Monitor workspace:** operational dashboard with upcoming demand, occupancy, topic counts, received registrations, completed sessions, and attendance. The agenda includes upcoming sessions and persisted sessions started in the last 28 days, student lists and questions, date blocking, and cancellation reasons. Session rosters are returned only to the authorized monitor.
+- **Attendance and completion:** the monitor records present, absent, or unrecorded after a session starts, and explicitly confirms completion after its scheduled end. Attendance can be corrected after completion. Writes preserve registration counts and record their author and timestamp, with version checks and safe retries.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
-[Landing page](./docs/screenshots/landing-desktop.png) · [Topic icons](./docs/screenshots/topics-icons-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png)
+[Landing page](./docs/screenshots/landing-desktop.png) · [Topic icons](./docs/screenshots/topics-icons-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png) · [Attendance on mobile](./docs/screenshots/f5-attendance-monitor-mobile.png)
 
 ## 🧰 Stack
 
@@ -173,7 +174,7 @@ docs/screenshots/        # committed desktop and mobile previews
 
 ## 📌 Roadmap and documentation
 
-Current delivery: F5.2, confirmed student lists and questions in the monitor's calendar and list views. The student dashboard and monitor agenda use the next-28-days window; past-session history is not included yet. Use the existing refresh action to retrieve updates from other users. Next: attendance, completed sessions, student-reported question resolution, and dashboard metrics. After this work, F6 introduces an asynchronous forum for students and monitors, with course-topic discussions, replies, and moderation. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are also planned.
+Current delivery is F5.3, with manual attendance, explicit session completion, recent-session history, and monitor dashboard metrics. The student agenda uses the next-28-days window. The monitor can also inspect persisted sessions started in the previous 28 days, including after the term ends. Use the agenda refresh action to retrieve changes from other users. Attendance opens at 11:30 and completion opens at 12:30 in America/Bahia. Received requests count registration records created in the last 28 days, including cancelled registrations and move destinations. Next is F5.4, student-reported question resolution after a completed session with recorded presence. After this work, F6 introduces an asynchronous forum for students and monitors, with course-topic discussions, replies, and moderation. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are also planned.
 
 - [Roadmap and task board](./ROADMAP.md)
 - [Project requirements](./INSTRUCTIONS.md) and [domain glossary](./GLOSSARY.md)

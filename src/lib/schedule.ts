@@ -10,6 +10,12 @@ export const sessionIdSchema = z
 const version = z.int().nonnegative();
 const session = { sessionId: sessionIdSchema };
 const registration = { ...session, expectedVersion: version };
+export const attendanceSchema = z.enum(["unrecorded", "present", "absent"]);
+export const attendanceLabels = {
+  unrecorded: "Não registrado",
+  present: "Presente",
+  absent: "Ausente",
+} as const;
 
 export const bookingChangeSchema = z.discriminatedUnion("type", [
   z.strictObject({
@@ -33,6 +39,17 @@ export const bookingChangeSchema = z.discriminatedUnion("type", [
     ...session,
     reason: z.string().trim().min(1).max(500),
   }),
+  z.strictObject({ type: z.literal("complete-session"), ...session }),
+  z.strictObject({
+    type: z.literal("attendance"),
+    ...registration,
+    studentId: z
+      .string()
+      .min(1)
+      .max(128)
+      .regex(/^[^/]+$/),
+    attendance: attendanceSchema,
+  }),
 ]);
 
 export type BookingChange = z.infer<typeof bookingChangeSchema>;
@@ -41,6 +58,7 @@ export type RegistrationView = {
   helpRequest: HelpRequestDraft;
   version: number;
   cancellationReason: string | null;
+  attendance: z.infer<typeof attendanceSchema>;
 };
 export type SessionView = {
   id: string;
@@ -54,6 +72,8 @@ export type SessionView = {
     studentId: string;
     displayName: string;
     helpRequest: HelpRequestDraft;
+    version: number;
+    attendance: z.infer<typeof attendanceSchema>;
   }[];
 };
 

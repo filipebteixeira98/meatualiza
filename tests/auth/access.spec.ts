@@ -119,6 +119,9 @@ test("Google, perfil persistido, recarga e saída", async ({
   await page.getByRole("link", { name: "Painel", exact: true }).click();
   await expect(page).toHaveURL(/\/aluno$/);
   await page.setViewportSize({ width: 320, height: 800 });
+  await expect(
+    page.getByRole("button", { name: "Abrir navegação do aluno" }),
+  ).toBeVisible();
   await openNavigation(page, "aluno");
   await page.keyboard.press("Escape");
   await expect(
@@ -128,7 +131,7 @@ test("Google, perfil persistido, recarga e saída", async ({
   await expect(page).toHaveURL(/\/aluno\/agenda$/);
   await page.goto("/monitor");
   await expect(page).toHaveURL(/\/aluno$/);
-  await expect(page.getByText("Acesso de monitor ativo.")).toHaveCount(0);
+  await expect(page.getByText("Sua monitoria, em perspectiva.")).toHaveCount(0);
   await signOut(page, "aluno");
   await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
   expect(
