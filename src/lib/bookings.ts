@@ -1,12 +1,13 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldValue, Timestamp, getFirestore } from "firebase-admin/firestore";
 import { z } from "zod";
 import { getAccountProfile } from "./auth/session.ts";
 import { getAdminApp } from "./firebase/admin.ts";
 import { helpRequestSchema } from "./help-request.ts";
 import { monitoria } from "./monitoria.ts";
+import { evaluationSchema } from "./evaluations.ts";
 import {
   bookingChangeSchema,
   attendanceSchema,
@@ -33,7 +34,29 @@ const registrationState = z.object({
   lastOperationId: z.string(),
   lastOperationHash: z.string(),
   attendance: attendanceSchema.default("unrecorded"),
+  evaluation: evaluationSchema
+    .extend({
+      helpRequest: helpRequestSchema,
+      submittedAt: z.instanceof(Timestamp),
+      operationId: z.uuid(),
+      operationHash: z.string(),
+    })
+    .nullable()
+    .default(null),
 });
+function evaluationView(
+  evaluation: z.infer<typeof registrationState>["evaluation"],
+) {
+  return evaluation
+    ? {
+        resolution: evaluation.resolution,
+        comment: evaluation.comment,
+        helpRequest: evaluation.helpRequest,
+        submittedAt: evaluation.submittedAt.toDate().toISOString(),
+      }
+    : null;
+}
+
 const emptySession: z.infer<typeof sessionState> = {
   status: "scheduled",
   enrolledCount: 0,
@@ -43,15 +66,27 @@ const emptySession: z.infer<typeof sessionState> = {
 export async function getAgenda(
   cookie?: string,
   now = Date.now(),
-  includeHistory = false,
+  scope: "upcoming" | "recent" | "evaluations" = "upcoming",
 ) {
   const profile = await getAccountProfile(cookie);
   if (!profile) return null;
   const database = getFirestore(getAdminApp());
   return database.runTransaction(
     async (transaction) => {
-      const details = upcomingSessions(now);
-      if (profile.role === "monitor" && includeHistory) {
+      const details = scope === "evaluations" ? [] : upcomingSessions(now);
+      if (scope === "evaluations") {
+        const completed = await transaction.get(
+          database.collection("sessions").where("status", "==", "completed"),
+        );
+        details.push(
+          ...completed.docs
+            .flatMap((row) => {
+              const detail = sessionDetails(row.id);
+              return detail && Date.parse(detail.endsAt) <= now ? [detail] : [];
+            })
+            .sort((a, b) => b.id.localeCompare(a.id)),
+        );
+      } else if (profile.role === "monitor" && scope === "recent") {
         const recent = await transaction.get(
           database
             .collection("sessions")
@@ -142,6 +177,7 @@ export async function getAgenda(
                 version: saved.version,
                 cancellationReason: saved.cancellationReason,
                 attendance: saved.attendance,
+                evaluation: evaluationView(saved.evaluation),
               }
             : null,
           ...(profile.role === "monitor"
@@ -156,6 +192,7 @@ export async function getAgenda(
                       helpRequest: saved.helpRequest,
                       version: saved.version,
                       attendance: saved.attendance,
+                      evaluation: evaluationView(saved.evaluation),
                     };
                   })
                   .sort(
@@ -167,6 +204,15 @@ export async function getAgenda(
             : {}),
         };
       });
+      const visibleSessions =
+        scope === "evaluations" && profile.role === "student"
+          ? sessions.filter(
+              (session) =>
+                session.registration?.status === "confirmed" &&
+                (session.registration.evaluation ||
+                  session.registration.attendance === "present"),
+            )
+          : sessions;
       const receivedRequests = registrations.reduce(
         (total, snapshot) =>
           total +
@@ -176,7 +222,12 @@ export async function getAgenda(
           }).length,
         0,
       );
-      return { role: profile.role, sessions, receivedRequests, asOf: now };
+      return {
+        role: profile.role,
+        sessions: visibleSessions,
+        receivedRequests,
+        asOf: now,
+      };
     },
     { readOnly: true },
   );
@@ -229,6 +280,55 @@ export async function changeBooking(
     const own = ownSnapshot?.exists
       ? registrationState.parse(ownSnapshot.data())
       : null;
+    if (command.type === "evaluate") {
+      if (own?.evaluation) {
+        if (
+          own.evaluation.operationId === operation.data &&
+          own.evaluation.operationHash === hash
+        )
+          return;
+        throw new BookingError(
+          "Este atendimento já foi avaliado. Atualize a página para consultar sua resposta.",
+        );
+      }
+      if (
+        !sessionSnapshot.exists ||
+        state.status !== "completed" ||
+        own?.status !== "confirmed" ||
+        own.attendance !== "present" ||
+        clock() < Date.parse(details.endsAt)
+      )
+        throw new BookingError(
+          "A avaliação fica disponível após a realização da sessão e o registro da sua presença.",
+        );
+      if (own.version !== command.expectedVersion)
+        throw new BookingError(
+          "Seu atendimento foi atualizado. Atualize a página antes de avaliar.",
+        );
+      const stamp = FieldValue.serverTimestamp();
+      transaction.update(ownReference, {
+        evaluation: {
+          ...command.evaluation,
+          helpRequest: own.helpRequest,
+          submittedAt: stamp,
+          operationId: operation.data,
+          operationHash: hash,
+        },
+        version: own.version + 1,
+        updatedAt: stamp,
+        ...operationFields,
+      });
+      transaction.create(
+        ownReference.collection("history").doc(operation.data),
+        {
+          type: "evaluated",
+          resolution: command.evaluation.resolution,
+          by: profile.uid,
+          at: stamp,
+        },
+      );
+      return;
+    }
     const previousOperation =
       command.type === "cancel-session" || command.type === "complete-session"
         ? state

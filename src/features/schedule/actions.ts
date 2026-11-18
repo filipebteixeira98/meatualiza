@@ -22,8 +22,10 @@ export async function submitBooking(input: unknown, operationId: unknown) {
       "/aluno",
       "/aluno/agenda",
       "/aluno/duvida",
+      "/aluno/avaliacoes",
       "/monitor",
       "/monitor/agenda",
+      "/monitor/avaliacoes",
     ])
       revalidatePath(path);
     return { ok: true };

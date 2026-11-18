@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { helpRequestSchema, type HelpRequestDraft } from "./help-request.ts";
 import { monitoria } from "./monitoria.ts";
+import { evaluationSchema, type EvaluationView } from "./evaluations.ts";
 
 const DAY = 86_400_000;
 export const SCHEDULE_END = "2026-12-11";
@@ -41,6 +42,11 @@ export const bookingChangeSchema = z.discriminatedUnion("type", [
   }),
   z.strictObject({ type: z.literal("complete-session"), ...session }),
   z.strictObject({
+    type: z.literal("evaluate"),
+    ...registration,
+    evaluation: evaluationSchema,
+  }),
+  z.strictObject({
     type: z.literal("attendance"),
     ...registration,
     studentId: z
@@ -59,6 +65,7 @@ export type RegistrationView = {
   version: number;
   cancellationReason: string | null;
   attendance: z.infer<typeof attendanceSchema>;
+  evaluation: EvaluationView | null;
 };
 export type SessionView = {
   id: string;
@@ -74,6 +81,7 @@ export type SessionView = {
     helpRequest: HelpRequestDraft;
     version: number;
     attendance: z.infer<typeof attendanceSchema>;
+    evaluation: EvaluationView | null;
   }[];
 };
 

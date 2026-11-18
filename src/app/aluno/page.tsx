@@ -9,6 +9,7 @@ import { getAgenda } from "@/lib/bookings";
 import { helpRequestTopics } from "@/lib/help-request";
 import { monitoria } from "@/lib/monitoria";
 import { sessionLabel } from "@/lib/schedule";
+import { summarizeEvaluations } from "@/lib/evaluations";
 
 export const metadata: Metadata = {
   title: "Sua área de monitoria",
@@ -16,9 +17,15 @@ export const metadata: Metadata = {
 };
 
 export default async function StudentPage() {
-  const agenda = await getAgenda((await cookies()).get(SESSION_COOKIE)?.value);
-  if (!agenda) redirect("/entrar");
-  if (agenda.role === "monitor") redirect("/monitor");
+  const cookie = (await cookies()).get(SESSION_COOKIE)?.value;
+  const [agenda, evaluations] = await Promise.all([
+    getAgenda(cookie),
+    getAgenda(cookie, undefined, "evaluations"),
+  ]);
+  if (!agenda || !evaluations) redirect("/entrar");
+  if (agenda.role === "monitor" || evaluations.role === "monitor")
+    redirect("/monitor");
+  const evaluationSummary = summarizeEvaluations(evaluations.sessions);
   const upcoming = agenda.sessions.filter(
     (session) =>
       session.status === "scheduled" &&
@@ -137,6 +144,29 @@ export default async function StudentPage() {
             </div>
           )}
         </section>
+        {(evaluationSummary.pending.length > 0 ||
+          evaluationSummary.responded.length > 0) && (
+          <section
+            aria-labelledby="evaluations-title"
+            className="mt-10 rounded-2xl border border-border bg-muted p-6"
+          >
+            <h2 id="evaluations-title" className="text-xl font-medium">
+              Avaliações dos atendimentos
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {evaluationSummary.pending.length} aguardando avaliação ·{" "}
+              {evaluationSummary.responded.length}{" "}
+              {evaluationSummary.responded.length === 1
+                ? "respondida"
+                : "respondidas"}
+            </p>
+            <Button asChild variant="outline" className="mt-4 min-h-11 px-4">
+              <Link href="/aluno/avaliacoes">
+                Ver avaliações <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </section>
+        )}
         {cancelled.length > 0 && (
           <section aria-labelledby="cancelled-title" className="mt-10">
             <h2 id="cancelled-title" className="text-xl font-medium">
