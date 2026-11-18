@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { getAgenda } from "@/lib/bookings";
@@ -149,11 +149,18 @@ export default async function MonitorPage() {
               </div>
             ))}
           </dl>
-          <p className="mt-4 text-xs leading-6 text-muted-foreground">
-            Pedidos recebidos contam inscrições criadas no período, incluindo
-            canceladas e destinos de remarcação. O comparecimento é registrado
-            pelo monitor.
-          </p>
+          <div
+            role="note"
+            aria-label="Sobre os indicadores"
+            className="mt-5 flex items-start gap-3 rounded-xl border border-border bg-muted p-4 text-foreground sm:p-5"
+          >
+            <Info aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+            <p className="text-sm leading-6">
+              Pedidos recebidos contam inscrições criadas no período, incluindo
+              canceladas e destinos de remarcação. O comparecimento é registrado
+              pelo monitor.
+            </p>
+          </div>
         </section>
       </div>
     </main>
