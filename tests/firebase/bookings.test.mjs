@@ -126,6 +126,7 @@ test("consulta não cria sessões e cada aluno recebe apenas a própria dúvida"
       helpRequest: doubt,
       version: 1,
       attendance: "unrecorded",
+      evaluation: null,
     },
   ]);
 });
@@ -153,6 +154,7 @@ test("monitor recebe nomes ordenados e dúvidas sem expor dados extras do perfil
         "studentId",
         "version",
         "attendance",
+        "evaluation",
       ].sort(),
     );
     assert.deepEqual(registration.helpRequest, doubt);
@@ -182,6 +184,7 @@ test("perfil removido ou sem nome não esconde a inscrição do monitor", async 
       helpRequest: doubt,
       version: 1,
       attendance: "unrecorded",
+      evaluation: null,
     },
   ]);
 });
@@ -526,7 +529,7 @@ test("comparecimento é manual, restrito ao monitor e preserva as vagas", async 
   assert.equal((await own(dates[0])).attendanceRecordedBy, monitor.uid);
   assert.equal((await own(dates[0])).version, 2);
   assert.equal((await state(dates[0])).enrolledCount, 2);
-  const agenda = await getAgenda(monitor.cookie, start, true);
+  const agenda = await getAgenda(monitor.cookie, start, "recent");
   assert.deepEqual(
     agenda.sessions[0].registrations.map((row) => row.attendance).sort(),
     ["present", "unrecorded"],
@@ -695,18 +698,18 @@ test("histórico consulta somente sessões persistidas nos últimos 28 dias, inc
   await execute(students[0], command("2026-12-09"));
   const afterTerm = Date.parse("2026-12-12T10:00:00-03:00");
   assert.deepEqual((await getAgenda(monitor.cookie, afterTerm)).sessions, []);
-  const agenda = await getAgenda(monitor.cookie, afterTerm, true);
+  const agenda = await getAgenda(monitor.cookie, afterTerm, "recent");
   assert.deepEqual(
     agenda.sessions.map((session) => session.id),
     ["2026-12-09"],
   );
   assert.equal(agenda.sessions[0].registrations[0].attendance, "unrecorded");
   assert.deepEqual(
-    (await getAgenda(students[1].cookie, afterTerm, true)).sessions,
+    (await getAgenda(students[1].cookie, afterTerm, "recent")).sessions,
     [],
   );
   assert.deepEqual(
-    (await getAgenda(monitor.cookie, afterTerm + 28 * 86_400_000, true))
+    (await getAgenda(monitor.cookie, afterTerm + 28 * 86_400_000, "recent"))
       .sessions,
     [],
   );
@@ -728,11 +731,246 @@ test("pedidos recebidos usam criação, incluem cancelados e excluem registros f
     sessionId: dates[0],
     expectedVersion: 1,
   });
-  const agenda = await getAgenda(monitor.cookie, referenceTime, true);
+  const agenda = await getAgenda(monitor.cookie, referenceTime, "recent");
   assert.equal(agenda.receivedRequests, 1);
   assert.equal(agenda.sessions[0].registrations.length, 2);
   assert.equal(
     (await getAgenda(students[0].cookie, referenceTime)).receivedRequests,
     0,
   );
+});
+
+async function attendedSession(user = students[0], id = dates[0]) {
+  await execute(user, command(id));
+  clock = () =>
+    Date.parse(
+      upcomingSessions(referenceTime).find((session) => session.id === id)
+        .endsAt,
+    );
+  await execute(monitor, {
+    type: "attendance",
+    sessionId: id,
+    studentId: user.uid,
+    expectedVersion: 1,
+    attendance: "present",
+  });
+  await execute(monitor, { type: "complete-session", sessionId: id });
+  return {
+    type: "evaluate",
+    sessionId: id,
+    expectedVersion: 2,
+    evaluation: {
+      resolution: "partial",
+      comment: " Já consigo organizar a condição. ",
+    },
+  };
+}
+
+test("avaliação exige realização e presença, e pendência não bloqueia novas inscrições", async () => {
+  await execute(students[0], command(dates[0]));
+  const input = {
+    type: "evaluate",
+    sessionId: dates[0],
+    expectedVersion: 1,
+    evaluation: { resolution: "resolved" },
+  };
+  await assert.rejects(execute(students[0], input), BookingError);
+  clock = () => Date.parse(upcomingSessions(referenceTime)[0].endsAt);
+  await execute(monitor, { type: "complete-session", sessionId: dates[0] });
+  await assert.rejects(execute(students[0], input), BookingError);
+  await execute(monitor, {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 1,
+    attendance: "present",
+  });
+  const pending = await getAgenda(students[0].cookie, clock(), "evaluations");
+  assert.equal(pending.sessions.length, 1);
+  assert.equal(pending.sessions[0].registration.evaluation, null);
+  await execute(students[0], command(dates[1]));
+  await assert.rejects(execute(students[0], input), BookingError);
+  await execute(students[0], { ...input, expectedVersion: 2 });
+  const saved = await own(dates[0]);
+  assert.equal(saved.evaluation.resolution, "resolved");
+  assert.equal(saved.evaluation.comment, "");
+  assert.equal((await state(dates[0])).enrolledCount, 1);
+  assert.equal((await state(dates[1])).enrolledCount, 1);
+});
+
+test("avaliação é única, reenvios são seguros e preservam contexto após correções", async () => {
+  const input = await attendedSession();
+  const operation = randomUUID();
+  await Promise.all(
+    Array.from({ length: 3 }, () => execute(students[0], input, operation)),
+  );
+  const saved = await own(dates[0]);
+  assert.equal(saved.version, 3);
+  assert.equal(saved.evaluation.comment, "Já consigo organizar a condição.");
+  assert.deepEqual(saved.evaluation.helpRequest, doubt);
+  assert.equal(
+    (
+      await database
+        .collection(
+          `sessions/${dates[0]}/registrations/${students[0].uid}/history`,
+        )
+        .get()
+    ).size,
+    3,
+  );
+  await execute(monitor, {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 3,
+    attendance: "absent",
+  });
+  await database
+    .doc(`sessions/${dates[0]}/registrations/${students[0].uid}`)
+    .update({
+      helpRequest: {
+        topicId: "condicionais",
+        description: "Descrição posterior",
+      },
+    });
+  await execute(students[0], input, operation);
+  await assert.rejects(
+    execute(
+      students[0],
+      { ...input, evaluation: { resolution: "resolved" } },
+      operation,
+    ),
+    BookingError,
+  );
+  await assert.rejects(
+    execute(students[0], { ...input, expectedVersion: 4 }),
+    BookingError,
+  );
+  const current = await own(dates[0]);
+  assert.equal(
+    current.evaluation.submittedAt.isEqual(saved.evaluation.submittedAt),
+    true,
+  );
+  assert.deepEqual(current.evaluation.helpRequest, doubt);
+  const view = (await getAgenda(students[0].cookie, clock(), "evaluations"))
+    .sessions[0].registration;
+  assert.equal(view.attendance, "absent");
+  assert.equal(view.evaluation.resolution, "partial");
+  assert.deepEqual(view.evaluation.helpRequest, doubt);
+  assert.equal(typeof view.evaluation.submittedAt, "string");
+  assert.equal(JSON.stringify(view).includes("operationHash"), false);
+});
+
+test("duas respostas concorrentes geram uma única avaliação", async () => {
+  const input = await attendedSession();
+  const results = await Promise.allSettled(
+    ["resolved", "unresolved"].map((resolution) =>
+      execute(students[0], { ...input, evaluation: { resolution } }),
+    ),
+  );
+  assert.equal(
+    results.filter((result) => result.status === "fulfilled").length,
+    1,
+  );
+  assert.equal((await own(dates[0])).version, 3);
+  assert.equal((await state(dates[0])).enrolledCount, 1);
+});
+
+test("monitor, outro aluno, dados forjados e comparecimento inelegível não avaliam", async () => {
+  const input = await attendedSession();
+  for (const [user, body] of [
+    [null, input],
+    [monitor, input],
+    [students[1], input],
+    [students[0], { ...input, studentId: students[1].uid }],
+    [
+      students[0],
+      { ...input, evaluation: { resolution: "resolved", helpRequest: doubt } },
+    ],
+    [
+      students[0],
+      {
+        ...input,
+        evaluation: { resolution: "resolved", comment: "a".repeat(1001) },
+      },
+    ],
+  ])
+    await assert.rejects(execute(user, body), BookingError);
+  for (const [index, attendance] of ["absent", "unrecorded"].entries()) {
+    await execute(monitor, {
+      type: "attendance",
+      sessionId: dates[0],
+      studentId: students[0].uid,
+      expectedVersion: 2 + index,
+      attendance,
+    });
+    await assert.rejects(
+      execute(students[0], { ...input, expectedVersion: 3 + index }),
+      BookingError,
+    );
+  }
+  assert.equal((await own(dates[0])).evaluation, undefined);
+});
+
+test("cancelamento, realização futura e disputa com correção de presença preservam elegibilidade", async () => {
+  await execute(students[0], command(dates[0]));
+  await execute(students[0], {
+    type: "cancel",
+    sessionId: dates[0],
+    expectedVersion: 1,
+  });
+  clock = () => Date.parse(upcomingSessions(referenceTime)[0].endsAt);
+  await execute(monitor, { type: "complete-session", sessionId: dates[0] });
+  const input = {
+    type: "evaluate",
+    sessionId: dates[0],
+    expectedVersion: 2,
+    evaluation: { resolution: "resolved" },
+  };
+  await assert.rejects(execute(students[0], input), BookingError);
+  await database.recursiveDelete(database.collection("sessions"));
+  clock = () => referenceTime;
+  const attended = await attendedSession();
+  clock = () => referenceTime;
+  await assert.rejects(execute(students[0], attended), BookingError);
+  clock = () => Date.parse(upcomingSessions(referenceTime)[0].endsAt);
+  const results = await Promise.allSettled([
+    execute(students[0], attended),
+    execute(monitor, {
+      type: "attendance",
+      sessionId: dates[0],
+      studentId: students[0].uid,
+      expectedVersion: 2,
+      attendance: "absent",
+    }),
+  ]);
+  assert.equal(
+    results.filter((result) => result.status === "fulfilled").length,
+    1,
+  );
+  const saved = await own(dates[0]);
+  assert.equal(Boolean(saved.evaluation), saved.attendance === "present");
+});
+
+test("avaliações continuam acessíveis após 28 dias e o término, com isolamento entre alunos", async () => {
+  const input = await attendedSession();
+  const later = Date.parse("2027-01-15T10:00:00-03:00");
+  assert.equal(
+    (await getAgenda(monitor.cookie, later, "recent")).sessions.length,
+    0,
+  );
+  const student = await getAgenda(students[0].cookie, later, "evaluations");
+  assert.equal(student.sessions.length, 1);
+  assert.equal("registrations" in student.sessions[0], false);
+  assert.deepEqual(
+    (await getAgenda(students[1].cookie, later, "evaluations")).sessions,
+    [],
+  );
+  clock = () => later;
+  await execute(students[0], input);
+  const response = (await getAgenda(monitor.cookie, later, "evaluations"))
+    .sessions[0].registrations[0].evaluation;
+  assert.equal(response.resolution, "partial");
+  assert.deepEqual(response.helpRequest, doubt);
+  assert.equal(JSON.stringify(response).includes("operationId"), false);
 });

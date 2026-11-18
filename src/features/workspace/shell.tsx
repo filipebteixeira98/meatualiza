@@ -8,6 +8,7 @@ import {
   CalendarDays,
   ChevronsUpDown,
   CircleUserRound,
+  ClipboardCheck,
   LayoutDashboard,
   LoaderCircle,
   LogOut,
@@ -33,11 +34,13 @@ const navigation = {
   monitor: [
     { href: "/monitor", label: "Painel", icon: LayoutDashboard },
     { href: "/monitor/agenda", label: "Agenda", icon: CalendarDays },
+    { href: "/monitor/avaliacoes", label: "Avaliações", icon: ClipboardCheck },
   ],
   student: [
     { href: "/aluno", label: "Painel", icon: LayoutDashboard },
     { href: "/aluno/agenda", label: "Agenda", icon: CalendarDays },
     { href: "/aluno/duvida", label: "Nova inscrição", icon: MessageSquarePlus },
+    { href: "/aluno/avaliacoes", label: "Avaliações", icon: ClipboardCheck },
   ],
 };
 type Role = keyof typeof navigation;

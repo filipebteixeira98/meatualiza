@@ -18,7 +18,7 @@ export default async function MonitorAgendaPage({
   const agenda = await getAgenda(
     (await cookies()).get(SESSION_COOKIE)?.value,
     undefined,
-    true,
+    "recent",
   );
   if (!agenda) redirect("/entrar");
   if (agenda.role !== "monitor") redirect("/aluno/agenda");

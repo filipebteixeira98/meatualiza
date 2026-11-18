@@ -13,6 +13,9 @@ import {
   MessageSquareText,
   UserCheck,
   UserX,
+  CircleCheck,
+  CircleDot,
+  CircleX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SESSION_COOKIE } from "@/lib/auth/session";
@@ -20,6 +23,7 @@ import { getAgenda } from "@/lib/bookings";
 import { summarizeMonitorSessions } from "@/lib/monitor-dashboard";
 import { monitoria } from "@/lib/monitoria";
 import { sessionLabel } from "@/lib/schedule";
+import { summarizeEvaluations } from "@/lib/evaluations";
 
 export const metadata: Metadata = {
   title: "Sua área de monitor",
@@ -27,14 +31,21 @@ export const metadata: Metadata = {
 };
 
 export default async function MonitorPage() {
-  const agenda = await getAgenda(
-    (await cookies()).get(SESSION_COOKIE)?.value,
-    undefined,
-    true,
-  );
-  if (!agenda) redirect("/entrar");
-  if (agenda.role !== "monitor") redirect("/aluno");
+  const cookie = (await cookies()).get(SESSION_COOKIE)?.value;
+  const [agenda, evaluations] = await Promise.all([
+    getAgenda(cookie, undefined, "recent"),
+    getAgenda(cookie, undefined, "evaluations"),
+  ]);
+  if (!agenda || !evaluations) redirect("/entrar");
+  if (agenda.role !== "monitor" || evaluations.role !== "monitor")
+    redirect("/aluno");
   const summary = summarizeMonitorSessions(agenda.sessions, agenda.asOf);
+  const evaluationSummary = summarizeEvaluations(evaluations.sessions);
+  const resultIcons = {
+    resolved: CircleCheck,
+    partial: CircleDot,
+    unresolved: CircleX,
+  };
 
   return (
     <main
@@ -202,6 +213,50 @@ export default async function MonitorPage() {
               pelo monitor.
             </p>
           </div>
+        </section>
+        <section aria-labelledby="resolution-title" className="mt-10">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="resolution-title" className="text-lg font-medium">
+              Resolução das dúvidas
+            </h2>
+            <Button asChild variant="link" className="min-h-11 px-0">
+              <Link href="/monitor/avaliacoes">
+                Ver avaliações <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Todas as sessões realizadas · {evaluationSummary.responded.length}{" "}
+            {evaluationSummary.responded.length === 1
+              ? "avaliação recebida"
+              : "avaliações recebidas"}{" "}
+            · {evaluationSummary.pending.length}{" "}
+            {evaluationSummary.pending.length === 1
+              ? "aguardada"
+              : "aguardadas"}
+          </p>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+            {evaluationSummary.results.map(({ resolution, label, count }) => {
+              const Icon = resultIcons[resolution];
+              return (
+                <div
+                  key={resolution}
+                  className="rounded-xl border border-border bg-card p-5"
+                >
+                  <dt className="flex items-start justify-between gap-3 text-sm text-muted-foreground">
+                    <span>{label}</span>
+                    <Icon
+                      aria-hidden="true"
+                      className="mt-0.5 size-4 shrink-0"
+                    />
+                  </dt>
+                  <dd className="mt-3 font-mono text-3xl tracking-tight">
+                    {count}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
         </section>
       </div>
     </main>

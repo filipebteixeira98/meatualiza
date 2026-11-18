@@ -4,7 +4,7 @@
     meatualiza
   </h1>
   <p>A group tutoring platform for Programming Logic at SENAI Dendezeiros.</p>
-  <img src="./docs/screenshots/f5-metrics-monitor-desktop.png" alt="Monitor dashboard showing upcoming sessions, topic demand, occupancy, completed sessions, and attendance" width="100%" />
+  <img src="./docs/screenshots/f5-metrics-monitor-desktop.png" alt="Monitor dashboard showing session demand, attendance, and student-reported question resolution" width="100%" />
   <p><sub>Monitor dashboard with sample data from local Firebase emulators.</sub></p>
 </div>
 
@@ -24,15 +24,16 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Public landing:** compact dark layout with original illustrations, a prominent image carousel with overlaid captions, arrow controls and navigation dots, session details, and topic icons with labels available on hover, keyboard focus, or touch. Images advance every five seconds; visitors can pause, navigate manually, or use reduced motion to disable automatic advancement.
 - **Interactive cube:** a monochrome 3×3 sculpture with slow automatic rotation and manual rotation by drag, touch, or arrow keys. Click, tap, or press Space to pause/resume. Automatic rotation runs at up to 30 fps and pauses offscreen, in hidden tabs, during interaction, or with reduced motion. Three.js loads near the viewport and uses one static instanced mesh with capped pixel density and a fallback without WebGL.
 - **Google sign-in:** any personal or institutional Google account can join. The server selects the student or monitor workspace.
-- **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. Both workspaces have a responsive sidebar and an account menu for sign-out.
+- **Student dashboard:** upcoming confirmed registrations, saved questions, cancellation reasons, and direct links to the matching session in the agenda. The dashboard also links to pending and answered session evaluations. Both workspaces have a responsive sidebar and an account menu for sign-out.
 - **Student agenda:** responsive calendar and list views, automatic confirmation when a seat is available, and one active registration per student per session.
 - **Help requests:** select a course topic, describe a question, review it, and save it with the registration. Editing the question does not reserve another seat.
 - **Booking changes:** edit, cancel, or move a registration before the session starts. A failed move keeps the original registration.
 - **Monitor workspace:** operational dashboard with upcoming demand, occupancy, topic counts, received registrations, completed sessions, and attendance. The agenda includes upcoming sessions and persisted sessions started in the last 28 days, student lists and questions, date blocking, and cancellation reasons. Session rosters are returned only to the authorized monitor.
 - **Attendance and completion:** the monitor records present, absent, or unrecorded after a session starts, and explicitly confirms completion after its scheduled end. Attendance can be corrected after completion. Writes preserve registration counts and record their author and timestamp, with version checks and safe retries.
+- **Student-reported resolution:** one evaluation per confirmed registration after a completed session with recorded presence. Students choose resolved, partially resolved, or unresolved and can add a comment of up to 1,000 characters. The response preserves a snapshot of the question and is available to its student and the monitor. Pending evaluations allow new bookings. Evaluation pages cover all completed sessions, including beyond the 28-day agenda window.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
-[Landing page](./docs/screenshots/landing-desktop.png) · [Topic icons](./docs/screenshots/topics-icons-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png) · [Attendance on mobile](./docs/screenshots/f5-attendance-monitor-mobile.png)
+[Landing page](./docs/screenshots/landing-desktop.png) · [Topic icons](./docs/screenshots/topics-icons-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png) · [Attendance on mobile](./docs/screenshots/f5-attendance-monitor-mobile.png) · [Student evaluation](./docs/screenshots/f5-evaluation-student-desktop.png) · [Monitor evaluations](./docs/screenshots/f5-evaluations-monitor-desktop.png)
 
 ## 🧰 Stack
 
@@ -150,7 +151,7 @@ npm test
 npm run test:auth
 ```
 
-- `test:domain` checks scheduling rules and help-request contracts.
+- `test:domain` checks scheduling rules, help-request contracts, and evaluation summaries.
 - `test:firebase` starts Auth/Firestore emulators and checks authorization, ownership, transactions, capacity races, and retries.
 - `npm test` runs the production landing/access browser suite on port `3100`, including keyboard navigation, image loading, and responsive layouts.
 - `test:auth` starts the emulators and a separate development server on port `3101` for Google popup, session, role, and booking flows. Tests use fictitious accounts; captures and traces go to `test-results/`.
@@ -165,7 +166,7 @@ Do not run the emulator suites or the build/browser checks concurrently: they sh
 src/
 ├── app/                 # routes, layouts, auth endpoints, theme, and local fonts
 ├── components/          # shared brand, navigation, and UI primitives
-├── features/            # landing, authentication, help requests, workspace shell, agenda
+├── features/            # landing, authentication, help requests, workspace shell, agenda, evaluations
 └── lib/                 # domain rules, validation, authorization, and Firebase clients
 tests/                   # domain, Firebase/server, and browser suites
 scripts/                 # trusted monitor access commands
@@ -174,7 +175,7 @@ docs/screenshots/        # committed desktop and mobile previews
 
 ## 📌 Roadmap and documentation
 
-Current delivery is F5.3, with manual attendance, explicit session completion, recent-session history, and monitor dashboard metrics. The student agenda uses the next-28-days window. The monitor can also inspect persisted sessions started in the previous 28 days, including after the term ends. Use the agenda refresh action to retrieve changes from other users. Attendance opens at 11:30 and completion opens at 12:30 in America/Bahia. Received requests count registration records created in the last 28 days, including cancelled registrations and move destinations. Next is F5.4, student-reported question resolution after a completed session with recorded presence. After this work, F6 introduces an asynchronous forum for students and monitors, with course-topic discussions, replies, and moderation. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are also planned.
+Current delivery covers F5.4–F5.6, with student-reported question resolution, private evaluation pages, safe retries, and resolution counts for the monitor. F5.3 attendance and operational metrics are already integrated. The student agenda uses the next-28-days window. The monitor can also inspect persisted sessions started in the previous 28 days, including after the term ends. Use the agenda refresh action to retrieve changes from other users. Attendance opens at 11:30 and completion opens at 12:30 in America/Bahia. Received requests count registration records created in the last 28 days, including cancelled registrations and move destinations. Evaluation results and pending counts cover all completed sessions. Responses preserve their original question context and remain available after later attendance corrections. Next, F6 introduces an asynchronous forum for students and monitors, with course-topic discussions, replies, and moderation. Guided tours, privacy preferences, PostHog Surveys, Sentry, and analytics are also planned.
 
 - [Roadmap and task board](./ROADMAP.md)
 - [Project requirements](./INSTRUCTIONS.md) and [domain glossary](./GLOSSARY.md)
