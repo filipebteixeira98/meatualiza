@@ -18,7 +18,13 @@ export async function submitBooking(input: unknown, operationId: unknown) {
       input,
       operationId,
     );
-    for (const path of ["/aluno/agenda", "/aluno/duvida", "/monitor/agenda"])
+    for (const path of [
+      "/aluno",
+      "/aluno/agenda",
+      "/aluno/duvida",
+      "/monitor",
+      "/monitor/agenda",
+    ])
       revalidatePath(path);
     return { ok: true };
   } catch (error) {

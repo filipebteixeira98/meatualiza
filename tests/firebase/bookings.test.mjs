@@ -12,7 +12,7 @@ import {
   getApps as getAdminApps,
 } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getAdminApp } from "../../src/lib/firebase/admin.ts";
 import { getBrowserAuth } from "../../src/lib/firebase/client.ts";
 import { createStudentSession } from "../../src/lib/auth/session.ts";
@@ -124,6 +124,8 @@ test("consulta não cria sessões e cada aluno recebe apenas a própria dúvida"
       studentId: students[0].uid,
       displayName: "Aluno Agenda",
       helpRequest: doubt,
+      version: 1,
+      attendance: "unrecorded",
     },
   ]);
 });
@@ -143,11 +145,16 @@ test("monitor recebe nomes ordenados e dúvidas sem expor dados extras do perfil
     ["Álvaro Lima", "Zélia Souza"],
   );
   for (const registration of registrations) {
-    assert.deepEqual(Object.keys(registration).sort(), [
-      "displayName",
-      "helpRequest",
-      "studentId",
-    ]);
+    assert.deepEqual(
+      Object.keys(registration).sort(),
+      [
+        "displayName",
+        "helpRequest",
+        "studentId",
+        "version",
+        "attendance",
+      ].sort(),
+    );
     assert.deepEqual(registration.helpRequest, doubt);
   }
   assert.equal(JSON.stringify(registrations).includes("não expor"), false);
@@ -173,6 +180,8 @@ test("perfil removido ou sem nome não esconde a inscrição do monitor", async 
       studentId: user.uid,
       displayName: "Aluno sem nome",
       helpRequest: doubt,
+      version: 1,
+      attendance: "unrecorded",
     },
   ]);
 });
@@ -496,4 +505,234 @@ test("no início do encontro, inscrição, edição, cancelamento e troca encerr
     await assert.rejects(execute(students[0], input), BookingError);
   assert.equal((await own(dates[0])).status, "confirmed");
   assert.equal((await state(dates[0])).enrolledCount, 1);
+});
+
+test("comparecimento é manual, restrito ao monitor e preserva as vagas", async () => {
+  await fill(dates[0], students.slice(0, 2));
+  const start = Date.parse(upcomingSessions(referenceTime)[0].startsAt);
+  const attendance = {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 1,
+    attendance: "present",
+  };
+  await assert.rejects(execute(monitor, attendance), BookingError);
+  clock = () => start;
+  await assert.rejects(execute(students[0], attendance), BookingError);
+  await assert.rejects(execute(null, attendance), BookingError);
+  await execute(monitor, attendance);
+  assert.equal((await own(dates[0])).attendance, "present");
+  assert.equal((await own(dates[0])).attendanceRecordedBy, monitor.uid);
+  assert.equal((await own(dates[0])).version, 2);
+  assert.equal((await state(dates[0])).enrolledCount, 2);
+  const agenda = await getAgenda(monitor.cookie, start, true);
+  assert.deepEqual(
+    agenda.sessions[0].registrations.map((row) => row.attendance).sort(),
+    ["present", "unrecorded"],
+  );
+  assert.equal(agenda.sessions[0].status, "scheduled");
+});
+
+test("realização exige fim do encontro e não infere presença; permite correção posterior", async () => {
+  await fill(dates[0], students.slice(0, 2));
+  const end = Date.parse(upcomingSessions(referenceTime)[0].endsAt);
+  const complete = { type: "complete-session", sessionId: dates[0] };
+  clock = () => end - 1;
+  await assert.rejects(execute(monitor, complete), BookingError);
+  clock = () => end;
+  await assert.rejects(execute(students[0], complete), BookingError);
+  const operation = randomUUID();
+  await Promise.all(
+    Array.from({ length: 3 }, () => execute(monitor, complete, operation)),
+  );
+  assert.equal((await state(dates[0])).status, "completed");
+  assert.equal((await state(dates[0])).completedBy, monitor.uid);
+  assert.equal((await state(dates[0])).enrolledCount, 2);
+  assert.equal(
+    (await database.collection(`sessions/${dates[0]}/history`).get()).size,
+    1,
+  );
+  for (const student of students.slice(0, 2))
+    assert.equal((await own(dates[0], student)).attendance, undefined);
+  await execute(monitor, {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 1,
+    attendance: "present",
+  });
+  await execute(monitor, {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 2,
+    attendance: "unrecorded",
+  });
+  assert.equal((await own(dates[0])).attendance, "unrecorded");
+  await assert.rejects(
+    execute(monitor, {
+      type: "cancel-session",
+      sessionId: dates[0],
+      reason: "Já realizada",
+    }),
+    BookingError,
+  );
+});
+
+test("reenvios e versões concorrentes de presença não sobrescrevem registros", async () => {
+  await execute(students[0], command(dates[0]));
+  clock = () => Date.parse(upcomingSessions(referenceTime)[0].startsAt);
+  const attendance = {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 1,
+    attendance: "present",
+  };
+  const operation = randomUUID();
+  await Promise.all(
+    Array.from({ length: 3 }, () => execute(monitor, attendance, operation)),
+  );
+  assert.equal((await own(dates[0])).version, 2);
+  await assert.rejects(
+    execute(monitor, { ...attendance, attendance: "absent" }, operation),
+    BookingError,
+  );
+  const results = await Promise.allSettled(
+    ["absent", "unrecorded"].map((value) =>
+      execute(monitor, {
+        ...attendance,
+        expectedVersion: 2,
+        attendance: value,
+      }),
+    ),
+  );
+  assert.equal(
+    results.filter((result) => result.status === "fulfilled").length,
+    1,
+  );
+  const saved = await own(dates[0]);
+  await assert.rejects(execute(monitor, attendance, operation), BookingError);
+  assert.equal((await own(dates[0])).attendance, saved.attendance);
+  assert.equal(saved.version, 3);
+  assert.equal(
+    (
+      await database
+        .collection(
+          `sessions/${dates[0]}/registrations/${students[0].uid}/history`,
+        )
+        .get()
+    ).size,
+    3,
+  );
+});
+
+test("presença rejeita inscrição cancelada, aluno inexistente, sessão cancelada e perfil revogado", async () => {
+  await fill(dates[0], students.slice(0, 2));
+  await execute(students[0], {
+    type: "cancel",
+    sessionId: dates[0],
+    expectedVersion: 1,
+  });
+  clock = () => Date.parse(upcomingSessions(referenceTime)[0].startsAt);
+  const attendance = {
+    type: "attendance",
+    sessionId: dates[0],
+    studentId: students[0].uid,
+    expectedVersion: 2,
+    attendance: "present",
+  };
+  await assert.rejects(execute(monitor, attendance), BookingError);
+  await assert.rejects(
+    execute(monitor, {
+      ...attendance,
+      studentId: "missing",
+      expectedVersion: 0,
+    }),
+    BookingError,
+  );
+  await assert.rejects(
+    execute(monitor, { ...attendance, studentId: "invalid/path" }),
+    BookingError,
+  );
+  await getAuth(getAdminApp()).setCustomUserClaims(monitor.uid, {});
+  try {
+    await assert.rejects(
+      execute(monitor, {
+        ...attendance,
+        studentId: students[1].uid,
+        expectedVersion: 1,
+      }),
+      BookingError,
+    );
+  } finally {
+    await getAuth(getAdminApp()).setCustomUserClaims(monitor.uid, {
+      monitor: true,
+    });
+  }
+  await execute(monitor, {
+    type: "cancel-session",
+    sessionId: dates[0],
+    reason: "Cancelamento",
+  });
+  await assert.rejects(
+    execute(monitor, {
+      ...attendance,
+      studentId: students[1].uid,
+      expectedVersion: 2,
+    }),
+    BookingError,
+  );
+  await assert.rejects(
+    execute(monitor, { type: "complete-session", sessionId: dates[0] }),
+    BookingError,
+  );
+});
+
+test("histórico consulta somente sessões persistidas nos últimos 28 dias, inclusive após o período", async () => {
+  clock = () => Date.parse("2026-11-20T10:00:00-03:00");
+  await execute(students[0], command("2026-12-09"));
+  const afterTerm = Date.parse("2026-12-12T10:00:00-03:00");
+  assert.deepEqual((await getAgenda(monitor.cookie, afterTerm)).sessions, []);
+  const agenda = await getAgenda(monitor.cookie, afterTerm, true);
+  assert.deepEqual(
+    agenda.sessions.map((session) => session.id),
+    ["2026-12-09"],
+  );
+  assert.equal(agenda.sessions[0].registrations[0].attendance, "unrecorded");
+  assert.deepEqual(
+    (await getAgenda(students[1].cookie, afterTerm, true)).sessions,
+    [],
+  );
+  assert.deepEqual(
+    (await getAgenda(monitor.cookie, afterTerm + 28 * 86_400_000, true))
+      .sessions,
+    [],
+  );
+  assert.equal((await database.collection("sessions").get()).size, 1);
+});
+
+test("pedidos recebidos usam criação, incluem cancelados e excluem registros fora do período", async () => {
+  await fill(dates[0], students.slice(0, 3));
+  for (const [index, created] of [
+    referenceTime - 1,
+    referenceTime - 28 * 86_400_000 - 1,
+    referenceTime + 1,
+  ].entries())
+    await database
+      .doc(`sessions/${dates[0]}/registrations/${students[index].uid}`)
+      .update({ createdAt: Timestamp.fromMillis(created) });
+  await execute(students[0], {
+    type: "cancel",
+    sessionId: dates[0],
+    expectedVersion: 1,
+  });
+  const agenda = await getAgenda(monitor.cookie, referenceTime, true);
+  assert.equal(agenda.receivedRequests, 1);
+  assert.equal(agenda.sessions[0].registrations.length, 2);
+  assert.equal(
+    (await getAgenda(students[0].cookie, referenceTime)).receivedRequests,
+    0,
+  );
 });
