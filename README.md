@@ -32,11 +32,14 @@ Meatualiza helps students explain their questions, choose a course topic, and bo
 - **Attendance and completion:** the monitor records present, absent, or unrecorded after a session starts, and explicitly confirms completion after its scheduled end. Attendance can be corrected after completion. Writes preserve registration counts and record their author and timestamp, with version checks and safe retries.
 - **Student-reported resolution:** one evaluation per confirmed registration after a completed session with recorded presence. Students choose resolved, partially resolved, or unresolved and can add a comment of up to 1,000 characters. The response preserves a snapshot of the question and is available to its student and the monitor. Pending evaluations allow new bookings. Evaluation pages cover all completed sessions, including beyond the 28-day agenda window.
 - **Collaborative forum:** authenticated course-topic discussions and replies, available to students and the monitor independently of in-person bookings. Authors edit their own visible posts. The monitor can hide and restore posts with an audited reason. Topics and replies use cursor pagination with ten items per page, plain text, version checks, and safe retries. Shared views show the publication name and role while excluding email, UID, and private tutoring data.
+- **Guided onboarding:** a first-visit invitation introduces five steps tailored to each workspace. Use Help to replay the tour or read the text guide. Skip and completion choices persist in Firestore for each account and role.
 - **Accessible interface:** dark theme, mobile navigation, keyboard controls, visible focus, loading states, and retryable errors.
 
 [Landing page](./docs/screenshots/landing-desktop.png) · [Topic icons](./docs/screenshots/topics-icons-desktop.png) · [Interactive cube](./docs/screenshots/interactive-cube-desktop.png) · [Sign-in preview](./docs/screenshots/auth-revamp-desktop.png) · [Student dashboard](./docs/screenshots/student-dashboard-desktop.png) · [Student agenda on mobile](./docs/screenshots/f4-agenda-aluno-mobile.png) · [Attendance on mobile](./docs/screenshots/f5-attendance-monitor-mobile.png) · [Student evaluation](./docs/screenshots/f5-evaluation-student-desktop.png) · [Monitor evaluations](./docs/screenshots/f5-evaluations-monitor-desktop.png)
 
 [Forum discussions](./docs/screenshots/f6-forum-student-desktop.png) · [Forum on mobile](./docs/screenshots/f6-forum-student-mobile.png) · [Monitor moderation](./docs/screenshots/f6-forum-monitor-desktop.png)
+
+[Student tour](./docs/screenshots/f7-tour-student-desktop.png) · [Monitor tour on mobile](./docs/screenshots/f7-tour-monitor-mobile.png)
 
 ## 🧰 Stack
 
@@ -157,7 +160,7 @@ npm run test:auth
 - `test:domain` checks scheduling rules, help-request contracts, evaluation summaries, and forum input contracts.
 - `test:firebase` starts Auth/Firestore emulators and checks authorization, ownership, transactions, capacity races, forum moderation, cursor pagination, and concurrent retries.
 - `npm test` runs the production landing/access browser suite on port `3100`, including keyboard navigation, image loading, and responsive layouts.
-- `test:auth` starts the emulators and a separate development server on port `3101` for Google popup, session, role, booking, and collaborative forum flows. Tests use fictitious accounts; captures and traces go to `test-results/`.
+- `test:auth` starts the emulators and a separate development server on port `3101` for Google popup, session, role, booking, forum, and onboarding flows. Tests use fictitious accounts; captures and traces go to `test-results/`.
 
 Do not run the emulator suites or the build/browser checks concurrently: they share ports or build output. The [CI workflow](./.github/workflows/ci.yml) runs these checks on pull requests and pushes to `main`. GitHub billing-related CI blocks do not replace the requirement to pass local checks.
 
@@ -178,7 +181,7 @@ docs/screenshots/        # committed desktop and mobile previews
 
 ## 📌 Roadmap and documentation
 
-F1–F5 are integrated into `main`. The current F6 delivery adds the authenticated forum to both workspaces, with course-topic discussions, replies, author edits, and reversible monitor moderation. Titles accept 3–120 characters, publication bodies up to 4,000, and moderation reasons up to 300. Topics are newest first and replies chronological, with ten items per page. Posts retain the author's name and role at publication time. Open or reload a discussion to retrieve changes from other participants. F7 guided tours are next, followed by F8 privacy preferences, PostHog Surveys, Sentry, and analytics.
+F1–F6 are integrated into `main`. The current F7 delivery adds guided onboarding to both workspaces. The authenticated forum supports course-topic discussions, replies, author edits, and reversible monitor moderation. Titles accept 3–120 characters, publication bodies up to 4,000, and moderation reasons up to 300. Topics are newest first and replies chronological, with ten items per page. Posts retain the author's name and role at publication time. Open or reload a discussion to retrieve changes from other participants. F8 is next, starting with terms and privacy preferences, followed by PostHog Surveys, Sentry, and analytics.
 
 The student agenda uses the next-28-days window. The monitor can also inspect persisted sessions started in the previous 28 days, including after the term ends. Use the agenda refresh action to retrieve changes from other users. Attendance opens at 11:30 and completion opens at 12:30 in America/Bahia. Received requests count registration records created in the last 28 days, including cancelled registrations and move destinations. Evaluation results and pending counts cover all completed sessions. Responses preserve their original question context and remain available after later attendance corrections.
 
