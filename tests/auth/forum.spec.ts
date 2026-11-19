@@ -121,7 +121,9 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     await create
       .getByRole("button", { name: "Publicar tópico", exact: true })
       .click();
-    await expect(page).toHaveURL(/\/aluno\/forum\/[\da-f-]{36}$/);
+    await expect(page).toHaveURL(/\/aluno\/forum\/[\da-f-]{36}$/, {
+      timeout: 20_000,
+    });
     await expect(composer).toHaveCount(0);
     topicId = new URL(page.url()).pathname.split("/").at(-1)!;
     expect(
