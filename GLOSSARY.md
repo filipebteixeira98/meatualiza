@@ -68,6 +68,15 @@ _Evitar_: Dúvida não resolvida, ausência do aluno.
 **Tour guiado**:
 Apresentação interativa dos recursos disponíveis na plataforma e de como utilizá-los.
 
+**Tópico do fórum**:
+Publicação compartilhada entre participantes autenticados, com título, assunto e descrição, criada explicitamente pelo autor para iniciar uma conversa.
+
+**Resposta no fórum**:
+Contribuição de um aluno ou monitor a um tópico compartilhado. Preserva sua autoria e pode ser editada pelo próprio autor enquanto estiver visível.
+
+**Moderação**:
+Ocultação ou restauração de uma publicação pelo monitor, com autoria e horário registrados. A ocultação exige motivo e preserva o conteúdo para acompanhamento.
+
 **Feedback da plataforma**:
 Sugestão de melhoria ou relato de problema relacionado ao funcionamento e à experiência de uso da aplicação.
 _Evitar_: Dúvida da disciplina, solicitação de monitoria.
