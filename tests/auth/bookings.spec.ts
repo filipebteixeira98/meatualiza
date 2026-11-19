@@ -228,12 +228,28 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
     }),
   ).toBeVisible();
   await targetCard.getByRole("link", { name: "Abrir inscrição" }).click();
-  await page
-    .getByRole("button", { name: "Cancelar inscrição", exact: true })
-    .click();
-  await page
+  const cancelTrigger = page.getByRole("button", {
+    name: "Cancelar inscrição",
+    exact: true,
+  });
+  await cancelTrigger.click();
+  const confirmation = page.getByRole("alertdialog", {
+    name: "Cancelar inscrição?",
+  });
+  await expect(confirmation).toContainText(sessionLabel(target));
+  const keepRegistration = confirmation.getByRole("button", {
+    name: "Manter inscrição",
+  });
+  await expect(keepRegistration).toBeFocused();
+  await keepRegistration.click();
+  await expect(confirmation).toHaveCount(0);
+  await expect(cancelTrigger).toBeFocused();
+  await expect(page.getByText("Sua inscrição está confirmada.")).toBeVisible();
+  await cancelTrigger.click();
+  await confirmation
     .getByRole("button", { name: "Confirmar cancelamento", exact: true })
     .click();
+  await expect(confirmation).toHaveCount(0);
   await expect(
     page.getByText("Inscrição cancelada.", { exact: false }),
   ).toBeVisible();

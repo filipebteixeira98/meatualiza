@@ -5,11 +5,13 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
+  CalendarX,
   ChevronLeft,
   ChevronRight,
   List,
   RefreshCw,
 } from "lucide-react";
+import { AlertDialog } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { monitoria } from "@/lib/monitoria";
 import { sessionLabel, type SessionView } from "@/lib/schedule";
@@ -29,7 +31,12 @@ function RegistrationActions({
 }) {
   const ready = useHydrated();
   const { run, pending, error } = useBookingMutation();
-  const [cancel, setCancel] = useState(false);
+  const {
+    run: cancelRegistration,
+    pending: cancelling,
+    error: cancellationError,
+  } = useBookingMutation();
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [target, setTarget] = useState("");
   const registration = session.registration!;
   const targets = sessions.filter(
@@ -45,50 +52,71 @@ function RegistrationActions({
         <Button asChild variant="outline" className="min-h-11 px-4">
           <Link href={`/aluno/duvida?sessao=${session.id}`}>Editar dúvida</Link>
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={!ready || pending}
-          className="min-h-11 px-4"
-          onClick={() => setCancel(!cancel)}
+        <AlertDialog.Root
+          open={cancelOpen}
+          onOpenChange={(open) => {
+            if (!cancelling) setCancelOpen(open);
+          }}
         >
-          Cancelar inscrição
-        </Button>
-      </div>
-      {cancel && (
-        <div className="mt-4 rounded-lg border border-border p-4">
-          <p className="text-sm leading-6">
-            Cancelar sua inscrição nesta sessão? A vaga será liberada para outro
-            aluno.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <AlertDialog.Trigger asChild>
             <Button
-              disabled={pending}
+              type="button"
+              variant="destructive"
+              disabled={!ready || pending || cancelling}
               className="min-h-11 px-4"
-              onClick={() =>
-                run(
-                  {
-                    type: "cancel",
-                    sessionId: session.id,
-                    expectedVersion: registration.version,
-                  },
-                  () => setCancel(false),
-                )
-              }
             >
-              Confirmar cancelamento
+              Cancelar inscrição
             </Button>
-            <Button
-              variant="ghost"
-              disabled={pending}
-              className="min-h-11"
-              onClick={() => setCancel(false)}
-            >
-              Manter inscrição
-            </Button>
-          </div>
-        </div>
-      )}
+          </AlertDialog.Trigger>
+          <AlertDialog.Portal>
+            <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/65" />
+            <AlertDialog.Content className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-lg sm:p-6">
+              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-destructive/15 text-destructive">
+                <CalendarX className="size-5" aria-hidden="true" />
+              </div>
+              <AlertDialog.Title className="mt-3 text-xl font-medium text-destructive">
+                Cancelar inscrição?
+              </AlertDialog.Title>
+              <AlertDialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
+                Você perderá sua vaga na monitoria de {sessionLabel(session.id)}
+                . Ela ficará disponível para outro aluno.
+              </AlertDialog.Description>
+              <BookingFeedback message={cancellationError} />
+              <div className="mt-5 grid gap-2 sm:flex sm:justify-end">
+                <AlertDialog.Cancel asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={cancelling}
+                    className="min-h-11 px-4"
+                  >
+                    Manter inscrição
+                  </Button>
+                </AlertDialog.Cancel>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={cancelling}
+                  aria-busy={cancelling}
+                  className="min-h-11 px-4"
+                  onClick={() =>
+                    cancelRegistration(
+                      {
+                        type: "cancel",
+                        sessionId: session.id,
+                        expectedVersion: registration.version,
+                      },
+                      () => setCancelOpen(false),
+                    )
+                  }
+                >
+                  {cancelling ? "Cancelando…" : "Confirmar cancelamento"}
+                </Button>
+              </div>
+            </AlertDialog.Content>
+          </AlertDialog.Portal>
+        </AlertDialog.Root>
+      </div>
       <form
         className="mt-5 border-t border-border pt-5"
         onSubmit={(event) => {
@@ -108,7 +136,7 @@ function RegistrationActions({
         }}
       >
         <fieldset
-          disabled={!ready || pending || !targets.length}
+          disabled={!ready || pending || cancelling || !targets.length}
           className="min-w-0"
         >
           <label htmlFor={`move-${session.id}`} className="text-sm font-medium">
