@@ -18,6 +18,7 @@ export default async function MonitorLayout({
   return (
     <WorkspaceShell
       role="monitor"
+      tourStatus={profile.tourStatus}
       account={{ displayName: profile.displayName, email: profile.email }}
     >
       {children}
