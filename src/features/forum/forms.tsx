@@ -2,8 +2,8 @@
 
 import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X } from "lucide-react";
-import { Dialog } from "radix-ui";
+import { Plus, Trash2, X } from "lucide-react";
+import { AlertDialog, Dialog } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { MutationFeedback, useMutation } from "@/features/workspace/mutation";
 import {
@@ -207,6 +207,95 @@ export function PublicationForm(props: PublicationProps) {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+export function DeletePublication({
+  base,
+  topicId,
+  post,
+  reply,
+}: {
+  base: string;
+  topicId: string;
+  post: ForumPost;
+  reply: boolean;
+}) {
+  const ready = useHydrated();
+  const router = useRouter();
+  const { run, pending, error } = useMutation<ForumChange>(submitForum);
+  const [open, setOpen] = useState(false);
+  const label = reply ? "Excluir resposta" : "Excluir tópico";
+
+  return (
+    <AlertDialog.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (!pending) setOpen(next);
+      }}
+    >
+      <AlertDialog.Trigger asChild>
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          className="mt-4 min-h-11 px-3"
+          disabled={!ready || pending}
+        >
+          <Trash2 aria-hidden="true" />
+          {label}
+        </Button>
+      </AlertDialog.Trigger>
+      <AlertDialog.Portal>
+        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-background/80" />
+        <AlertDialog.Content className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-xl sm:p-6">
+          <Trash2 className="size-5 text-destructive" aria-hidden="true" />
+          <AlertDialog.Title className="mt-3 text-xl font-medium text-destructive">
+            {label}?
+          </AlertDialog.Title>
+          <AlertDialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
+            {reply
+              ? "Sua resposta será removida desta discussão."
+              : "O tópico e todas as respostas deixarão de aparecer no fórum."}{" "}
+            Essa ação não pode ser desfeita pelo aplicativo.
+          </AlertDialog.Description>
+          <MutationFeedback message={error} />
+          <div className="mt-5 grid gap-2 sm:flex sm:justify-end">
+            <AlertDialog.Cancel asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11 px-4"
+                disabled={pending}
+              >
+                Manter publicação
+              </Button>
+            </AlertDialog.Cancel>
+            <Button
+              type="button"
+              variant="destructive"
+              className="min-h-11 px-4"
+              disabled={pending}
+              aria-busy={pending}
+              onClick={() => {
+                const target = { topicId, expectedVersion: post.version };
+                run(
+                  reply
+                    ? { type: "deleteReply", ...target, replyId: post.id }
+                    : { type: "deleteTopic", ...target },
+                  () => {
+                    setOpen(false);
+                    if (!reply) router.replace(base);
+                  },
+                );
+              }}
+            >
+              {pending ? "Excluindo…" : "Confirmar exclusão"}
+            </Button>
+          </div>
+        </AlertDialog.Content>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
   );
 }
 

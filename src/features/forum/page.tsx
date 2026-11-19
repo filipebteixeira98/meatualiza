@@ -14,7 +14,7 @@ import { getForumFeed, getForumTopic } from "@/lib/forum-store";
 import { forumIdSchema, type ForumPost, type ForumTopic } from "@/lib/forum";
 import { helpRequestTopics } from "@/lib/help-request";
 import { monitoria } from "@/lib/monitoria";
-import { ModerationForm, PublicationForm } from "./forms";
+import { DeletePublication, ModerationForm, PublicationForm } from "./forms";
 import { PublicationBody } from "./publication-body";
 
 type Role = "student" | "monitor";
@@ -137,6 +137,14 @@ function Publication({
             )}
           </div>
         </details>
+      )}
+      {post.mine && (
+        <DeletePublication
+          base={base}
+          topicId={topicId}
+          post={post}
+          reply={!topic}
+        />
       )}
       {monitor && (
         <details className="mt-5 border-t border-border pt-2">
