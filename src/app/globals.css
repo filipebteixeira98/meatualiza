@@ -174,3 +174,31 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+.forum-code {
+  .hljs-keyword,
+  .hljs-selector-tag {
+    color: light-dark(var(--color-violet-700), var(--color-violet-300));
+  }
+
+  .hljs-string,
+  .hljs-regexp {
+    color: light-dark(var(--color-emerald-700), var(--color-emerald-300));
+  }
+
+  .hljs-number,
+  .hljs-literal {
+    color: light-dark(var(--color-amber-700), var(--color-amber-300));
+  }
+
+  .hljs-title,
+  .hljs-built_in,
+  .hljs-type,
+  .hljs-attr {
+    color: light-dark(var(--color-sky-700), var(--color-sky-300));
+  }
+
+  .hljs-comment {
+    color: var(--muted-foreground);
+  }
+}

@@ -158,7 +158,7 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     const edit = ownReply.getByRole("form", { name: "Editar publicação" });
     const editor = edit.getByLabel("Sua resposta", { exact: true });
     const intro = `${answer} Confira \`i\`. `;
-    const snippet = "  i = i + 1;\n  escreva(i);";
+    const snippet = '  i = i + 1;\n  escreva("<b>literal</b>");';
     const plainIntro = `${answer} Confira i. `;
     await expect(
       edit.getByText("Até 4.000 caracteres.", { exact: true }),
@@ -205,6 +205,15 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
       "textContent",
       snippet,
     );
+    const codeBlock = ownReply.locator("pre code");
+    const numberToken = codeBlock.locator(".hljs-number");
+    await expect(numberToken).toHaveText("1");
+    expect(
+      await numberToken.evaluate((token) => getComputedStyle(token).color),
+    ).not.toBe(
+      await codeBlock.evaluate((code) => getComputedStyle(code).color),
+    );
+    await expect(codeBlock.locator("b")).toHaveCount(0);
     await expect(ownReply).toContainText("✅");
     await page.reload();
     await expect(
