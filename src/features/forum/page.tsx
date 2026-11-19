@@ -16,6 +16,7 @@ import { forumIdSchema, type ForumPost, type ForumTopic } from "@/lib/forum";
 import { helpRequestTopics } from "@/lib/help-request";
 import { monitoria } from "@/lib/monitoria";
 import { ModerationForm, PublicationForm } from "./forms";
+import { PublicationBody } from "./publication-body";
 
 type Role = "student" | "monitor";
 export type ForumSearch = Promise<{ cursor?: string | string[] }>;
@@ -117,11 +118,7 @@ function Publication({
           )}
         </p>
       )}
-      {visible && (
-        <p className="mt-5 text-sm leading-7 whitespace-pre-wrap [overflow-wrap:anywhere]">
-          {post.body}
-        </p>
-      )}
+      {visible && <PublicationBody body={post.body} />}
       {post.mine && !post.hidden && !locked && (
         <details className="mt-5 border-t border-border pt-2">
           <summary className={summaryClass}>
