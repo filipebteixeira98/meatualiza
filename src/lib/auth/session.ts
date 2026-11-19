@@ -109,10 +109,15 @@ export async function getAccountProfile(cookie?: string) {
   ) {
     return null;
   }
+  const tourStatus = snapshot.get(`tour.${role}`);
   return {
     uid: identity.uid,
     displayName: profile.displayName,
     email: profile.email,
     role,
+    tourStatus:
+      tourStatus === "completed" || tourStatus === "skipped"
+        ? tourStatus
+        : null,
   };
 }
