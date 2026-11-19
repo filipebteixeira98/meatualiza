@@ -6,7 +6,6 @@ import {
   ArrowRight,
   MessageCircle,
   Pencil,
-  Plus,
   Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -190,18 +189,9 @@ export async function ForumPage({
         <p className="mt-5 text-base leading-7 text-muted-foreground">
           Troque ideias sobre Lógica de Programação com a turma e o monitor.
         </p>
-        <details
-          id="novo-topico"
-          className="mt-8 rounded-2xl border border-border bg-card p-5 sm:p-7"
-        >
-          <summary className={`${summaryClass} font-medium text-foreground`}>
-            <Plus className="size-4" aria-hidden="true" />
-            Novo tópico
-          </summary>
-          <div className="pt-5">
-            <PublicationForm base={base} kind="topic" />
-          </div>
-        </details>
+        <div className="mt-6 flex justify-end">
+          <PublicationForm base={base} kind="topic" />
+        </div>
         <section aria-label="Tópicos recentes" className="mt-8">
           {feed.topics.length === 0 ? (
             <div

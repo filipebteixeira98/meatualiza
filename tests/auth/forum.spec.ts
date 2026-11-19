@@ -56,14 +56,23 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Uma dúvida. Mais de um caminho.",
     );
-    const newTopic = page.getByText("Novo tópico", { exact: true });
-    await newTopic.focus();
-    await page.keyboard.press("Enter");
-    const create = page.getByRole("form", {
+    const newTopic = page.getByRole("button", {
+      name: "Novo tópico",
+      exact: true,
+    });
+    await expect(newTopic).toBeEnabled();
+    await newTopic.press("Enter");
+    const composer = page.getByRole("dialog", {
+      name: "Novo tópico",
+      exact: true,
+    });
+    const create = composer.getByRole("form", {
       name: "Criar tópico",
       exact: true,
     });
-    await create.getByLabel("Título", { exact: true }).fill(title);
+    const titleField = create.getByLabel("Título", { exact: true });
+    await expect(titleField).toBeFocused();
+    await titleField.fill(title);
     await create
       .getByLabel("Assunto", { exact: true })
       .selectOption("repeticao");
@@ -71,6 +80,14 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     await expect(
       create.getByLabel("Descrição", { exact: true }),
     ).toHaveAttribute("maxlength", "4000");
+    await page.keyboard.press("Escape");
+    await expect(composer).toHaveCount(0);
+    await expect(newTopic).toBeFocused();
+    await newTopic.click();
+    await expect(titleField).toHaveValue(title);
+    await expect(create.getByLabel("Descrição", { exact: true })).toHaveValue(
+      body,
+    );
     let stage = "origin";
     await page.route("**/aluno/forum", async (route) => {
       if (route.request().method() !== "POST") return route.continue();
@@ -105,6 +122,7 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
       .getByRole("button", { name: "Publicar tópico", exact: true })
       .click();
     await expect(page).toHaveURL(/\/aluno\/forum\/[\da-f-]{36}$/);
+    await expect(composer).toHaveCount(0);
     topicId = new URL(page.url()).pathname.split("/").at(-1)!;
     expect(
       (
@@ -392,9 +410,8 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     ).toHaveCount(10);
     await expect(
       page.getByRole("button", {
-        name: "Publicar tópico",
+        name: "Novo tópico",
         exact: true,
-        includeHidden: true,
       }),
     ).toBeEnabled();
     await page.screenshot({

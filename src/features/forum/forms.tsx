@@ -2,6 +2,8 @@
 
 import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus, X } from "lucide-react";
+import { Dialog } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { MutationFeedback, useMutation } from "@/features/workspace/mutation";
 import {
@@ -33,6 +35,7 @@ export function PublicationForm(props: PublicationProps) {
   const [subject, setSubject] = useState(initialTopic?.topicId ?? "");
   const [body, setBody] = useState(props.post?.body ?? "");
   const [saved, setSaved] = useState(false);
+  const [open, setOpen] = useState(false);
 
   function submit() {
     let command: ForumChange;
@@ -65,16 +68,20 @@ export function PublicationForm(props: PublicationProps) {
     }
     setSaved(false);
     run(command, (operationId) => {
-      if (command.type === "createTopic")
+      if (command.type === "createTopic") {
+        setOpen(false);
+        setTitle("");
+        setSubject("");
+        setBody("");
         router.push(`${props.base}/${operationId}`);
-      else {
+      } else {
         if (command.type === "reply") setBody("");
         setSaved(true);
       }
     });
   }
 
-  return (
+  const form = (
     <form
       aria-label={
         props.post
@@ -153,6 +160,53 @@ export function PublicationForm(props: PublicationProps) {
       )}
       <MutationFeedback message={error} />
     </form>
+  );
+
+  if (props.kind !== "topic" || props.post) return form;
+
+  return (
+    <Dialog.Root
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!pending) setOpen(nextOpen);
+      }}
+    >
+      <Dialog.Trigger asChild>
+        <Button
+          type="button"
+          size="sm"
+          className="min-h-11 px-3"
+          disabled={!ready || pending}
+        >
+          <Plus aria-hidden="true" />
+          Novo tópico
+        </Button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-background/80" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-xl sm:p-7">
+          <Dialog.Title className="pr-11 text-xl font-medium tracking-tight">
+            Novo tópico
+          </Dialog.Title>
+          <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
+            Escolha o assunto e descreva sua dúvida para a turma e o monitor.
+          </Dialog.Description>
+          <div className="mt-5">{form}</div>
+          <Dialog.Close asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute top-3 right-3 size-11"
+              aria-label="Fechar novo tópico"
+              disabled={pending}
+            >
+              <X aria-hidden="true" />
+            </Button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 
