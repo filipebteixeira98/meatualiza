@@ -259,11 +259,13 @@ test("inscrição, resposta perdida, edição, troca, cancelamento e agenda do m
   await page.goto("/aluno");
   await expect(page.getByText("Confirmadas: 0", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Nenhuma inscrição confirmada." }),
+    page.getByRole("heading", { name: "Sem monitorias agendadas" }),
   ).toBeVisible();
   await expect(
     page.getByText("Cancelada pelo aluno.", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("link", { name: "Ver sessões na agenda" }).click();
+  await expect(page).toHaveURL(/\/aluno\/agenda$/);
   await book(page, target);
 
   const monitorContext = await browser.newContext({

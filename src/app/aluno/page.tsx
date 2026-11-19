@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, CalendarDays, Plus } from "lucide-react";
+import { ArrowUpRight, CalendarDays, CalendarMinus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { getAgenda } from "@/lib/bookings";
@@ -125,21 +125,23 @@ export default async function StudentPage() {
               })}
             </div>
           ) : (
-            <div className="mt-5 rounded-2xl border border-dashed border-border p-7 sm:p-9">
-              <CalendarDays
-                className="size-7 text-muted-foreground"
-                aria-hidden="true"
-              />
+            <div className="mt-5 flex flex-col items-center rounded-2xl border border-dashed border-border bg-card p-7 text-center sm:p-9">
+              <div className="grid size-12 place-items-center rounded-xl bg-muted text-muted-foreground">
+                <CalendarMinus className="size-6" aria-hidden="true" />
+              </div>
               <h3 className="mt-4 text-lg font-medium">
-                Nenhuma inscrição confirmada.
+                Sem monitorias agendadas
               </h3>
-              <p className="mt-3 max-w-lg text-sm leading-7 text-muted-foreground">
+              <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
                 {agenda.sessions.length
-                  ? "Consulte a agenda para encontrar uma sessão. Sua dúvida será salva junto à inscrição."
-                  : "Não há novas sessões no período da monitoria. Consulte a agenda para conferir a disponibilidade."}
+                  ? "Escolha uma sessão na agenda para marcar sua próxima monitoria."
+                  : "Não há novas sessões no período da monitoria."}
               </p>
               <Button asChild variant="outline" className="mt-5 min-h-11 px-4">
-                <Link href="/aluno/agenda">Ver sessões na agenda</Link>
+                <Link href="/aluno/agenda">
+                  <CalendarDays aria-hidden="true" />
+                  Ver sessões na agenda
+                </Link>
               </Button>
             </div>
           )}

@@ -57,7 +57,7 @@ test("Google, perfil persistido, recarga e saída", async ({
   await googlePopup(page, email);
   await expect(page).toHaveURL(/\/aluno$/, { timeout: 25_000 });
   await expect(
-    page.getByRole("heading", { name: "Nenhuma inscrição confirmada." }),
+    page.getByRole("heading", { name: "Sem monitorias agendadas" }),
   ).toBeVisible();
   if (info.project.name === "desktop")
     await checkCollapsibleSidebar(page, "aluno", info);
