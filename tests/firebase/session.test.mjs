@@ -27,6 +27,7 @@ import {
 } from "../../src/lib/auth/session.ts";
 import { CSRF_COOKIE, issueCsrf } from "../../src/lib/auth/http.ts";
 import { POST, DELETE } from "../../src/app/api/auth/session/route.ts";
+import { saveTourStatus } from "../../src/lib/tour.ts";
 
 const execute = promisify(execFile);
 
@@ -108,6 +109,7 @@ test("Google token creates a five-day session and one identity-derived profile",
     email: user.email,
     displayName: "Aluno Sessão",
     role: "student",
+    tourStatus: null,
   });
   const stored = await getFirestore(getAdminApp())
     .doc(`users/${user.uid}`)
@@ -145,6 +147,48 @@ test("sessions only return the profile belonging to the verified cookie", async 
   assert.notEqual((await getAccountProfile(cookieA)).email, b.email);
   assert.equal(await getAccountProfile(), null);
   assert.equal(await getAccountProfile("tampered-cookie"), null);
+});
+
+test("tour decisions are scoped to the signed-in account and role and preserve completion across retries", async () => {
+  const other = await googleUser();
+  const otherCookie = await createStudentSession(other.token);
+  const user = await googleUser();
+  const studentCookie = await createStudentSession(user.token);
+  assert.equal(await saveTourStatus(undefined, "student", "skipped"), false);
+  assert.equal(
+    await saveTourStatus(studentCookie, "monitor", "completed"),
+    false,
+  );
+  assert.equal(
+    await saveTourStatus(studentCookie, "student", { uid: other.uid }),
+    false,
+  );
+  assert.equal(await saveTourStatus(studentCookie, "student", "skipped"), true);
+  assert.equal((await getAccountProfile(studentCookie)).tourStatus, "skipped");
+  assert.equal((await getAccountProfile(otherCookie)).tourStatus, null);
+
+  await getAuth(getAdminApp()).setCustomUserClaims(user.uid, { monitor: true });
+  const monitorCookie = await createStudentSession(
+    await getBrowserAuth().currentUser.getIdToken(true),
+  );
+  assert.equal((await getAccountProfile(monitorCookie)).tourStatus, null);
+  assert.equal(
+    await saveTourStatus(monitorCookie, "student", "completed"),
+    false,
+  );
+  assert.deepEqual(
+    await Promise.all([
+      saveTourStatus(monitorCookie, "monitor", "skipped"),
+      saveTourStatus(monitorCookie, "monitor", "completed"),
+    ]),
+    [true, true],
+  );
+  assert.equal(await saveTourStatus(monitorCookie, "monitor", "skipped"), true);
+  const renewed = await createStudentSession(
+    await getBrowserAuth().currentUser.getIdToken(),
+  );
+  assert.equal((await getAccountProfile(renewed)).tourStatus, "completed");
+  assert.equal((await getAccountProfile(studentCookie)).tourStatus, "skipped");
 });
 
 test("invalid tokens, forged identity fields, wrong origin and invalid CSRF never create a cookie", async () => {

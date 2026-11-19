@@ -1,6 +1,6 @@
 # Roadmap da plataforma de monitoria
 
-Status: F1–F5 integradas à `main`, incluindo avaliação do atendimento no [PR #15](https://github.com/filipebteixeira98/meatualiza/pull/15). **Entrega atual: F6.1–F6.5**, fórum colaborativo com tópicos, respostas, edição e moderação implementado para revisão. A próxima fase é o tour em F7, seguido de privacidade/feedback/observabilidade em F8 e validação/publicação em F9. OAuth em celular real permanece como acompanhamento da F2-B.6.
+Status: F1–F6 integradas à `main`, incluindo o fórum colaborativo no [PR #16](https://github.com/filipebteixeira98/meatualiza/pull/16). **Entrega atual: F7.1–F7.3**, tour guiado nos portais do aluno e do monitor. A próxima fase é F8, começando por termos e preferências de coleta, seguida de feedback e observabilidade. OAuth em celular real permanece como acompanhamento da F2-B.6.
 
 Este documento detalha o escopo de [INSTRUCTIONS.md](./INSTRUCTIONS.md). Termos do domínio são definidos em [GLOSSARY.md](./GLOSSARY.md).
 
@@ -190,7 +190,7 @@ Cada tarefa de implementação deve gerar uma feature branch e um PR revisável,
 
 Sequência: F2 → preparação de F3 → F4 com o pedido e a inscrição salvos juntos → F5 com acompanhamento, presença e avaliação. Após F5, seguir com F6 — fórum colaborativo → F7 — tour → F8 — privacidade, feedback e observabilidade → F9 — validação e publicação. O formulário de F3 não publica uma solicitação sem sessão. O plano de F2 divide acesso e autorização em três PRs, com validação junto de cada comportamento.
 
-A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. F5.1b reutiliza essa navegação na área do aluno, com Painel, Agenda, Nova inscrição e saída no menu da conta. Novos recursos entram no menu quando forem entregues. O fórum será incluído para ambos os perfis em F6, com tour em F7 e privacidade/feedback em F8.
+A navegação do monitor foi antecipada de F5 a pedido do responsável: sidebar responsiva com ícones para Painel e Agenda, indicação da página ativa e menu da conta no rodapé. F5.1b reutiliza essa navegação na área do aluno, com Painel, Agenda, Nova inscrição e saída no menu da conta. Novos recursos entram no menu quando forem entregues. Fórum está nas duas sidebars. Ajuda abre o tour da F7 nos dois portais. Privacidade e feedback seguem em F8.
 
 F5.2 apresenta as inscrições confirmadas em cada sessão, com nome, assunto e descrição expansível da dúvida, no calendário e na lista do monitor. A leitura usa a mesma janela de quatro semanas e o botão “Atualizar agenda” para buscar alterações feitas por outros usuários. Dados da turma são selecionados somente para o monitor autorizado; alunos recebem apenas a própria inscrição. Perfis removidos ou sem nome não ocultam inscrições: o monitor vê “Aluno sem nome”. F5.3 acrescenta registro de presença e consulta das sessões persistidas iniciadas nos últimos 28 dias.
 
@@ -211,7 +211,7 @@ Responsividade, acessibilidade, estados de interface e testes são critérios de
 
 ## Quadro de tarefas
 
-O quadro distingue regras definidas e entregas implementadas. F1–F5 estão integradas à `main`. F6.1–F6.5 compõem a entrega atual do fórum, implementada para revisão. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
+O quadro distingue regras definidas e entregas implementadas. F1–F6 estão integradas à `main`. F7.1–F7.3 compõem a entrega atual do tour guiado para revisão. Avisos de cobrança do GitHub Actions são desconsiderados; verificações locais continuam obrigatórias.
 
 | A Fazer                                                                     | Em Andamento                                                                         | Concluído                                                                                                  |
 | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -264,14 +264,14 @@ O quadro distingue regras definidas e entregas implementadas. F1–F5 estão int
 | —                                                                           | —                                                                                    | F5.4 — Avaliação por inscrição integrada no PR #15                                                         |
 | —                                                                           | —                                                                                    | F5.5 — Persistência, resolução e pendências integradas no PR #15                                           |
 | —                                                                           | —                                                                                    | F5.6 — Permissões, reenvios, falhas e contagens verificados no PR #15                                      |
-| —                                                                           | F6.1 — Dados, autoria, visibilidade e moderação definidos para revisão               | —                                                                                                          |
-| —                                                                           | F6.2 — Tópicos, respostas e paginação implementados para revisão                     | —                                                                                                          |
-| —                                                                           | F6.3 — Edição e moderação reversível implementadas para revisão                      | —                                                                                                          |
-| —                                                                           | F6.4 — Navegação, estados, teclado e responsividade verificados                      | —                                                                                                          |
-| —                                                                           | F6.5 — Autorização, renderização e colaboração verificadas                           | —                                                                                                          |
-| F7.1 — Escrever passos do onboarding e do tour para cada perfil             | —                                                                                    | —                                                                                                          |
-| F7.2 — Implementar pular, reabrir e persistir conclusão do tour             | —                                                                                    | —                                                                                                          |
-| F7.3 — Verificar foco, teclado, movimento reduzido e telas móveis           | —                                                                                    | —                                                                                                          |
+| —                                                                           | —                                                                                    | F6.1 — Dados, autoria e regras de moderação integrados no PR #16                                           |
+| —                                                                           | —                                                                                    | F6.2 — Tópicos, respostas e paginação integrados no PR #16                                                 |
+| —                                                                           | —                                                                                    | F6.3 — Edição e moderação integradas no PR #16                                                             |
+| —                                                                           | —                                                                                    | F6.4 — Navegação por teclado e responsividade verificadas no PR #16                                        |
+| —                                                                           | —                                                                                    | F6.5 — Autorização e colaboração verificadas no PR #16                                                     |
+| —                                                                           | F7.1 — Guia em texto e cinco passos por perfil disponíveis para revisão              | —                                                                                                          |
+| —                                                                           | F7.2 — Tour com opção de pular, concluir e reabrir disponível para revisão           | —                                                                                                          |
+| —                                                                           | F7.3 — Foco, teclado e layout móvel verificados com Playwright                       | —                                                                                                          |
 | F8.1 — Implementar termos, preferências, recusa e revogação                 | —                                                                                    | —                                                                                                          |
 | F8.2 — Definir eventos e responsabilidades de Firebase Analytics e PostHog  | —                                                                                    | —                                                                                                          |
 | F8.3 — Criar survey de feedback e integrar acesso pela aplicação            | —                                                                                    | —                                                                                                          |
@@ -336,17 +336,16 @@ Decisões da primeira entrega de F6.1–F6.5.
 
 O aceite inclui uma conversa entre duas contas de aluno e a conta do monitor, com persistência, edição pelo autor, ocultação/restauração, navegação por teclado, paginação e layout móvel. O tour de F7 apresentará esse fluxo.
 
-## Tour guiado
+## Tour guiado — F7
 
-O tour apresenta apenas recursos já disponíveis para o perfil. Recursos futuros do roadmap não devem aparecer como ações utilizáveis.
+O tour tem cinco passos por perfil, com links para recursos disponíveis e um guia em texto no menu Ajuda.
 
-- Aluno: painel → solicitar ajuda e escolher assunto → calendário/agendamento → acompanhar pedidos → avaliação do atendimento quando disponível → fórum → ajuda e feedback.
-- Monitor: resumo de demandas → consultar dúvidas → agenda, total por sessão e lista de inscritos → bloqueios → presença, avaliações e resolução → resultados e métricas → fórum e moderação → ajuda e feedback.
-- Exibir convite no primeiro acesso; permitir pular e reabrir pelo menu de ajuda.
-- Persistir conclusão por usuário e perfil; separar esse estado da conclusão de cadastro e das preferências de privacidade.
-- Tratar elementos fora da área visível, menus móveis fechados e mudanças de tamanho da tela.
-- Garantir navegação por teclado, saída do tour e devolução do foco; oferecer explicação em texto dos mesmos recursos.
-- Validar o tour sem enviar solicitações, reservar horários ou registrar respostas em nome do aluno.
+- Aluno: painel de inscrições, registro da dúvida, agenda, avaliação e fórum.
+- Monitor: painel de demandas, preparação de sessões e cancelamentos, comparecimento e realização, avaliações e moderação do fórum.
+- O convite aparece no primeiro acesso de cada perfil, inclusive em links diretos. Pular ou concluir dispensa o convite. A opção **Rever tour** fica disponível em **Ajuda**.
+- O Firestore guarda a decisão de pular ou concluir no perfil autenticado, por UID e papel. Concluir prevalece sobre pular, inclusive em reenvios concorrentes. O passo atual pertence à visita e o tour reabre no primeiro passo.
+- A caixa de diálogo funciona mesmo com a sidebar recolhida ou com o menu móvel fechado. O foco acompanha cada passo e volta ao botão de origem ou a Ajuda ao fechar. O painel tem rolagem interna em telas baixas e funciona com movimento reduzido.
+- Os links abrem as telas reais. Inscrições, publicações e registros de presença exigem as ações usuais do usuário nas respectivas telas.
 
 ## Avaliação do atendimento e resolução
 

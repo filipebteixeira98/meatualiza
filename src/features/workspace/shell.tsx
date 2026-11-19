@@ -29,6 +29,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { AuthNotice, useSignOut } from "@/features/auth/actions";
+import { WorkspaceTour } from "@/features/tour/workspace-tour";
+import type { TourStatus } from "@/lib/tour";
 import { cn } from "@/lib/utils";
 
 const navigation = {
@@ -183,10 +185,12 @@ function AccountMenu({
 export function WorkspaceShell({
   account,
   role,
+  tourStatus,
   children,
 }: {
   account: Account;
   role: Role;
+  tourStatus: TourStatus | null;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -246,37 +250,46 @@ export function WorkspaceShell({
           />
         </div>
       </aside>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mt-4 ml-5 size-11 shrink-0 self-start sm:ml-8 lg:hidden"
-            aria-label={`Abrir navegação do ${roleNames[role]}`}
-            disabled={!signOut.ready}
-          >
-            <Menu aria-hidden="true" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="gap-0 overflow-y-auto bg-sidebar p-4 text-sidebar-foreground data-[side=left]:w-[min(88vw,18rem)]"
-        >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Navegação do {roleNames[role]}</SheetTitle>
-            <SheetDescription>
-              Acesse os recursos da sua área e o menu da conta.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="mt-3 px-2">
-            <Brand />
-          </div>
-          <WorkspaceNavigation role={role} onNavigate={() => setOpen(false)} />
-          <div className="mt-auto border-t border-sidebar-border pt-4">
-            <AccountMenu account={account} role={role} signOut={signOut} />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <WorkspaceTour
+        role={role}
+        initialStatus={tourStatus}
+        mobileNavigation={
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11 shrink-0 lg:hidden"
+                aria-label={`Abrir navegação do ${roleNames[role]}`}
+                disabled={!signOut.ready}
+              >
+                <Menu aria-hidden="true" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="gap-0 overflow-y-auto bg-sidebar p-4 text-sidebar-foreground data-[side=left]:w-[min(88vw,18rem)]"
+            >
+              <SheetHeader className="sr-only">
+                <SheetTitle>Navegação do {roleNames[role]}</SheetTitle>
+                <SheetDescription>
+                  Acesse os recursos da sua área e o menu da conta.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-3 px-2">
+                <Brand />
+              </div>
+              <WorkspaceNavigation
+                role={role}
+                onNavigate={() => setOpen(false)}
+              />
+              <div className="mt-auto border-t border-sidebar-border pt-4">
+                <AccountMenu account={account} role={role} signOut={signOut} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        }
+      />
       {children}
     </div>
   );

@@ -17,6 +17,7 @@ export default async function StudentLayout({
   return (
     <WorkspaceShell
       role="student"
+      tourStatus={profile.tourStatus}
       account={{ displayName: profile.displayName, email: profile.email }}
     >
       {children}
