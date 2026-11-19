@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   MessageSquarePlus,
+  MessagesSquare,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -35,12 +36,14 @@ const navigation = {
     { href: "/monitor", label: "Painel", icon: LayoutDashboard },
     { href: "/monitor/agenda", label: "Agenda", icon: CalendarDays },
     { href: "/monitor/avaliacoes", label: "Avaliações", icon: ClipboardCheck },
+    { href: "/monitor/forum", label: "Fórum", icon: MessagesSquare },
   ],
   student: [
     { href: "/aluno", label: "Painel", icon: LayoutDashboard },
     { href: "/aluno/agenda", label: "Agenda", icon: CalendarDays },
     { href: "/aluno/duvida", label: "Nova inscrição", icon: MessageSquarePlus },
     { href: "/aluno/avaliacoes", label: "Avaliações", icon: ClipboardCheck },
+    { href: "/aluno/forum", label: "Fórum", icon: MessagesSquare },
   ],
 };
 type Role = keyof typeof navigation;
@@ -63,24 +66,29 @@ function WorkspaceNavigation({
       aria-label={`Navegação do ${roleNames[role]}`}
       className="mt-8 space-y-1"
     >
-      {navigation[role].map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          href={href}
-          aria-current={pathname === href ? "page" : undefined}
-          title={collapsed ? label : undefined}
-          onClick={onNavigate}
-          className={cn(
-            "flex min-h-11 items-center gap-3 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring",
-            collapsed ? "justify-center px-0" : "px-3",
-            pathname === href &&
-              "bg-sidebar-accent font-medium text-sidebar-accent-foreground",
-          )}
-        >
-          <Icon className="size-4 shrink-0" aria-hidden="true" />
-          <span className={collapsed ? "sr-only" : undefined}>{label}</span>
-        </Link>
-      ))}
+      {navigation[role].map(({ href, label, icon: Icon }) => {
+        const active =
+          pathname === href ||
+          (href.endsWith("/forum") && pathname.startsWith(`${href}/`));
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            title={collapsed ? label : undefined}
+            onClick={onNavigate}
+            className={cn(
+              "flex min-h-11 items-center gap-3 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring",
+              collapsed ? "justify-center px-0" : "px-3",
+              active &&
+                "bg-sidebar-accent font-medium text-sidebar-accent-foreground",
+            )}
+          >
+            <Icon className="size-4 shrink-0" aria-hidden="true" />
+            <span className={collapsed ? "sr-only" : undefined}>{label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
