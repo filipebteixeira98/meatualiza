@@ -473,11 +473,13 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
       .getByRole("button", { name: "Confirmar exclusão" })
       .click();
     await expect(page).toHaveURL(/\/aluno\/forum$/);
+    await expect(page.locator(`a[href="/aluno/forum/${topicId}"]`)).toHaveCount(
+      0,
+    );
+    await other.goto(`/aluno/forum/${topicId}`);
     await expect(
-      page.getByRole("link", { name: title, exact: true }),
-    ).toHaveCount(0);
-    const deleted = await other.goto(`/aluno/forum/${topicId}`);
-    expect(deleted?.status()).toBe(404);
+      other.getByRole("heading", { name: "404", exact: true }),
+    ).toBeVisible();
     await expect(other.getByText(monitorAnswer, { exact: true })).toHaveCount(
       0,
     );
