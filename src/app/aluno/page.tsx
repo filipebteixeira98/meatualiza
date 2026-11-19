@@ -50,7 +50,7 @@ export default async function StudentPage() {
       <div className="mx-auto max-w-4xl">
         <p className="eyebrow">SEU PAINEL</p>
         <h1 className="mt-4 text-4xl font-medium tracking-tight sm:text-5xl">
-          Seu ponto de partida.
+          Seu primeiro passo.
         </h1>
         <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
           Acompanhe suas inscrições e as dúvidas que você quer trabalhar nos
