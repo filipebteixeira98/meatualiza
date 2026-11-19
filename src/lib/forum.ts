@@ -56,6 +56,12 @@ export const forumChangeSchema = z
       replyId: forumIdSchema,
       content: replyContentSchema,
     }),
+    z.strictObject({ type: z.literal("deleteTopic"), ...target }),
+    z.strictObject({
+      type: z.literal("deleteReply"),
+      ...target,
+      replyId: forumIdSchema,
+    }),
     z.strictObject({
       type: z.literal("moderateTopic"),
       ...target,

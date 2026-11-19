@@ -81,7 +81,11 @@ export async function getForumFeed(cookie?: string, cursor?: string) {
     if (!forumIdSchema.safeParse(cursor).success)
       throw new ForumError("Paginação inválida.");
     const row = await collection.doc(cursor).get();
-    if (row.exists) query = query.startAfter(row);
+    if (row.exists)
+      query = query.startAfter(
+        row.get("createdAt") ?? row.get("deletedCreatedAt"),
+        row.id,
+      );
   }
   const page = await query.limit(FORUM_PAGE_SIZE + 1).get();
   const rows = page.docs.slice(0, FORUM_PAGE_SIZE);
@@ -109,7 +113,7 @@ export async function getForumTopic(
   return database.runTransaction(
     async (transaction) => {
       const row = await transaction.get(reference);
-      if (!row.exists)
+      if (!row.exists || row.get("deletedCreatedAt"))
         return {
           role: profile.role,
           topic: null,
@@ -127,7 +131,11 @@ export async function getForumTopic(
         const start = await transaction.get(
           reference.collection("replies").doc(cursor),
         );
-        if (start.exists) query = query.startAfter(start);
+        if (start.exists)
+          query = query.startAfter(
+            start.get("createdAt") ?? start.get("deletedCreatedAt"),
+            start.id,
+          );
       }
       const page = await transaction.get(query.limit(FORUM_PAGE_SIZE + 1));
       const rows = page.docs.slice(0, FORUM_PAGE_SIZE);
@@ -187,7 +195,9 @@ export async function changeForum(
         throw new ForumError("Esta publicação já existe. Atualize a página.");
       if (
         command.type === "reply" &&
-        (!topicRow.exists || topicState.parse(topicRow.data()).hidden)
+        (!topicRow.exists ||
+          topicRow.get("deletedCreatedAt") ||
+          topicState.parse(topicRow.data()).hidden)
       )
         throw new ForumError("Este tópico está indisponível para respostas.");
       const destination =
@@ -211,14 +221,28 @@ export async function changeForum(
       if (command.type === "reply")
         transaction.update(reference, { replyCount: FieldValue.increment(1) });
     } else {
-      if (!topicRow.exists || !postRow.exists)
+      if (
+        !topicRow.exists ||
+        topicRow.get("deletedCreatedAt") ||
+        !postRow.exists ||
+        postRow.get("deletedCreatedAt")
+      )
         throw new ForumError("Publicação indisponível.");
       const post = postState.parse(postRow.data());
       if (post.version !== command.expectedVersion)
         throw new ForumError(
           "A publicação foi alterada. Atualize a página antes de tentar novamente.",
         );
-      if ("hidden" in command) {
+      if (command.type === "deleteTopic" || command.type === "deleteReply") {
+        if (post.authorId !== profile.uid)
+          throw new ForumError("Somente o autor pode excluir esta publicação.");
+        // Keep the ID and cursor reserved without keeping this post's content.
+        transaction.set(postReference, { deletedCreatedAt: post.createdAt });
+        if (command.type === "deleteReply")
+          transaction.update(reference, {
+            replyCount: FieldValue.increment(-1),
+          });
+      } else if ("hidden" in command) {
         if (profile.role !== "monitor")
           throw new ForumError("Somente o monitor pode moderar publicações.");
         transaction.update(postReference, {

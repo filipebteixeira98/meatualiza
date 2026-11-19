@@ -358,3 +358,62 @@ test("revogar a claim de monitor remove imediatamente a permissão de moderaçã
     ForumError,
   );
 });
+
+test("só o autor exclui, sem duplicar o efeito ou expor conteúdo removido", async () => {
+  const { topicId } = await publish();
+  const replyId = randomUUID();
+  await reply(topicId, students[1], replyId);
+  const remaining = randomUUID();
+  await reply(topicId, monitor, remaining);
+  const deleteReply = {
+    type: "deleteReply",
+    topicId,
+    replyId,
+    expectedVersion: 1,
+  };
+  const deleteTopic = { type: "deleteTopic", topicId, expectedVersion: 1 };
+  for (const user of [students[0], monitor])
+    await assert.rejects(execute(user, deleteReply), /Somente o autor/);
+  for (const user of [students[1], monitor])
+    await assert.rejects(execute(user, deleteTopic), /Somente o autor/);
+  await assert.rejects(
+    execute(students[1], { ...deleteReply, expectedVersion: 2 }),
+    /publicação foi alterada/,
+  );
+  const operation = randomUUID();
+  await execute(students[1], deleteReply, operation);
+  await execute(students[1], deleteReply, operation);
+  const topic = await getForumTopic(monitor.cookie, topicId);
+  assert.equal(topic.topic.replyCount, 1);
+  assert.deepEqual(
+    topic.replies.map(({ id }) => id),
+    [remaining],
+  );
+  const deletedReply = await database
+    .doc(`forumTopics/${topicId}/replies/${replyId}`)
+    .get();
+  assert.deepEqual(Object.keys(deletedReply.data()), ["deletedCreatedAt"]);
+  await assert.rejects(
+    execute(monitor, { ...deleteReply, type: "moderateReply", hidden: false }),
+    /Publicação indisponível/,
+  );
+  const nextTopic = (await publish()).topicId;
+  const oldDate = (await row(topicId)).createdAt.toMillis();
+  await database.doc(`forumTopics/${nextTopic}`).update({
+    createdAt: Timestamp.fromMillis(oldDate + 1000),
+  });
+  await execute(students[0], deleteTopic);
+  for (const user of [...students, monitor]) {
+    const deleted = await getForumTopic(user.cookie, topicId);
+    assert.equal(deleted.topic, null);
+    assert.deepEqual(deleted.replies, []);
+    assert.deepEqual(
+      (await getForumFeed(user.cookie)).topics.map(({ id }) => id),
+      [nextTopic],
+    );
+    assert.deepEqual((await getForumFeed(user.cookie, topicId)).topics, []);
+  }
+  await assert.rejects(reply(topicId), /tópico está indisponível/);
+  await assert.rejects(publish(students[1], topicId), /publicação já existe/);
+  assert.deepEqual(Object.keys(await row(topicId)), ["deletedCreatedAt"]);
+});
