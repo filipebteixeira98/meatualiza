@@ -155,16 +155,45 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     ).toBeVisible();
     expect(await other.evaluate(() => "forumExecuted" in window)).toBe(false);
     await ownReply.getByText("Editar", { exact: true }).click();
-    await ownReply
-      .getByRole("form", { name: "Editar publicação" })
-      .getByLabel("Sua resposta", { exact: true })
-      .fill(answer);
+    const edit = ownReply.getByRole("form", { name: "Editar publicação" });
+    const editor = edit.getByLabel("Sua resposta", { exact: true });
+    const intro = `${answer} Confira \`i\`. `;
+    const snippet = "  i = i + 1;\n  escreva(i);";
+    await editor.fill(`${intro}\n${snippet}`);
+    await editor.evaluate((field: HTMLTextAreaElement, start) => {
+      field.setSelectionRange(start, field.value.length);
+    }, intro.length + 1);
+    await edit
+      .getByRole("button", { name: "Bloco de código", exact: true })
+      .click();
+    await expect(editor).toBeFocused();
+    await expect(editor).toHaveValue(`${intro}\n\`\`\`\n${snippet}\n\`\`\``);
+    await editor.evaluate((field: HTMLTextAreaElement, caret) => {
+      field.setSelectionRange(caret, caret);
+    }, intro.length);
+    await edit
+      .getByRole("button", { name: "Escolher emoji", exact: true })
+      .press("Enter");
+    const picker = other.getByRole("dialog", { name: "Seletor de emojis" });
+    await picker
+      .getByRole("button", { name: "Confirmação", exact: true })
+      .press("Enter");
+    await expect(picker).toHaveCount(0);
+    await expect(editor).toBeFocused();
+    await expect(editor).toHaveValue(`${intro}✅\n\`\`\`\n${snippet}\n\`\`\``);
     await ownReply
       .getByRole("button", { name: "Salvar alterações", exact: true })
       .click();
-    await expect(
-      ownReply.getByRole("paragraph").filter({ hasText: answer }),
-    ).toBeVisible();
+    const published = ownReply
+      .getByRole("paragraph")
+      .filter({ hasText: answer });
+    await expect(published).toBeVisible();
+    await expect(published.locator("code")).toHaveText("i");
+    await expect(ownReply.locator("pre code")).toHaveJSProperty(
+      "textContent",
+      snippet,
+    );
+    await expect(ownReply).toContainText("✅");
     await page.reload();
     await expect(
       page
@@ -199,6 +228,10 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
       name: "Resposta de Bruno Lima",
       exact: true,
     });
+    await expect(moderatedReply.locator("pre code")).toHaveJSProperty(
+      "textContent",
+      snippet,
+    );
     await moderatedReply.getByText("Moderar", { exact: true }).click();
     await moderatedReply
       .getByLabel("Motivo da ocultação", { exact: true })

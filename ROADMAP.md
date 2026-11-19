@@ -323,7 +323,7 @@ O fórum amplia a monitoria com discussões sobre Lógica de Programação entre
 Decisões da primeira entrega de F6.1–F6.5.
 
 - Qualquer participante autenticado com Google pode ler, criar tópicos e responder, independentemente de inscrição presencial ou do término do calendário.
-- Tópicos têm título de 3 a 120 caracteres, assunto da lista aprovada e descrição. Descrições e respostas usam texto simples de até 4.000 caracteres. Código é exibido como texto literal.
+- Tópicos têm título de 3 a 120 caracteres, assunto da lista aprovada e descrição. Descrições e respostas aceitam até 4.000 caracteres, com seletor de emojis, código em linha entre crases e blocos de código que preservam a indentação.
 - Autoria e perfil são definidos no servidor. Cada publicação preserva o nome e o perfil no momento da escrita; nomes usados como e-mail recebem a identificação genérica “Participante”. E-mail, UID, registros de moderação e dados privados de inscrições/avaliações ficam fora da projeção compartilhada.
 - A tela informa a visibilidade do nome e do texto antes da publicação. O fórum é acessado explicitamente pelas sidebars dos dois perfis.
 - Tópicos começam pelos mais recentes. Respostas seguem a ordem cronológica. Ambas as listagens têm dez itens por página, desempate pelo ID e cursor persistente; edições e moderação preservam a ordem original. Publicações ocultadas ocupam seu lugar na paginação.

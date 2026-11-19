@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MutationFeedback, useMutation } from "@/features/workspace/mutation";
 import {
-  FORUM_BODY_MAX_LENGTH,
   FORUM_REASON_MAX_LENGTH,
   FORUM_TITLE_MAX_LENGTH,
   type ForumChange,
@@ -15,6 +14,7 @@ import {
 import { helpRequestTopics } from "@/lib/help-request";
 import { useHydrated } from "@/lib/use-hydrated";
 import { submitForum } from "./actions";
+import { PublicationBodyField } from "./body-field";
 
 type PublicationProps = { base: string } & (
   | { kind: "topic"; post?: ForumTopic }
@@ -129,28 +129,13 @@ export function PublicationForm(props: PublicationProps) {
             </div>
           </>
         )}
-        <div>
-          <label htmlFor={`${id}-body`} className="text-sm font-medium">
-            {props.kind === "topic" ? "Descrição" : "Sua resposta"}
-          </label>
-          <textarea
-            id={`${id}-body`}
-            value={body}
-            onChange={(event) => setBody(event.target.value)}
-            required
-            maxLength={FORUM_BODY_MAX_LENGTH}
-            rows={5}
-            aria-describedby={`${id}-hint`}
-            className={`${inputClass} resize-y leading-7`}
-          />
-          <p
-            id={`${id}-hint`}
-            className="mt-2 text-xs leading-6 text-muted-foreground"
-          >
-            Texto simples, até 4.000 caracteres. Seu nome e a publicação ficam
-            visíveis aos participantes.
-          </p>
-        </div>
+        <PublicationBodyField
+          id={`${id}-body`}
+          label={props.kind === "topic" ? "Descrição" : "Sua resposta"}
+          value={body}
+          onChange={setBody}
+          className={inputClass}
+        />
         <Button type="submit" className="min-h-11" aria-busy={pending}>
           {pending
             ? "Salvando…"
