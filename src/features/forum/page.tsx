@@ -31,7 +31,7 @@ function PublishedBy({ post }: { post: ForumPost }) {
         <span className="min-w-0">
           {post.author.displayName}
           {post.author.role === "monitor" && (
-            <span className="ml-2 rounded-md bg-secondary px-2 py-1 text-secondary-foreground">
+            <span className="ml-2 rounded-md bg-monitor-badge px-2 py-1 text-monitor-badge-foreground">
               Monitor
             </span>
           )}
