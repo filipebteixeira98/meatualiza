@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CodeXml, Smile } from "lucide-react";
+import { Code, CodeXml, Smile } from "lucide-react";
 import { Popover } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { FORUM_BODY_MAX_LENGTH } from "@/lib/forum";
-import { wrapForumCode } from "@/lib/forum-body";
+import { wrapForumCode, wrapForumInlineCode } from "@/lib/forum-body";
 
 const emojis = [
   ["😊", "Sorriso"],
@@ -38,14 +38,14 @@ export function PublicationBodyField({
   const textarea = useRef<HTMLTextAreaElement>(null);
   const insertedEmoji = useRef(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [exceedsLimit, setExceedsLimit] = useState(false);
+  const [editError, setEditError] = useState("");
 
   function applyEdit(edit: ReturnType<typeof wrapForumCode>) {
     if (edit.value.length > FORUM_BODY_MAX_LENGTH) {
-      setExceedsLimit(true);
+      setEditError("A inserção ultrapassa o limite de 4.000 caracteres.");
       return false;
     }
-    setExceedsLimit(false);
+    setEditError("");
     onChange(edit.value);
     requestAnimationFrame(() => {
       textarea.current?.focus({ preventScroll: true });
@@ -85,13 +85,13 @@ export function PublicationBodyField({
         id={id}
         value={value}
         onChange={(event) => {
-          setExceedsLimit(false);
+          setEditError("");
           onChange(event.target.value);
         }}
         required
         maxLength={FORUM_BODY_MAX_LENGTH}
         rows={5}
-        aria-describedby={`${id}-hint${exceedsLimit ? ` ${id}-limit` : ""}`}
+        aria-describedby={`${id}-hint${editError ? ` ${id}-edit-error` : ""}`}
         className={`${className} resize-y leading-7`}
       />
       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -142,6 +142,25 @@ export function PublicationBodyField({
           className="min-h-11"
           onClick={() => {
             const field = textarea.current;
+            if (!field) return;
+            const edit = wrapForumInlineCode(
+              value,
+              field.selectionStart,
+              field.selectionEnd,
+            );
+            if (edit) applyEdit(edit);
+            else setEditError("Selecione texto de uma linha, sem crases.");
+          }}
+        >
+          <Code aria-hidden="true" />
+          Código em linha
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          onClick={() => {
+            const field = textarea.current;
             if (field)
               applyEdit(
                 wrapForumCode(value, field.selectionStart, field.selectionEnd),
@@ -156,17 +175,15 @@ export function PublicationBodyField({
         id={`${id}-hint`}
         className="mt-2 text-xs leading-6 text-muted-foreground"
       >
-        Use crases como em <code>{"`variável`"}</code> para código em linha. Até
-        4.000 caracteres. Seu nome e a publicação ficam visíveis aos
-        participantes.
+        Até 4.000 caracteres.
       </p>
-      {exceedsLimit && (
+      {editError && (
         <p
-          id={`${id}-limit`}
+          id={`${id}-edit-error`}
           role="alert"
           className="mt-2 text-sm text-muted-foreground"
         >
-          A inserção ultrapassa o limite de 4.000 caracteres.
+          {editError}
         </p>
       )}
     </div>

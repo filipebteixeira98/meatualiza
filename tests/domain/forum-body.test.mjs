@@ -4,6 +4,7 @@ import {
   forumBodyBlocks,
   forumInlineCode,
   wrapForumCode,
+  wrapForumInlineCode,
 } from "../../src/lib/forum-body.ts";
 
 test("forum bodies preserve existing text and recognize only delimited code", () => {
@@ -48,4 +49,21 @@ test("the code control wraps the selection and preserves inner fences and prose"
     selectionStart: 4,
     selectionEnd: 4,
   });
+});
+
+test("the inline code control wraps text or places the caret between backticks", () => {
+  const edit = wrapForumInlineCode("use i aqui", 4, 5);
+  assert.deepEqual(edit, {
+    value: "use `i` aqui",
+    selectionStart: 5,
+    selectionEnd: 6,
+  });
+  assert.deepEqual(forumInlineCode(edit.value), ["use ", "`i`", " aqui"]);
+  assert.deepEqual(wrapForumInlineCode("", 0, 0), {
+    value: "``",
+    selectionStart: 1,
+    selectionEnd: 1,
+  });
+  assert.equal(wrapForumInlineCode("a\nb", 0, 3), null);
+  assert.equal(wrapForumInlineCode("`i`", 1, 2), null);
 });

@@ -159,7 +159,19 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     const editor = edit.getByLabel("Sua resposta", { exact: true });
     const intro = `${answer} Confira \`i\`. `;
     const snippet = "  i = i + 1;\n  escreva(i);";
-    await editor.fill(`${intro}\n${snippet}`);
+    const plainIntro = `${answer} Confira i. `;
+    await expect(
+      edit.getByText("Até 4.000 caracteres.", { exact: true }),
+    ).toBeVisible();
+    await editor.fill(`${plainIntro}\n${snippet}`);
+    await editor.evaluate((field: HTMLTextAreaElement, start) => {
+      field.setSelectionRange(start, start + 1);
+    }, plainIntro.length - 3);
+    await edit
+      .getByRole("button", { name: "Código em linha", exact: true })
+      .click();
+    await expect(editor).toBeFocused();
+    await expect(editor).toHaveValue(`${intro}\n${snippet}`);
     await editor.evaluate((field: HTMLTextAreaElement, start) => {
       field.setSelectionRange(start, field.value.length);
     }, intro.length + 1);

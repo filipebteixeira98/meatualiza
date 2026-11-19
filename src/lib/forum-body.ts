@@ -29,6 +29,18 @@ export function forumInlineCode(text: string) {
   return text.split(/((?<!`)`[^`\n]+`(?!`))/);
 }
 
+export function wrapForumInlineCode(body: string, start: number, end: number) {
+  const selected = body.slice(start, end);
+  if (/[`\r\n]/.test(selected) || body[start - 1] === "`" || body[end] === "`")
+    return null;
+
+  return {
+    value: body.slice(0, start) + "`" + selected + "`" + body.slice(end),
+    selectionStart: start + 1,
+    selectionEnd: end + 1,
+  };
+}
+
 export function wrapForumCode(body: string, start: number, end: number) {
   const before = body.slice(0, start);
   const selected = body.slice(start, end);
