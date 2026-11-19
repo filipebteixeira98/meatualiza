@@ -73,9 +73,6 @@ export default async function StudentPage() {
               Confirmadas: {upcoming.length}
             </p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Próximas quatro semanas · horários em {monitoria.fuso}.
-          </p>
           {upcoming.length ? (
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               {upcoming.map((session) => {
