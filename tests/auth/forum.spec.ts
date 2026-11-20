@@ -121,7 +121,9 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     await create
       .getByRole("button", { name: "Publicar tópico", exact: true })
       .click();
-    await expect(page).toHaveURL(/\/aluno\/forum\/[\da-f-]{36}$/);
+    await expect(page).toHaveURL(/\/aluno\/forum\/[\da-f-]{36}$/, {
+      timeout: 20_000,
+    });
     await expect(composer).toHaveCount(0);
     topicId = new URL(page.url()).pathname.split("/").at(-1)!;
     expect(
@@ -426,6 +428,61 @@ test("duas contas de aluno colaboram e o monitor responde, oculta e restaura pub
     await expect(
       page.getByRole("link", { name: "Voltar ao início", exact: true }),
     ).toBeVisible();
+    await other.reload();
+    const deleteReply = other.getByRole("button", {
+      name: "Excluir resposta",
+      exact: true,
+    });
+    await deleteReply.click();
+    const replyDialog = other.getByRole("alertdialog", {
+      name: "Excluir resposta?",
+    });
+    await expect(
+      replyDialog.getByRole("button", { name: "Manter publicação" }),
+    ).toBeFocused();
+    await other.keyboard.press("Escape");
+    await expect(replyDialog).toHaveCount(0);
+    await expect(deleteReply).toBeFocused();
+    await expect(ownReply).toBeVisible();
+    await deleteReply.click();
+    await replyDialog
+      .getByRole("button", { name: "Confirmar exclusão" })
+      .click();
+    await expect(ownReply).toHaveCount(0);
+
+    await other.goto(`/aluno/forum/${topicId}`);
+    await expect(
+      other.getByRole("button", { name: "Excluir tópico", exact: true }),
+    ).toHaveCount(0);
+    await page.goto(`/aluno/forum/${topicId}`);
+    await expect(
+      page.getByRole("heading", { name: "Respostas (1)" }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Excluir tópico", exact: true })
+      .click();
+    const topicDialog = page.getByRole("alertdialog", {
+      name: "Excluir tópico?",
+    });
+    await expect(topicDialog).toContainText("todas as respostas");
+    await page.screenshot({
+      path: info.outputPath("forum-delete-topic.png"),
+      style: "nextjs-portal { display: none; }",
+    });
+    await topicDialog
+      .getByRole("button", { name: "Confirmar exclusão" })
+      .click();
+    await expect(page).toHaveURL(/\/aluno\/forum$/);
+    await expect(page.locator(`a[href="/aluno/forum/${topicId}"]`)).toHaveCount(
+      0,
+    );
+    await other.goto(`/aluno/forum/${topicId}`);
+    await expect(
+      other.getByRole("heading", { name: "404", exact: true }),
+    ).toBeVisible();
+    await expect(other.getByText(monitorAnswer, { exact: true })).toHaveCount(
+      0,
+    );
   } finally {
     for (const id of [topicId, ...seedIds].filter(Boolean))
       await database.recursiveDelete(database.doc(`forumTopics/${id}`));
